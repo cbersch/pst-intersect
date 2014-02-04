@@ -1,0 +1,42 @@
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{pst-intersect}
+    [2014/01/25 v0.1]
+\RequirePackage{pstricks}
+\RequirePackage{pst-xkey}
+\RequirePackage{pst-node}
+\RequirePackage{multido}
+\RequirePackage{pst-eucl}
+\RequirePackage{pstricks-add}
+\@addtofilelist{pst-intersect.pro}{}%
+\pst@addfams{intersect}
+\pstheader{pst-intersect.pro}
+
+\def\pst@intersectdict{tx@IntersectDict begin }
+\def\PIT@dict#1{\pst@intersectdict #1 end}
+\def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
+
+\def\intersectBeziers{\pst@object{intersectBeziers}}
+\def\intersectBeziers@i(#1)(#2)(#3)(#4)(#5)(#6)(#7)(#8){%
+  \begin@SpecialObj
+    \pst@getcoor{#1}\PIT@tempa
+    \pst@getcoor{#2}\PIT@tempb
+    \pst@getcoor{#3}\PIT@tempc
+    \pst@getcoor{#4}\PIT@tempd
+    \pst@getcoor{#5}\PIT@tempe
+    \pst@getcoor{#6}\PIT@tempf
+    \pst@getcoor{#7}\PIT@tempg
+    \pst@getcoor{#8}\PIT@temph
+    \addtopscode{%
+      \pst@intersectdict
+      [ \PIT@tempa
+        \PIT@tempb
+        \PIT@tempc
+        \PIT@tempd ]
+      [ \PIT@tempe
+        \PIT@tempf
+        \PIT@tempg
+        \PIT@temph ]
+        
+    }
+  \end@SpecialObj
+}%

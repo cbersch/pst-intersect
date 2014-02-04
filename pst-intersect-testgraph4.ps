@@ -1,0 +1,20 @@
+%!PS
+(pst-intersect.pro) run
+
+tx@IntersectDict begin
+/CurveA [[50 100] [50 200] [150 200] [150 250]] def
+/CurveB [[50 150] [100 100] [110 285] [150 180]] def
+
+-200 -400 translate
+5 5 scale
+gsave
+  %0.1 setlinewidth
+  CurveA ShowCurve stroke
+  1 0 0 setrgbcolor 
+  CurveB ShowCurve stroke
+grestore
+0.2 setlinewidth
+CurveA CurveB IntersectBeziers
+aload length 2 idiv { 1 0 360 arc stroke } repeat
+aload length 2 idiv { 2 0 360 arc stroke } repeat
+end
