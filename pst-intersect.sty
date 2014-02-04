@@ -5,8 +5,8 @@
 \RequirePackage{pst-xkey}
 \RequirePackage{pst-node}
 \RequirePackage{multido}
-\RequirePackage{pst-eucl}
-\RequirePackage{pstricks-add}
+\RequirePackage{pst-func}
+%\RequirePackage{pstricks-add}
 \@addtofilelist{pst-intersect.pro}{}%
 \pst@addfams{intersect}
 \pstheader{pst-intersect.pro}
@@ -16,27 +16,58 @@
 \def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
 
 \def\intersectBeziers{\pst@object{intersectBeziers}}
-\def\intersectBeziers@i(#1)(#2)(#3)(#4)(#5)(#6)(#7)(#8){%
+\def\intersectBeziers@i{%
+  \@ifnextchar\bgroup
+    {\intersectBeziers@ii}{\intersectBeziers@iii}}%
+\def\intersectBeziers@iii(#1)(#2)(#3)(#4)(#5)(#6)(#7)(#8){%
   \begin@SpecialObj
-    \pst@getcoor{#1}\PIT@tempa
-    \pst@getcoor{#2}\PIT@tempb
-    \pst@getcoor{#3}\PIT@tempc
-    \pst@getcoor{#4}\PIT@tempd
-    \pst@getcoor{#5}\PIT@tempe
-    \pst@getcoor{#6}\PIT@tempf
-    \pst@getcoor{#7}\PIT@tempg
-    \pst@getcoor{#8}\PIT@temph
-    \addtopscode{%
-      \pst@intersectdict
-      [ \PIT@tempa
-        \PIT@tempb
-        \PIT@tempc
-        \PIT@tempd ]
-      [ \PIT@tempe
-        \PIT@tempf
-        \PIT@tempg
-        \PIT@temph ]
-        
-    }
-  \end@SpecialObj
+    \addto@pscode{%
+      \pst@intersectdict }%
+      \pst@@getcoor{#1}\addto@pscode{ [[\pst@coor] }%
+      \pst@@getcoor{#2}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#3}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#4}\addto@pscode{ [\pst@coor]] }%
+      \pst@@getcoor{#5}\addto@pscode{ [[\pst@coor] }%
+      \pst@@getcoor{#6}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#7}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#8}\addto@pscode{ [\pst@coor]] }%
+    \addto@pscode{%
+      IntersectBeziers pop [ exch aload pop }%
+    \psdots@ii
+}%
+\def\intersectBeziers@ii#1#2{%
+  \begin@SpecialObj
+    \addto@pscode{%
+      \pst@intersectdict 
+      #1 #2 IntersectBeziers pop [ exch aload pop }%
+    \psdots@ii
+}%
+
+\def\SaveBezier#1{%
+  \def\PIT@aftercurve{\let#1\PIT@tmpcurve}%
+  \def\PIT@tmpcurve{[}%
+  \SaveBezier@i}%
+\def\SaveBezier@i{%
+  \@ifnextchar(%)
+    {\SaveBezier@ii}%
+    {\edef\PIT@tmpcurve{\PIT@tmpcurve ]}\PIT@aftercurve}
+}%
+\def\SaveBezier@ii(#1){%
+  \pst@@getcoor{#1}%
+  \edef\PIT@tmpcurve{\PIT@tmpcurve [\pst@coor]}%
+  \SaveBezier@i
+}%
+\def\ShowBezier{\pst@object{ShowBezier}}%
+\def\ShowBezier@i#1{%
+  \addbefore@par{plotpoints=200}%
+  \begin@OpenObj
+    \addto@pscode{%
+      [#1 { aload pop } forall
+      counttomark 2 sub 2 idiv
+      \psk@plotpoints
+      exch
+      \txFunc@BezierCurve
+      \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+    }%
+  \end@OpenObj
 }%

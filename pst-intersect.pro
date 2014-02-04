@@ -1,5 +1,3 @@
-(/usr/local/texlive/2013/texmf-dist/dvips/pstricks/pstricks.pro) run
-(/usr/local/texlive/2013/texmf-dist/dvips/pst-func/pst-func.pro) run
 /tx@IntersectDict 200 dict def
 tx@IntersectDict begin
 
@@ -16,29 +14,36 @@ tx@IntersectDict begin
     [ 3 1 roll ]
 } bind def
 
-/MaxPrecision 1e-5 def
+/MaxPrecision 1e-6 def
 /H1Interval [0 0.5] def
 /H2Interval [0.5 MaxPrecision add 1] def
 /Epsilon 1e-4 def
 /MinClippedSizeThreshold 0.8 def
 
 /CurveToString {
+    (CurveToString) DebugBegin
     aload pop ([) 3 -1 roll 20 string cvs strcat (, ) strcat exch 20 string cvs strcat (]) strcat
+    DebugEnd
 } bind def
 %
 /IntersectBeziers {
     2 copy [0 1] [0 1] MaxPrecision IterateIntersection
+    exch TArray dup /lt exch quicksort
+    exch TArray dup /lt exch quicksort
     3 -1 roll exch LoadIntersectionPoints 
     3 1 roll LoadIntersectionPoints
 } bind def
 
 %
-% Curve t
-/LoadIntersectionPoints {
+/TArray {
     [ exch
     { dup type /nulltype eq { pop exit } if
 	aload pop add 0.5 mul
     } forall ] % -> array of tvalues
+} bind def
+%
+% Curve t
+/LoadIntersectionPoints {
     % prepare Curve for use with tx@Func
     exch [ exch { aload pop } forall ]
     tx@Dict begin tx@FuncDict begin 2 dict begin
@@ -54,7 +59,7 @@ tx@IntersectDict begin
 %
 % [CurveA] [CurveB] [intervalA] [intervalB] precision -> domsA domsB
 /IterateIntersection {
-    (IntersectIntersection) DebugBegin
+    (IterateIntersection) DebugBegin
     11 dict begin
 	/precision exch def
 	% in order to limit recursion
@@ -74,6 +79,7 @@ tx@IntersectDict begin
 %
 % /domsA /domsB CurveA CurveB domA domB
 /_IterateIntersection {
+    (_IterateIntersection) DebugBegin
     CloneVec /domB exch def
     CloneVec /domA exch def
     CloneCurve /CurveB exch def
@@ -82,27 +88,15 @@ tx@IntersectDict begin
     /depth depth 1 add def
     /dom null def
     /counter counter 1 add def
-    /checkcnt 33 def
 
-    counter checkcnt eq {
-	gsave
-	0.5 setlinewidth
-	0 1 0 setrgbcolor
-	CurveA ShowCurve
-	stroke
-	0 1 1 setrgbcolor
-	CurveB ShowCurve stroke
-	grestore
-    } if
-    Check {
+    CheckIT {
 	(>> curve subdivision performed: dom(A) = ) domA CurveToString strcat
 	(, dom(B) = ) strcat domB CurveToString strcat ( <<) strcat ==
     } if
     CurveA IsConstant CurveB IsConstant and {
 	CurveA MiddlePoint ToVec
 	CurveB MiddlePoint ToVec AreNear {
-	    (found an intersection ||||||||||||||||) ==
-	    domA domB 4 debug 4 -1 roll exch PutInterval PutInterval
+	    domA domB 4 -1 roll exch PutInterval PutInterval
 	} {
 	    pop pop
 	} ifelse
@@ -115,14 +109,9 @@ tx@IntersectDict begin
 		iter 100 lt
 		domA Extent precision ge
 		domB Extent precision ge or and not {
-		    (iter > 100 or precision reached) ==
-		    (domA.extent() ) == domA Extent ==
-		    (domB.extent() ) == domB Extent ==
-		    (CurveA MiddlePoint ) == CurveA MiddlePoint ToVec ==
-		    (CurveB MiddlePoint ) == CurveB MiddlePoint ToVec ==
-		    iter 100 ge { (iter > 100) ==
+		    iter 100 ge {
 			false 
-		    } { (precision reached) ==
+		    } {
 			CurveA MiddlePoint ToVec
 			CurveB MiddlePoint ToVec AreNear {
 			    domA domB true
@@ -133,7 +122,7 @@ tx@IntersectDict begin
 		    exit
 		} if
 		% iter < 100 && (dompA.extent() >= precision || dompB.extent() >= precision)
-		Check {
+		CheckIT {
 		    (counter: ) counter 20 string cvs strcat
 		    (, iter: ) iter 20 string cvs strcat strcat
 		    (, depth: ) depth 20 string cvs strcat strcat ==
@@ -141,11 +130,14 @@ tx@IntersectDict begin
 	
 		CurveA CurveB ClipCurve /dom exch def
 	
-		Check {(dom : ) dom CurveToString strcat == } if		
-		dom IsEmptyInterval { (empty interval, exit) == false exit } if
+		CheckIT {(dom : ) dom CurveToString strcat == } if		
+		dom IsEmptyInterval {
+		    CheckIT { (empty interval, exit) == } if
+		    false exit
+		} if
 		% dom[0] > dom[1], invalid. How to handle?	
 		dom aload pop 2 copy min 3 1 roll max gt {
-		    Check {
+		    CheckIT {
 			(dom[0] > dom[1], invalid!) ==
 		    } if
 		    false exit
@@ -153,15 +145,9 @@ tx@IntersectDict begin
 
 		domB dom MapTo /domB exch def
 		CurveB dom Portion
-		counter checkcnt eq {
-		    gsave
-		    0.5 setlinewidth
-		    1 1 0 setrgbcolor
-		    CurveB ShowCurve stroke
-		    grestore
-		} if
+
 		CurveB IsConstant CurveA IsConstant and {
-		    Check {
+		    CheckIT {
           		(both curves are constant: ) ==	
 			(C1: [ ) CurveA { CurveToString ( ) strcat strcat } forall (]) strcat ==
 			(C2: [ ) CurveB { CurveToString ( ) strcat strcat } forall (]) strcat ==
@@ -176,9 +162,8 @@ tx@IntersectDict begin
 		} if
 		% if we have clipped less than 20%, we need to subdivide the
 		% curve with the largest domain into two sub-curves.
-		(domB.extent()) == domB Extent ==
 		dom Extent MinClippedSizeThreshold gt {
-		    Check {
+		    CheckIT {
 			(clipped less than 20% : ) ==
 			(angle(A) = ) CurveA dup length 1 sub get aload pop
 				      CurveA 0 get aload pop VecSub
@@ -230,23 +215,27 @@ tx@IntersectDict begin
 		    /domA exch def
 		    /CurveB exch def
 		    /CurveA exch def
-		    (recursive calls completed) ==
 		    false exit
 		} if
 		CurveA CurveB /CurveA exch def /CurveB exch def
 		domA domB /domA exch def /domB exch def
 		% exchange /domsA and /domsB on the stack!
 		exch
-		(dompA) == domA == (dompB) == domB ==
 	    } loop	
 
 	    % boolean on stack
-	    { 2 debug 4 -1 roll exch PutInterval PutInterval (found an intersection ============================) == } { pop pop } ifelse
+	    {
+		4 -1 roll exch PutInterval PutInterval
+		CheckIT {
+		    (found an intersection ============================) ==
+		} if
+	    } { pop pop } ifelse
 	} {
 	    pop pop
 	} ifelse
     } ifelse
     /depth depth 1 sub def
+    DebugEnd
 } bind def
 %
 % Add a new interval [newinterval] to the array stored in /Intervals
@@ -275,7 +264,7 @@ tx@IntersectDict begin
     10 array dup 9 -1 put def
 } bind def
 %
-% Check if an interval is empty, which is represented by a [1 0] interval.
+% CheckIT if an interval is empty, which is represented by a [1 0] interval.
 %
 % [interval] -> empty?
 /IsEmptyInterval {
@@ -516,12 +505,12 @@ tx@IntersectDict begin
     } {
 	CurveA PickOrientationLine
     } ifelse
-    Check {
+    CheckIT {
 	3 copy exch 3 -1 roll (OrientationLine : )
 	3 { exch 20 string cvs ( ) strcat strcat } repeat ==
     } if
     CurveA FatLineBounds
-    Check { dup (FatLineBounds : ) exch aload pop exch 20 string cvs (, ) strcat exch 20 string cvs strcat strcat == } if
+    CheckIT { dup (FatLineBounds : ) exch aload pop exch 20 string cvs (, ) strcat exch 20 string cvs strcat strcat == } if
     CurveB ClipCurveInterval
     end % end local dictionary
     DebugEnd
@@ -890,8 +879,8 @@ end } def
 /debug {
     dup 1 add copy {==} repeat pop
 } bind def
-/DebugIT true def
-/Check true def
+/DebugIT false def
+/CheckIT false def
 /DebugDepth 0 def
 /DebugBegin {
   DebugIT {

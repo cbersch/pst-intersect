@@ -1,0 +1,19 @@
+\documentclass{article}
+\usepackage{pst-intersect}
+\SpecialCoor
+\begin{document}
+\multido{\r=0+1}{4}{%
+\begin{pspicture}[showgrid](5,5)  \psset{showpoints}
+\psbezier[linecolor=red](0,0)(0,5)(5,2)(5,5)
+\psbezier(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)
+\intersectBeziers[linecolor=green!70!black](0,0)(0,5)(5,2)(5,5)(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)
+\end{pspicture} }
+
+\begin{pspicture}[showgrid](5,5)
+  \SaveBezier{\curveA}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \SaveBezier{\curveB}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \ShowBezier{\curveA}
+  \ShowBezier[linecolor=red]{\curveB}
+  \intersectBeziers[linecolor=green!70!black]{\curveA}{\curveB}
+\end{pspicture}
+\end{document}
