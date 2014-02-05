@@ -6,14 +6,32 @@
 \begin{pspicture}[showgrid](5,5)  \psset{showpoints}
 \psbezier[linecolor=red](0,0)(0,5)(5,2)(5,5)
 \psbezier(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)
-\intersectBeziers[linecolor=green!70!black](0,0)(0,5)(5,2)(5,5)(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)
+\intersectbeziers[linecolor=green!70!black](0,0)(0,5)(5,2)(5,5)(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)
 \end{pspicture} }
 
 \begin{pspicture}[showgrid](5,5)
-  \SaveBezier{\curveA}(0,0)(0,5)(5,5)(5,1)(1,1.5)
-  \SaveBezier{\curveB}(0,5)(0,0)(5,0)(5,5)(0,2)
-  \ShowBezier{\curveA}
-  \ShowBezier[linecolor=red]{\curveB}
-  \intersectBeziers[linecolor=green!70!black]{\curveA}{\curveB}
+  \savebezier{\curveA}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \savebezier{\curveB}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \showbezier[linewidth=2\pslinewidth]{\curveA}
+  \showbezier[linecolor=red, linewidth=2\pslinewidth]{\curveB}
+  \showbezier[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{\curveA}
+  \intersectbeziers[linecolor=green!70!black]{\curveA}{\curveB}
+\end{pspicture}
+
+\begin{pspicture}[showgrid](5,5)
+  \savebezier{\curveA}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \multido{\i=100+-20,\r=1+-0.2}{5}{%
+    \showbezier[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{\curveA}
+  }%
+\end{pspicture}
+
+\begin{pspicture}[showgrid](5,5)
+  \savepath[isectname=First]{\pscurve(0,0)(3,3)(3,0)}
+  \savepath[isectname=Second]{\psline(0,5)(2,0)(5,5)}
+\end{pspicture}
+\begin{pspicture}[showgrid](5,5)
+  \showpath[isectname=First, linecolor=red]
+  \showpath[isectname=Second, linecolor=green]
+  \intersectpaths{First}{Second}
 \end{pspicture}
 \end{document}

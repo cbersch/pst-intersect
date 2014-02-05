@@ -19,12 +19,6 @@ tx@IntersectDict begin
 /H2Interval [0.5 MaxPrecision add 1] def
 /Epsilon 1e-4 def
 /MinClippedSizeThreshold 0.8 def
-
-/CurveToString {
-    (CurveToString) DebugBegin
-    aload pop ([) 3 -1 roll 20 string cvs strcat (, ) strcat exch 20 string cvs strcat (]) strcat
-    DebugEnd
-} bind def
 %
 /IntersectBeziers {
     2 copy [0 1] [0 1] MaxPrecision IterateIntersection
@@ -269,6 +263,24 @@ tx@IntersectDict begin
 % [interval] -> empty?
 /IsEmptyInterval {
     aload pop 0 eq exch 1 eq and
+} bind def
+%
+%
+% start stop -> 
+/ToUnitInterval {
+    ToUnitRange exch ToUnitRange 2 copy gt {
+	exch
+    } if
+    ToVec
+} bind def
+/ToUnitRange {
+    dup 0 lt {
+	pop 0
+    }{
+	dup 1 gt {
+	    pop 1
+	} if
+    } ifelse
 } bind def
 %
 % Does a deep copy of the array [Curve].
@@ -924,5 +936,10 @@ end } def
 % A B C
 /ShowLine {
     exch neg dup 3 1 roll div dup 0 exch moveto 3 1 roll div 200 mul add 200 exch lineto
+} bind def
+/CurveToString {
+    (CurveToString) DebugBegin
+    aload pop ([) 3 -1 roll 20 string cvs strcat (, ) strcat exch 20 string cvs strcat (]) strcat
+    DebugEnd
 } bind def
 end % tx@IntersectDict
