@@ -25,8 +25,7 @@ dist : doc Changes
 	@ echo $(ARCHNAME).tar.gz
 
 $(PACKAGE).dvi: L = english
-$(PACKAGE)-DE.dvi: L = ngerman
-%.dvi: $(PACKAGE).dtx $(PACKAGE).sty $(PACKAGE).ist $(PACKAGE).pro
+%.dvi: $(PACKAGE).dtx $(PACKAGE).sty $(PACKAGE).tex $(PACKAGE).pro
 	$(LATEX) -jobname=$(basename $@) '\newcommand*{\mainlang}{$(L)}\input{$(PACKAGE).dtx}'
 	$(LATEX) -jobname=$(basename $@) '\newcommand*{\mainlang}{$(L)}\input{$(PACKAGE).dtx}'
 
@@ -34,7 +33,6 @@ $(PACKAGE)-DE.dvi: L = ngerman
 	dvips $< 
 %.pdf: %.ps
 	$(PS2PDF) $< $@
-	python $<
 
 $(PACKAGE).sty $(PACKAGE).pro $(PACKAGE).tex: $(PACKAGE).ins $(PACKAGE).dtx
 	tex $<
