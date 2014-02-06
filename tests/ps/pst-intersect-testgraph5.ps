@@ -1,15 +1,13 @@
 %!PS
-(pst-intersect.pro) run
-
 tx@IntersectDict begin
 100 100 translate
 3 3 scale
 
-/CurveA [[0 0] [0 100] [100 100] [100 150]] def
-/CurveB [[0 50] [0 50] [100 60] [100 60]] def
+/CurveA [[55 50] [50 150] [150 150] [150 200]] def
+/CurveB [[50 100] [100 100] [90 200] [50 50]] def
 
 gsave
-  2 setlinewidth
+  0.5 setlinewidth
   CurveA ShowCurve stroke
   1 0 0 setrgbcolor 
   CurveB ShowCurve stroke
