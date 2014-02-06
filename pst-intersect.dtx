@@ -36,21 +36,6 @@
 \usepackage[dvipsnames,x11names,svgnames]{xcolor}
 \usepackage{array,booktabs,paralist,tabularx}
 \usepackage{ragged2e, calc}
-\newlength{\POEcaptionmargin}
-\newlength{\POEcaptionheight}
-\usepackage[labelfont={color=DOrange}, 
-            singlelinecheck=false, 
-            justification=raggedright]{caption} 
-\DeclareCaptionFormat{poenocaption}{%
-  \setlength{\POEcaptionmargin}{\widthof{#1}+7pt}%
-  \setlength{\POEcaptionheight}{\heightof{#1}+3pt}%
-  \hspace*{-\POEcaptionmargin}#1\par\vspace*{-\POEcaptionheight}%
-}%
-\DeclareCaptionFormat{poecaption}{%
-  \setlength{\POEcaptionmargin}{\widthof{#1}+7pt}%
-  \hspace*{-\POEcaptionmargin}#1#2#3\par
-}%
-\captionsetup[lstlisting]{format=poenocaption}
 \usepackage{nicefrac}
 \usepackage{pst-intersect}
 \usepackage{hypdoc}
@@ -153,45 +138,6 @@
 \renewcommand*{\changeloglabelfont}{\spotcolor\sffamily\bfseries}
 
 \makeatletter
-%^^A an idea from GL to provide links inside the listings to the pst-optexp commands: 
-%^^A <https://groups.google.com/groups/search?as_umsgid=4d89ee49%240%2418590%24426a74cc%40news.free.fr>
-\providerobustcmd*\ifrefundefined [1]{%
-  \begingroup%
-    \csname @safe@activestrue\endcsname%
-    \expandafter\endgroup\csname @\ifodd
-      \ifcsname r@comp:#1\endcsname 1\else
-        \ifcsname r@prm:#1\endcsname 1\else 
-          \ifcsname r@cs:#1\endcsname 1\else
-            \ifcsname r@sty:#1\endcsname 1\else 0
-      \fi\fi\fi\fi second\else first\fi oftwo\endcsname
-}% \ifrefundefined
-\def\lsthk@OutputBox@H@@k{%
-    \begingroup%
-      \let\lst@UM\@empty%
-      \edef\@tempc{\detokenize\expandafter{\the\lst@token }}%\edef
-      \ifrefundefined{\@tempc}%
-    \endgroup%
-    \sethyperlistings%
-}% \lsthk@OutputBox@H@@k
-\def\sethyperlistings {\global\let \hyperlistingsreference =\@tempc
-     \endgroup \aftergroup \dohyperlistings }% after \hbox
-\def\dohyperlistings {\def\lst@alloverstyle ##1{\hyperlistings ##1}}
-\def\hyperlistings{%
-    \setbox\@tempboxa\hbox%
-    \bgroup%
-      \rlap{\hypersetup {linkcolor=.}\relax\fboxrule\z@%
-        \ifcsdef{r@prm:\hyperlistingsreference}%
-          {\hyperref[prm:\hyperlistingsreference]{\xLkeyword{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}%
-          {\ifcsdef{r@comp:\hyperlistingsreference}%
-            {\hyperref[comp:\hyperlistingsreference]{\xLcomp{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}%
-            {\ifcsdef{r@sty:\hyperlistingsreference}%
-              {\hyperref[sty:\hyperlistingsreference]{\xLstyle{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}%
-              {\hyperref[cs:\hyperlistingsreference]{\xLcs{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}}}}%
-      \unhbox\@tempboxa%
-    \egroup%
-}% \hyperlistings
-\let\lsthk@OutputBox\lsthk@OutputBox@H@@k
-
 \renewenvironment*{ltxsyntax}
   {\list{}{%
      \setlength{\labelwidth}{\marglistwidth}%
@@ -739,9 +685,9 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(5,5)
-  \savebezier{\curveA}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
-    \showbezier[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{\curveA}
+    \showbezier[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
 \end{pspicture}
 \end{LTXexample}
@@ -828,7 +774,6 @@
 
 \edef\PstAtCode{\the\catcode`\@} \catcode`\@=11\relax
 
- %\@addtofilelist{pst-intersect.pro}{}%
 \pst@addfams{intersect}
 \pstheader{pst-intersect.pro}
 
@@ -837,47 +782,35 @@
 \def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
 
 \def\intersectbeziers{\pst@object{intersectbeziers}}
-\def\intersectbeziers@i{%
-  \@ifnextchar\bgroup
-    {\intersectbeziers@ii}{\intersectbeziers@iii}}%
-\def\intersectbeziers@iii(#1)(#2)(#3)(#4)(#5)(#6)(#7)(#8){%
-  \begin@SpecialObj
-    \addto@pscode{%
-      \pst@intersectdict }%
-      \pst@@getcoor{#1}\addto@pscode{ [[\pst@coor] }%
-      \pst@@getcoor{#2}\addto@pscode{ [\pst@coor] }%
-      \pst@@getcoor{#3}\addto@pscode{ [\pst@coor] }%
-      \pst@@getcoor{#4}\addto@pscode{ [\pst@coor]] }%
-      \pst@@getcoor{#5}\addto@pscode{ [[\pst@coor] }%
-      \pst@@getcoor{#6}\addto@pscode{ [\pst@coor] }%
-      \pst@@getcoor{#7}\addto@pscode{ [\pst@coor] }%
-      \pst@@getcoor{#8}\addto@pscode{ [\pst@coor]] }%
-    \addto@pscode{%
-      IntersectBeziers pop [ exch aload pop }%
-    \psdots@ii
-}%
-\def\intersectbeziers@ii#1#2{%
+\def\intersectbeziers@i#1#2{%
   \begin@SpecialObj
     \addto@pscode{%
       \pst@intersectdict 
-      #1 #2 IntersectBeziers pop [ exch aload pop }%
+      \PIT@name{#1} \PIT@name{#2} IntersectBeziers 
+      pop pop LoadIntersectionPoints
+      [ exch aload pop }%
     \psdots@ii
 }%
-
-\def\savebezier#1{%
-  \def\PIT@aftercurve{\let#1\PIT@tmpcurve}%
-  \def\PIT@tmpcurve{[}%
-  \savebezier@i}%
-\def\savebezier@i{%
-  \@ifnextchar(%)
-    {\savebezier@ii}%
-    {\edef\PIT@tmpcurve{\PIT@tmpcurve ]}\PIT@aftercurve}
+\def\savebezier{\pst@object{savebezier}}
+\def\savebezier@i#1{%
+  \begin@SpecialObj
+    \addto@pscode{ /\PIT@name{#1} }%
+    \pst@getcoors[\savebezier@ii%]
 }%
-\def\savebezier@ii(#1){%
-  \pst@@getcoor{#1}%
-  \edef\PIT@tmpcurve{\PIT@tmpcurve [\pst@coor]}%
-  \savebezier@i
-}%
+\def\savebezier@ii{%
+  \addto@pscode{%
+    % reverse the point order
+    counttomark -2 4 { 2 roll } for
+    ] ArrayToPointArray def }%
+  \PIT@Verb{%
+    gsave
+    STV CP T
+    \pst@code
+    grestore
+  }%
+  \gdef\pst@code{}%
+  \endgroup
+\ignorespaces}%
 \define@key[psset]{intersect}{tstart}{%
   \pst@checknum{#1}\PIT@key@tstart
 }
@@ -890,24 +823,22 @@
 \define@key[psset]{intersect}{isectstop}{%
   \pst@checknum{#1}\PIT@key@isectstop
 }
-\define@key[psset]{intersect}{isectname}{%
-  \def\PIT@key@isectname{#1}%
-}
 \psset[intersect]{%
   tstart=0,
   tstop=1,
   isectstart=0,
-  isectstop=-1,
-  isectname={}
+  isectstop=-1
 }%
 \def\showbezier{\pst@object{showbezier}}%
 \def\showbezier@i#1{%
   \addbefore@par{plotpoints=200}%
   \begin@OpenObj
     \addto@pscode{%
-      [#1 dup
-      \PIT@key@tstart\space\PIT@key@tstop\space 
-      \pst@intersectdict ToUnitInterval Portion end
+      \pst@intersectdict
+        [\PIT@name{#1} dup
+        \PIT@key@tstart\space\PIT@key@tstop\space 
+        ToUnitInterval Portion 
+      end
       { aload pop } forall
       counttomark 2 sub 2 idiv
       \psk@plotpoints
@@ -931,7 +862,7 @@
   \gdef\pst@code{}%
 }%
 \let\PIT@pst@stroke@orig\pst@stroke
-\def\PIT@pst@stroke{%
+\def\PIT@save@path{%
   \PIT@pst@stroke@orig
   \addto@pscode{%
     clear mark
@@ -940,34 +871,28 @@
     { /curvetype counttomark 7 roll }{} pathforall 
     counttomark 1 add -1 roll pop count }%
 }%
+\def\PIT@name#1{PIT@#1}%
 \def\savepath{\pst@object{savepath}}%
-\long\def\savepath@i#1{%
+\long\def\savepath@i#1#2{%
   \begin@SpecialObj
-    \let\pst@stroke\PIT@pst@stroke
+    \let\pst@stroke\PIT@save@path
     \let\use@pscode\PIT@use@pscode
-    \pscustom{#1}%
+    \pscustom{#2}%
     \PIT@Verb{%
-      \ifx\PIT@key@isectname\@empty
-        /PIT@1
-      \else
-        /PIT@\PIT@key@isectname\space
-      \fi
+      /\PIT@name{#1}
       [ 3 -1 roll 2 add 2 roll ] def }%
   \end@SpecialObj
-\ignorespaces}%
+}%
 \def\showpath{\pst@object{showpath}}%
-\def\showpath@i{%
-  \begin@SpecialObj
-    \ifx\PIT@key@isectname\@empty
-      \PackageError{pst-intersect}{You must provide an 'isectname' to show}%
-    \fi
+\def\showpath@i#1{%
+  \begin@OpenObj
     \addto@pscode{%
       \pst@intersectdict 
       3 dict begin
         /movetype /moveto load def
         /linetype /lineto load def
         /curvetype /curveto load def
-        mark PIT@\PIT@key@isectname\space aload pop
+        mark \PIT@name{#1} aload pop
         {
           counttomark 0 eq { exit } if
           load exec
@@ -975,9 +900,8 @@
         pop 
       end
     }%
-    \pst@stroke
-  \end@SpecialObj
-\ignorespaces}%
+  \end@OpenObj
+}%
 \def\intersectpaths{\pst@object{intersectpaths}}%
 \def\intersectpaths@i#1#2{%
   \begin@SpecialObj
@@ -987,14 +911,17 @@
         /nA -1 def /nB -1 def
         /isectA [] def /isectB [] def
         /tA [] def /tB [] def
-        PIT@#1 PreparePath PIT@#2 PreparePath
+        \PIT@name{#1} PreparePath \PIT@name{#2} PreparePath
         { 
           /nB nB 1 add def
           exch dup 3 1 roll
           {
             /nA nA 1 add def
             exch dup 3 1 roll
-            IntersectBeziers pop
+            IntersectBeziers 
+            LoadIntersectionPoints
+            [ exch isectB aload pop ] /isectB exch def
+            LoadIntersectionPoints
             [ exch isectA aload pop ] /isectA exch def
           } forall
           pop
@@ -1005,7 +932,6 @@
       end
     }%
     \psdots@ii
-    %\end@SpecialObj
 \ignorespaces}%
 \catcode`\@=\PstAtCode\relax
 %    \end{macrocode}
@@ -1124,14 +1050,14 @@ tx@IntersectDict begin
 %   \PSarray{\PSarray{X0 Y0} \PSarray{X1 Y1} \ldots \PSarray{XN YN}}.
 %
 % \begin{pssyntax}
-%   \PSvar{curveA} \PSvar{curveB} \PSop{IntersectBeziers}
+%   \PSvar{curveA} \PSvar{curveB} \PSop{IntersectBeziers} 
+%   \PSarray{curveA} \PSarray{tA} \PSarray{curveB} \PSarray{tB}
 % \end{pssyntax}
 %    \begin{macrocode}
 /IntersectBeziers {
     2 copy [0 1] [0 1] IterateIntersection
     exch TArray exch TArray
-    3 -1 roll exch LoadIntersectionPoints 
-    3 1 roll LoadIntersectionPoints
+    3 -1 roll exch
 } bind def
 %    \end{macrocode}
 % \end{macro}
