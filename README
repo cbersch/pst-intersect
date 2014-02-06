@@ -1,0 +1,24 @@
+------------------------------------------------------------------------
+The pst-intersect package --- Intersecting arbitrary curves
+Maintained by Christoph Bersch
+E-mail: usenet@bersch.net
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+------------------------------------------------------------------------
+
+The package pst-intersect computes the intersections between two
+arbitrary Bézier curves using the Bézier clipping algorithm.
+
+Installation
+------------
+
+The package is supplied in dtx format and as a pre-extracted zip file,
+pst-intersect.tds.zip. The later is most convenient for most users:
+simply unzip this in your local texmf directory and run texhash to
+update the database of file locations. If you want to unpack the dtx
+yourself you must run "tex pst-intersect.ins", to typeset the
+documentation run "latex pst-intersect.dtx", or preferably use the
+provided Makefile.
+
+The package requires recent versions of pstricks, pst-node, multido, and
+pst-func.

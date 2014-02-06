@@ -1,0 +1,2016 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2014 by Christoph Bersch <usenet@bersch.net>
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008/05/04 or later.
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{pst-intersect.dtx}
+%</driver>
+%<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<stylefile>\ProvidesPackage{pst-intersect}
+%<*stylefile>
+    [2014/02/06 v0.1alpha package wrapper for pst-intersect.tex]
+%</stylefile>
+%
+%<*driver>
+\documentclass[a4paper, DIV=9, oneside, toc=index, parskip=half-]{scrreprt}
+\usepackage{doc}
+\setcounter{IndexColumns}{2}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} 
+\usepackage{amsmath, marvosym} 
+\usepackage{bera}
+\providecommand*\mainlang{}
+\usepackage[ngerman, english,\mainlang]{babel}
+\usepackage{prettyref}
+\usepackage[dvipsnames,x11names,svgnames]{xcolor}
+\usepackage{array,booktabs,paralist,tabularx}
+\usepackage{ragged2e, calc}
+\newlength{\POEcaptionmargin}
+\newlength{\POEcaptionheight}
+\usepackage[labelfont={color=DOrange}, 
+            singlelinecheck=false, 
+            justification=raggedright]{caption} 
+\DeclareCaptionFormat{poenocaption}{%
+  \setlength{\POEcaptionmargin}{\widthof{#1}+7pt}%
+  \setlength{\POEcaptionheight}{\heightof{#1}+3pt}%
+  \hspace*{-\POEcaptionmargin}#1\par\vspace*{-\POEcaptionheight}%
+}%
+\DeclareCaptionFormat{poecaption}{%
+  \setlength{\POEcaptionmargin}{\widthof{#1}+7pt}%
+  \hspace*{-\POEcaptionmargin}#1#2#3\par
+}%
+\captionsetup[lstlisting]{format=poenocaption}
+\usepackage{nicefrac}
+\usepackage{pst-intersect}
+\usepackage{hypdoc}
+\hypersetup{%
+  colorlinks=true, 
+  urlcolor=DOrange, 
+  linkcolor=pdflinkcolor, 
+  breaklinks,
+  linktocpage=true} 
+\usepackage{breakurl}
+\definecolor{DOrange}{rgb}{1,.4,.2}%
+\definecolor{DDOrange}{rgb}{0.7, 0.23, 0.07}%
+\colorlet{pdflinkcolor}{DOrange}
+\colorlet{DGreen}{green!90!black}
+\usepackage{showexpl}
+\makeatletter\renewcommand*\SX@Info{}\makeatother
+\usepackage{etoolbox}
+\undef{\cs}\undef{\cmd}
+\usepackage{ltxdockit}
+\newcommand{\poeTR}[1]{\TR{\ttfamily\color{DOrange}#1}}
+\definecolor{colKeys}{rgb}{0,0,0}
+\definecolor{colIdentifier}{rgb}{0,0,0}
+\colorlet{colComments}{green!60!black}
+\definecolor{colString}{rgb}{0,0.5,0}
+\newlength{\codeoverhang}
+\setlength{\codeoverhang}{0.5\marginparwidth+\marginparsep}
+\lstset{%
+  language=[LaTeX]TeX, identifierstyle=\color{colIdentifier},
+  keywordstyle=\color{colKeys},
+  keywordstyle = [21]\color{DOrange},
+  keywordstyle = [22]\color{DOrange},
+  stringstyle=\color{colString},
+  commentstyle=\color{colComments},
+  alsoletter={12},
+  float=hbp,
+  basicstyle=\ttfamily\small,
+  columns=flexible,
+  tabsize=4,
+  showspaces=false,
+  showstringspaces=false,
+  breaklines=true,
+  breakautoindent=true,
+  breakatwhitespace=true,
+  captionpos=t,
+  belowcaptionskip=0pt,
+  abovecaptionskip=0pt,
+  xleftmargin=1em,
+  prebreak = {\raisebox{-0.5ex}[\ht\strutbox]{\kern0.5ex\large\Righttorque}},
+  rulecolor=\color{black!20}, 
+  texcsstyle = [20]\color{DDOrange},
+  moretexcs = [20]{savebezier, showbezier, savepath, showpath, intersectpaths, intersectbeziers},
+  explpreset={%
+    pos=l, width=-99pt, hsep=5mm, overhang=\codeoverhang, varwidth,
+    vsep=\bigskipamount, rframe={}}, extendedchars=true
+}%
+\lstdefinestyle{example}{explpreset={%
+    escapechar=*, pos=l, width=-99pt, hsep=5mm, overhang=\codeoverhang,
+    varwidth, vsep=\bigskipamount, rframe={}}}
+\makeatletter
+\providecommand\ON{%
+  \gdef\lst@alloverstyle##1{\textcolor{black!50}{\strut##1}%
+}}
+\providecommand\OFF{\xdef\lst@alloverstyle##1{##1}}
+\makeatother
+\colorlet{sectioncolor}{DOrange}
+\addtokomafont{sectioning}{\color{sectioncolor}}
+\usepackage[automark,nouppercase]{scrpage2}
+\pagestyle{scrheadings}
+\clearscrheadings
+\clearscrplain
+\ohead{\pagemark}
+\ihead{\headmark}
+\ofoot[\pagemark]{}
+\automark[subsection]{section}
+\setheadsepline{.4pt}[\color{DOrange}]
+\setheadwidth[0pt]{text}
+\setfootwidth[0pt]{text}
+\makeatletter
+\patchcmd{\l@chapter}{1.5em}{2em}{}{}
+\renewcommand*\l@section{\bprot@dottedtocline{1}{1.5em}{3.0em}}
+\renewcommand*\l@subsection{\bprot@dottedtocline{2}{3.8em}{4.0em}}
+\newrobustcmd*{\fnurl}[1][]{\hyper@normalise\ltd@fnurl{#1}}
+\def\ltd@fnurl#1#2{\footnote{#1\hyper@linkurl{\Hurl{#2}}{#2}}}
+\newrobustcmd*{\arxivurl}[1]{\href{http://arxiv.org/abs/#1}{arXiv:#1}}
+\newrobustcmd*{\doiurl}[1]{\href{http://dx.doi.org/#1}{DOI:#1}}
+\makeatother
+\usepackage{csquotes}
+\MakeAutoQuote{«}{»}
+%^^A spot is used in ltxdockit.sty
+\colorlet{spot}{sectioncolor}
+%^^A Fonts definitions used in ltxdockit.sty
+\renewcommand*{\verbatimfont}{\ttfamily}
+\renewcommand*{\displayverbfont}{\ttfamily}
+\renewcommand*{\marglistfont}{\spotcolor\sffamily\small}
+\renewcommand*{\margnotefont}{\sffamily\small}
+\renewcommand*{\optionlistfont}{\spotcolor\sffamily\displayverbfont}
+\renewcommand*{\ltxsyntaxfont}{\ttfamily}
+\renewcommand*{\ltxsyntaxlabelfont}{\spotcolor\displayverbfont}
+\renewcommand*{\changelogfont}{\normalfont}
+\renewcommand*{\changeloglabelfont}{\spotcolor\sffamily\bfseries}
+
+\makeatletter
+%^^A an idea from GL to provide links inside the listings to the pst-optexp commands: 
+%^^A <https://groups.google.com/groups/search?as_umsgid=4d89ee49%240%2418590%24426a74cc%40news.free.fr>
+\providerobustcmd*\ifrefundefined [1]{%
+  \begingroup%
+    \csname @safe@activestrue\endcsname%
+    \expandafter\endgroup\csname @\ifodd
+      \ifcsname r@comp:#1\endcsname 1\else
+        \ifcsname r@prm:#1\endcsname 1\else 
+          \ifcsname r@cs:#1\endcsname 1\else
+            \ifcsname r@sty:#1\endcsname 1\else 0
+      \fi\fi\fi\fi second\else first\fi oftwo\endcsname
+}% \ifrefundefined
+\def\lsthk@OutputBox@H@@k{%
+    \begingroup%
+      \let\lst@UM\@empty%
+      \edef\@tempc{\detokenize\expandafter{\the\lst@token }}%\edef
+      \ifrefundefined{\@tempc}%
+    \endgroup%
+    \sethyperlistings%
+}% \lsthk@OutputBox@H@@k
+\def\sethyperlistings {\global\let \hyperlistingsreference =\@tempc
+     \endgroup \aftergroup \dohyperlistings }% after \hbox
+\def\dohyperlistings {\def\lst@alloverstyle ##1{\hyperlistings ##1}}
+\def\hyperlistings{%
+    \setbox\@tempboxa\hbox%
+    \bgroup%
+      \rlap{\hypersetup {linkcolor=.}\relax\fboxrule\z@%
+        \ifcsdef{r@prm:\hyperlistingsreference}%
+          {\hyperref[prm:\hyperlistingsreference]{\xLkeyword{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}%
+          {\ifcsdef{r@comp:\hyperlistingsreference}%
+            {\hyperref[comp:\hyperlistingsreference]{\xLcomp{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}%
+            {\ifcsdef{r@sty:\hyperlistingsreference}%
+              {\hyperref[sty:\hyperlistingsreference]{\xLstyle{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}%
+              {\hyperref[cs:\hyperlistingsreference]{\xLcs{\hyperlistingsreference}\boxframe{\wd\@tempboxa}{\ht\@tempboxa}{\dp\@tempboxa}}}}}}%
+      \unhbox\@tempboxa%
+    \egroup%
+}% \hyperlistings
+\let\lsthk@OutputBox\lsthk@OutputBox@H@@k
+
+\renewenvironment*{ltxsyntax}
+  {\list{}{%
+     \setlength{\labelwidth}{\marglistwidth}%
+     \setlength{\labelsep}{0pt}%
+     \setlength{\leftmargin}{0pt}%
+     \renewcommand*{\makelabel}[1]{%
+       \hss\ltxsyntaxfont\ltxsyntaxlabelfont##1}}%
+   \let\cmditem\PIT@cmditem}
+  {\endlist}
+
+\def\ltd@optionlist{%
+  \let\optitem\PIT@optitem
+  \let\valitem\PIT@valitem
+  \let\choitem\PIT@choitem
+  \let\boolitem\PIT@boolitem
+  \let\intitem\PIT@intitem
+  \let\numitem\PIT@numitem
+  \let\psnumitem\PIT@psnumitem
+  \let\pititem\ltd@item
+  \let\typeitem\PIT@typeitem}
+
+\def\PIT@typeitem#1#2{%
+  \item[{#1}]%
+  \label{prm:#1}%\docindexdef{#1=\nxLkeyword{#1}}%
+  \begingroup\raggedright
+  #2%
+  \settowidth\@tempdimb{\prm{psstyle}}%
+  \settowidth\@tempdimc{#1}%
+  \@tempdimc=\dimexpr\@tempdimc+\labelsep-\labelwidth\relax
+  \ifdim\@tempdimc>0pt%
+    \@tempdima=\dimexpr\linewidth-\@tempdimb-\@tempdimc-1em\relax
+  \else
+    \@tempdima=\dimexpr\linewidth-\@tempdimb-1em\relax
+  \fi
+  \par\endgroup}
+
+\def\PIT@option#1#2#3{%
+  \item[#1]%
+  \begingroup\raggedright
+  \ltd@textverb{=}%
+  \settowidth\@tempdimb{\ltd@textverb{=}}%
+  \settowidth\@tempdimc{#1}%
+  \@tempdimc=\dimexpr\labelwidth-\@tempdimc\relax
+  \ifdim\@tempdimc<0pt
+    \@tempdima=\dimexpr\linewidth-\@tempdimb+\@tempdimc-2em\relax
+  \else
+    \@tempdima=\dimexpr\linewidth-\@tempdimb-2em\relax
+  \fi
+  \ifblank{#3}
+    {}
+    {\settowidth\@tempdimb{default: #3}%
+     \@tempdima=\dimexpr\@tempdima-\@tempdimb-2em\relax}%
+  \parbox[t]{\@tempdima}{\raggedright #2}%
+  \ifblank{#3}
+    {}
+    {\hfill default:~#3}%
+  \par\endgroup
+  \nobreak\vspace{\itemsep}}
+
+\def\PIT@optitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@optitem@i}
+    {\booltrue{@tempswa}\PIT@optitem@i}}
+\newcommand*{\PIT@optitem@i}[3][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{#3}{}}
+    {\PIT@option{#2}{#3}{\ltd@textverb{#1}}}}%
+
+\def\PIT@valitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@valitem@i}
+    {\booltrue{@tempswa}\PIT@valitem@i}}
+\newcommand*{\PIT@valitem@i}[3][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{\prm{#3}}{}}
+    {\PIT@option{#2}{\prm{#3}}{\ltd@textverb{#1}}}}%
+
+\def\PIT@choitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@choitem@i}
+    {\booltrue{@tempswa}\PIT@choitem@i}}
+\newcommand*{\PIT@choitem@i}[3][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{\ltd@verblist{#3}}{}}
+    {\PIT@option{#2}{\ltd@verblist{#3}}{\ltd@textverb{#1}}}}%
+
+\def\PIT@boolitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@boolitem@i}
+    {\booltrue{@tempswa}\PIT@boolitem@i}}
+\newcommand*{\PIT@boolitem@i}[2][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{\ltd@verblist{true,false}}{}}
+    {\PIT@option{#2}{\ltd@verblist{true,false}}{\ltd@textverb{#1}}}}%
+
+\def\PIT@intitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@intitem@i}
+    {\booltrue{@tempswa}\PIT@intitem@i}}
+\newcommand*{\PIT@intitem@i}[2][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{\prm{int}}{}}
+    {\PIT@option{#2}{\prm{int}}{\ltd@textverb{#1}}}}%
+
+\def\PIT@numitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@numitem@i}
+    {\booltrue{@tempswa}\PIT@numitem@i}}
+\newcommand*{\PIT@numitem@i}[2][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{\prm{num}}{}}
+    {\PIT@option{#2}{\prm{num}}{\ltd@textverb{#1}}}}%
+
+\def\PIT@psnumitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@psnumitem@i}
+    {\booltrue{@tempswa}\PIT@psnumitem@i}}
+\newcommand*{\PIT@psnumitem@i}[2][]{%
+  \ifbool{@tempswa}%
+    {\label{prm:#2}\xdefLkeyword{#2}}%
+    {\xLkeyword{#2}}%
+  \ifblank{#1}
+    {\PIT@option{#2}{\prm{psnum}}{}}
+    {\PIT@option{#2}{\prm{psnum}}{\ltd@textverb{#1}}}}%
+
+\def\ltd@csitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\ltd@csitem@i}
+    {\booltrue{@tempswa}\ltd@csitem@i}}
+\def\ltd@csitem@i#1{%
+  \ifbool{@tempswa}
+    {\ltd@item@ii{\textbackslash#1\hspace\marglistsep}{#1}}
+    {\ltd@item@ii{\textbackslash#1\hspace\marglistsep}{}}}
+
+\def\PIT@cmditem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@cmditem@i}
+    {\booltrue{@tempswa}\PIT@cmditem@i}}
+\def\PIT@cmditem@i#1{%
+  \ifbool{@tempswa}
+    {\PIT@cmditem@ii{\textbackslash#1}{cs:#1}}
+    {\PIT@cmditem@ii{\textbackslash#1}{}}}
+\def\PIT@compitem{%
+  \@ifstar
+    {\boolfalse{@tempswa}\PIT@compitem@i}
+    {\booltrue{@tempswa}\PIT@compitem@i}}
+\def\PIT@compitem@i#1{%
+  \ifbool{@tempswa}
+    {\PIT@cmditem@ii{\textbackslash#1}{comp:#1}}
+    {\PIT@cmditem@ii{\textbackslash#1}{}}}
+\def\PIT@cmditem@ii#1#2{%
+  \ltd@itemsave
+  \ifhmode
+    \itemsep-\topsep
+  \else
+    \ltd@itembreak
+  \fi
+  \item[#1]%
+  \ltd@itemrest
+  \ifblank{#2}{}{\label{#2}}%
+  \begingroup
+  \ltd@syntaxsetup
+  \ltxsyntaxfont
+  \let\@tempa\@empty
+  \ltd@parseargs}
+
+\def\ltd@csitem@ii#1#2{%
+  \ltd@itemsave
+  \ifhmode
+    \itemsep-\topsep
+  \else
+    \ltd@itembreak
+  \fi
+  \item[#1]%
+  \ltd@itemrest
+  \ifblank{#2}{}{\label{cs:#2}}%
+  \begingroup
+  \ltd@syntaxsetup
+  \ltxsyntaxfont
+  \let\@tempa\@empty
+  \ltd@parseargs}
+
+
+\let\plainllap\llap
+\newrobustcmd\macro@llap[1]{{\global\let\llap\plainllap
+ \setbox0=\hbox\bgroup \macro@font\small\saved@macroname\egroup
+ \ifdim\wd0>30mm
+    \hbox to\z@ \bgroup\hss \hbox to30mm{\unhcopy0\hss}\egroup
+    \edef\@tempa{\hskip\dimexpr\the\wd0-30mm}\global\everypar\expandafter{\the\expandafter\everypar
+                                                                           \@tempa \global\everypar{}}%
+ \else \llap{\unhbox0}\fi}}
+ \AtBeginEnvironment{macro}{\let\llap\macro@llap}
+\makeatother
+
+\newcommand*{\PSstring}[1]{{\normalfont\small\ttfamily(#1)}}
+\newcommand*{\PSarray}[1]{{\normalfont\small\ttfamily[#1]}}
+\newcommand*{\PSname}[1]{{\normalfont\small\ttfamily/#1}}
+\newcommand*{\PSproc}[1]{{\normalfont\small\ttfamily\textbraceleft #1\textbraceright}}
+\newcommand*{\PSvar}[1]{{\normalfont\small\ttfamily #1}}
+\newcommand*{\PSop}[1]{{\normalfont\small\ttfamily\color{DOrange}\hskip 3pt #1\hskip 3pt}}
+
+\newcommand*{\compref}[1]{\ref{comp:#1}}
+\newcommand*{\hyperpagedef}[1]{\textbf{\hyperpage{#1}}}
+\newcommand*{\nodename}[1]{\emph{#1}}
+\newcommand*{\param}[1]{\normalfont\texttt{#1}}
+\newcommand*{\paramvalue}[1]{\texttt{#1}}
+\newcommand*{\styleshape}[1]{\texttt{#1}}
+\newcommand{\docindex}[1]{\sindex[doc]{#1|hyperpage}}
+\newcommand{\docindexdef}[1]{\sindex[doc]{#1|hyperpagedef}}
+\makeatletter
+\def\Lcs{\@ifstar{\Lcs@nobm}{\Lcs@bm}}
+\def\Lcs@nobm#1{\nxLcs{#1}\xLcs{#1}}
+\def\Lcs@bm#1{\hyperref[cs:#1]{\Lcs@nobm{#1}}}
+\def\xLcs#1{}%\docindex{#1=\nxLcs{#1}}\docindex{\PITindexMacro!#1=\nxLcs{#1}}}
+\def\nxLcs#1{\texttt{\textbackslash#1}}
+
+\def\Lcomp{\@ifstar{\Lcomp@nobm}{\Lcomp@bm}}
+\def\Lcomp@nobm#1{\nxLcomp{#1}\xLcomp{#1}}
+\def\Lcomp@bm#1{\hyperref[comp:#1]{\Lcomp@nobm{#1}}}
+\def\xLcomp#1{}%\docindex{#1=\nxLcomp{#1}}\docindex{\PITindexComp!#1=\nxLcomp{#1}}}
+\def\nxLcomp#1{\texttt{\textbackslash#1}}
+
+\def\LPack#1{\nxLPack{#1}}%\docindex{#1=\nxLPack{#1}}\docindex{\PITindexPack!#1=\nxLPack{#1}}}
+\def\nxLPack#1{\texttt{#1}}
+
+\def\Lenv{\@ifstar{\Lenv@nobm}{\Lenv@bm}}
+\def\Lenv@nobm#1{\nxLenv{#1}\xLenv{#1}}
+\def\Lenv@bm#1{\hyperref[env:#1]{\Lenv@nobm{#1}}}
+\def\xLenv#1{}%\docindex{#1=\nxLenv{#1}}\docindex{\PITindexEnv!#1=\nxLenv{#1}}}
+\def\nxLenv#1{\texttt{#1}}
+\let\orig@ltd@envitem\ltd@envitem
+\def\ltd@envitem#1{\orig@ltd@envitem{#1}\label{env:#1}\xLenv{#1}}
+
+\def\Lkeyword{\@ifstar{\Lkeyword@nobm}{\Lkeyword@bm}}
+\def\Lkeyword@nobm#1{\nxLkeyword{#1}\xLkeyword{#1}}
+\def\Lkeyword@bm#1{\hyperref[prm:#1]{\Lkeyword@nobm{#1}}}
+\def\xLkeyword#1{}%\docindex{#1=\nxLkeyword{#1}}\docindex{\PITindexKeyword!#1=\nxLkeyword{#1}}}
+\def\xdefLkeyword#1{}%\docindexdef{#1=\nxLkeyword{#1}}\docindexdef{\PITindexKeyword!#1=\nxLkeyword{#1}}}
+\def\nxLkeyword#1{\texttt{#1}}
+
+\def\xLoption#1{}%\docindex{#1=\texttt{#1}}}
+\def\Loption#1{\texttt{#1}\xLoption{#1}}
+\def\nxLoption#1{\texttt{#1}}
+
+\def\Lstyle{\@ifstar{\Lstyle@nobm}{\Lstyle@bm}}
+\def\Lstyle@nobm#1{\nxLstyle{#1}\xLstyle{#1}}
+\def\Lstyle@bm#1{\hyperref[sty:#1]{\Lstyle@nobm{#1}}}
+\def\xLstyle#1{}%\docindex{#1=\nxLstyle{#1}}\docindex{\PITindexStyle!#1=\nxLstyle{#1}}}
+\def\xdefLstyle#1{}%\docindexdef{#1=\nxLstyle{#1}}\docindexdef{\PITindexStyle!#1=\nxLstyle{#1}}}
+\def\nxLstyle#1{\texttt{#1}}
+
+\makeatother
+
+\newcommand{\dipoledesc}[1]{%
+  \xLdipole{#1}%
+  \compitem{#1}[options](in)(out){label}%
+}
+\newcommand{\tripoledesc}[1]{%
+  \xLtripole{#1}%
+  \compitem{#1}[options](in)(center)(out){label}%
+}
+
+\newcommand{\fiberdipoledesc}[1]{%
+  \xLfdipole{#1}%
+  \compitem{#1}[options](in)(out){label}%
+}
+
+\newenvironment*{pssyntax}
+  {\list{}{\small
+     \setlength{\labelsep}{0pt}%
+     \setlength{\leftmargin}{10pt}%
+     \item[]}}
+  {\endlist}
+
+\newcommand{\psarglistfont}{\small}
+\newenvironment*{psarglist}
+  {\list{}{%
+     \setlength{\labelwidth}{10pt}%
+     \setlength{\labelsep}{0pt}%
+     \setlength{\leftmargin}{0pt}%
+     \setlength{\itemsep}{\parsep}%
+     \setlength{\parsep}{0pt}%
+     \renewcommand*{\makelabel}[1]{\hss\psarglistfont##1}}}
+  {\endlist}
+
+\makeatletter
+\renewenvironment{theglossary}{\GlossaryParms \let\item\@idxitem \ignorespaces}{}
+\makeatother
+\def\psargitem#1{\item[#1]\hfill\par\nobreak}
+
+\addtopsstyle{Fiber}{linecolor=DOrange,linewidth=1.5\pslinewidth}
+\addtopsstyle{Beam}{linewidth=1.5\pslinewidth}
+\EnableCrossrefs
+\CodelineIndex
+\OnlyDescription
+\begin{document}
+  \DocInput{pst-intersect.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \GetFileInfo{pst-intersect.dtx}
+%
+% \newif\ifGERMAN  \GERMANfalse
+% \newif\ifENGLISH \ENGLISHfalse
+% \iflanguage{ngerman}{\GERMANtrue}{%
+%   \iflanguage{german}{\GERMANtrue}{\GERMANfalse}}
+% \iflanguage{english}{\ENGLISHtrue}{\ENGLISHfalse}
+%
+% \ifGERMAN
+%   \newrefformat{chap}{Kap.~\ref{#1}}
+%   \newrefformat{sec}{Kap.~\ref{#1}}
+%   \newrefformat{l}{Zeile~\ref{#1}}
+%   \newrefformat{ex}{Bsp.~\ref{#1}}
+%   \newrefformat{tab}{Tab.~\ref{#1}}
+%   \newrefformat{fig}{Abb.~\ref{#1}}
+%   \newcommand{\PITindexMacro}{Makros}
+%   \newcommand{\PITindexKeyword}{Parameter}
+%   \newcommand{\PITindexEnv}{Umgebungen}
+%   \newcommand{\PITindexPack}{Pakete}
+%   \renewcommand*\lstlistingname{Bsp.}
+% \fi
+% \ifENGLISH
+%   \newrefformat{chap}{Sec.~\ref{#1}}
+%   \newrefformat{sec}{Sec.~\ref{#1}} 
+%   \newrefformat{l}{Line~\ref{#1}}
+%   \newrefformat{ex}{Ex.~\ref{#1}}
+%   \newrefformat{tab}{Tab.~\ref{#1}}
+%   \newrefformat{fig}{Fig.~\ref{#1}}
+%   \newcommand{\PITindexMacro}{macros}
+%   \newcommand{\PITindexKeyword}{parameters}
+%   \newcommand{\PITindexEnv}{environments}
+%   \newcommand{\PITindexPack}{packages}
+%   \renewcommand*\lstlistingname{Ex.}
+% \fi
+%
+% \makeatletter
+% \renewcommand\maketitle{^^A
+% \thispagestyle{empty}^^A
+% \begin{titlepage}
+% \begin{pspicture}(1.6in,0.685in)(10,21.7)
+%   \psframe[fillstyle=solid,linecolor=lightgray,fillcolor=lightgray,linestyle=solid](0,-5.75)(21.5,10)
+%   \psframe[fillstyle=solid,linecolor=Orange!85!Red,fillcolor=Orange!85!Red,linestyle=solid](0,10)(21.5,10.5)
+%   \psframe[fillstyle=solid,linecolor=Orange!85!Red,fillcolor=Orange!85!Red,linestyle=solid](0,21.1)(21.5,21.2)
+%   \rput[lb](3,22){\Huge\sffamily\color{Orange!65!Red}\psscalebox{2}{\textbf{PSTricks}}}
+%   \rput[lb](3,14.1){\parbox{15cm}{\sffamily\RaggedRight\bfseries\huge\@title}}
+%   \rput[lb](3,7.6){\parbox{13cm}{\sffamily\@date}}
+%   \rput[lb](3,-2.6){\parbox[b]{17cm}{\sffamily\RaggedRight 
+%     ~\hfill\makebox[7cm][l]{\ifGERMAN Paketautor:\fi\ifENGLISH Package author:\fi}\\
+%     ~\hfill\makebox[7cm][l]{^^A
+%       \bfseries\tabular[t]{@{}l@{}}\@author\endtabular}}}
+%  \rput[C](11,4){\bgImage}
+%  \end{pspicture}^^A
+% \end{titlepage}}
+% \makeatother
+% 
+% \ifGERMAN
+%   \title{\texttt{pst-intersect}\\ Berechnen der Schnittpunkte von Kurven\\[0.5ex] \small \fileversion}
+%   \hypersetup{pdftitle={Schnittpunkte von Bezierkurven}}
+% \fi
+% \ifENGLISH
+%   \title{\texttt{pst-optexp}\\ Intersecting arbitrary curves\\[0.5ex] \small \fileversion}
+%   \hypersetup{pdftitle={Intersections of Bezier curves}}
+% \fi
+% \author{Christoph Bersch}
+% \date{\filedate}
+% \def\bgImage{}
+%
+% \maketitle
+% 
+% \clearpage
+% \tableofcontents
+% \clearpage
+% 
+% \ifGERMAN
+%   \chapter{Einführung}
+% \fi
+% \ifENGLISH
+%   \chapter{Introduction}
+% \fi
+% 
+% \ifGERMAN
+%   \section{Über das Paket}
+%
+%   \LPack{pst-intersect} ist ein PSTricks-Paket zur Berechnung der
+%   Schnittpunkte von beliebigen Kurven und Pfaden.
+% \fi 
+% \ifENGLISH
+%   \section{About the package}
+%   The package \LPack{pst-intersect} is a PSTricks package to calculate
+%   the intersections of Bezier curves and arbitrary Postscript paths.
+% \fi
+%
+% \ifGERMAN
+%   \section{Anforderungen}
+%   \LPack{pst-intersect} aktuelle Versionen der
+%   Pakete \LPack{pstricks}, \LPack{pst-node}, \LPack{pst-func} und \LPack{multido}.
+%
+%   Alle PSTricks-Pakete machen regen Gebrauch von der Postscript-Sprache, so
+%   dass der typische Arbeitsfluss \opt{latex}, \opt{dvips} und
+%   ggf. \opt{ps2pdf} umfasst. Es gibt viele alternative Methoden um die
+%   Dokumente zu
+%   kompilieren.\fnurl{http://tug.org/PSTricks/main.cgi?file=pdf/pdfoutput}
+% \fi
+% \ifENGLISH
+%   \section{Requirements}
+%   \LPack{pst-intersect} requires recent versions of
+%   \LPack{pstricks}, \LPack{pst-node}, \LPack{pst-func}, and \LPack{multido}.
+%
+%   All PSTricks package rely heavily on the Postscript language so that the
+%   typical workflow involves \opt{latex}, \opt{dvips}, and \opt{ps2pdf}. Of
+%   course there are several alternative ways to compile your
+%   documents.\fnurl{http://tug.org/PSTricks/main.cgi?file=pdf/pdfoutput} 
+% \fi
+%
+% \ifGERMAN
+%   \section{Verbreitung und Installation}
+%   %Dieses Paket ist auf
+%   %CTAN\fnurl{http://mirror.ctan.org/help/Catalogue/entries/pst-intersect.html}
+%   %erhältlich und in \TeX Live and MiK\TeX{} enthalten.
+% 
+%   Das \LPack{pst-intersect}-Paket umfasst die zwei Hauptdateien
+%   \texttt{pst-intersect.ins} und \texttt{pst-intersect.dtx}. Durch Aufrufen
+%   von \texttt{tex pst-intersect.ins} werden die drei folgenden
+%   Dateien erzeugt:
+%   \begin{itemize}
+%   \item \texttt{pst-intersect.pro}: die Postscript Prologdatei
+%   \item \texttt{pst-intersect.sty}: die \LaTeX-Stildatei
+%   \item \texttt{pst-intersect.sty}: die \TeX-Datei
+%   \end{itemize}
+%   Speichern Sie diese Dateien in einem Verzeichnis der Teil Ihres
+%   lokalen \TeX-Baums ist.
+% 
+%   Vergessen Sie nicht \texttt{texhash} aufzurufen um den Baum zu
+%   aktualisieren. MiK\TeX{}-Benutzer müssen die Dateinamen-Datenbank
+%   (FNDB) aktualisieren.
+% 
+%   Detailliertere Information finden Sie in der Dokumentation Ihrer
+%   \LaTeX-Distribution über die Installation in den lokalen
+%   \TeX{}-Baum.
+% \fi
+% \ifENGLISH
+%   \section{Distribution and installation}
+%   This package is available on
+%   CTAN\fnurl{http://mirror.ctan.org/help/Catalogue/entries/pst-intersect.html} and
+%   is included in \TeX Live and MiK\TeX.
+% 
+%   The \LPack{pst-intersect} package consists of the two main files
+%   \texttt{pst-intersect.ins} and \texttt{pst-intersect.dtx}. By running \texttt{tex
+%   pst-intersect.ins} the following derived files are generated:
+%   \begin{itemize}
+%   \item \texttt{pst-intersect.pro}: the Postscript prolog file
+%   \item \texttt{pst-intersect.sty}: the \LaTeX{} style file
+%   \item \texttt{pst-intersect.tex}: the \TeX{} file
+%   \end{itemize}
+%   Save the files in a directory which is part of your local \TeX{} tree.
+% 
+%   Do not forget to run \texttt{texhash} to update this tree. For MiK\TeX{}
+%   users, do not forget to update the file name database (FNDB).
+% 
+%   For more detailed information see the documentation of your personal
+%   \LaTeX{} distribution on installing packages to your local \TeX{}
+%   system.
+% \fi
+%
+% \ifGERMAN\section{Lizenz}\fi
+% \ifENGLISH\section{License}\fi
+% \ifGERMAN
+% Es wird die Erlaubnis gewährt, dieses Dokument zu kopieren, zu verteilen
+% und\slash oder zu modifizieren, unter den Bestimmungen der \LaTeX{} Project
+% Public License, Version
+% 1.3c.\fnurl{http://www.latex-project.org/lppl.txt}. Dieses
+% Paket wird vom Autor betreut (author-maintained).
+% \fi
+% \ifENGLISH
+% Permission is granted
+% to copy, distribute and\slash or modify this software under the terms of the
+% \LaTeX{} Project Public License, version
+% 1.3c.\fnurl{http://www.latex-project.org/lppl.txt} This
+% package is author-maintained.
+% \fi
+%
+% \ifGERMAN
+%   \section{Danksagung}
+% \fi
+% \ifENGLISH
+%   \section{Acknowledgements}
+% \fi
+% \ifGERMAN
+% Ich danke Marco Cecchetti, dessen lib2geom-Bibliothek mir als Vorlage
+% für einen Großteil des Postscript-Kodes für den
+% Bezier-Clipping-Algorithmus diente. Außerdem gilt mein Dank William
+% A. Casselman, für seine Erlaubnis, den Quicksort-Kode und den Kode zur
+% Berechung der konvexen Hüllen aus seinem Buch »Mathematical
+% Illustration« verwenden zu dürfen. Der Dokumentationsstil ist eine
+% Mischung aus der \opt{pst-doc} Klasse (Herbert Voß) und dem
+% \opt{ltxdockit} Paket für die \opt{biblatex} Dokumentation (Philipp
+% Lehmann).
+% \fi
+%
+% \ifGERMAN
+% \chapter{Beispiele}
+% \fi
+% \ifENGLISH
+% \chapter{Examples}
+% \fi
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5,5)
+  \savebezier{\curveA}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \multido{\i=100+-20,\r=1+-0.2}{5}{%
+    \showbezier[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{\curveA}
+  }%
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi 
+%
+% \appendix
+%
+% \ifGERMAN
+% \chapter{Versionsgeschichte}
+%
+% Diese Versionsgeschichte ist eine Liste von Änderungen, die für den Nutzer des
+% Pakets von Bedeutung sind. Änderungen, die eher technischer Natur sind und für
+% den Nutzer des Pakets nicht relevant sind und das Verhalten des Pakets nicht
+% ändern, werden nicht aufgeführt. Wenn ein Eintrag der Versionsgeschichte ein
+% Feature als \emph{improved} oder \emph{extended} bekannt gibt, so bedeutet
+% dies, dass eine Modifikation die Syntax und das Verhalten des Pakets nicht
+% beeinflusst, oder das es für ältere Versionen kompatibel ist. Einträge, die
+% als \emph{deprecated}, \emph{modified}, \emph{renamed}, oder \emph{removed}
+% deklariert sind, verlangen besondere Aufmerksamkeit. Diese bedeuten, dass eine
+% Modifikation Änderungen in existierenden Dokumenten mit sich ziehen kann. Die
+% Zahlen an der rechten Seite stehen für die relevante Stelle dieser
+% Dokumentation, zusätzliche Informationen zur Migration von älteren Dokumenten
+% sind in \prettyref{sec:bwd-comp} zu finden.
+% \fi
+% \ifENGLISH
+% \chapter{Revision history}
+%
+% This revision history is a list of changes relevant to users of this
+% package. Changes of a more technical nature which do not affect the
+% user interface or the behavior of the package are not included in the
+% list. If an entry in the revision history states that a feature has
+% been \emph{improved} or \emph{extended}, this indicates a modification
+% which either does not affect the syntax and behavior of the package or
+% is syntactically backwards compatible (such as the addition of an
+% optional argument to an existing command). Entries stating that a
+% feature has been \emph{deprecated}, \emph{modified}, \emph{fixed},
+% \emph{renamed}, or \emph{removed} demand attention. They indicate a
+% modification which may require changes to existing documents. The
+% numbers on the right indicate the relevant section of this manual,
+% more information regarding backward compatibility can be found in
+% \prettyref{sec:bwd-comp}.  \fi
+%
+% \begin{changelog}
+%\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
+%   \begin{release}{1.0}{2014-xx-xx}
+%   \item First CTAN version
+%   \end{release}
+% \end{changelog}
+%
+% \StopEventually{}
+%
+%   \begin{otherlanguage}{english}
+%    \printindex[idx]
+%  \end{otherlanguage}
+%
+% \chapter{The \LaTeX\ wrapper}
+%<*stylefile>
+%    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{pst-intersect}%
+   [2014/02/06 v0.1alpha package wrapper for pst-intersect.tex]
+\RequirePackage{pstricks}
+\RequirePackage{pst-xkey}
+\RequirePackage{pst-node}
+\RequirePackage{multido}
+\RequirePackage{pst-func}
+\input{pst-intersect.tex}
+\IfFileExists{pst-intersect.pro}{%
+    \ProvidesFile{pst-intersect.pro}
+      [2014/02/06 PostScript prologue file]
+      \@addtofilelist{pst-intersect.pro}}{}%
+%    \end{macrocode}
+%</stylefile>
+%
+% \chapter{The \TeX\ implementation}
+%
+%<*texfile>
+%    \begin{macrocode}
+\csname PSTintersectLoaded\endcsname
+\let\PSTintersectLoaded\endinput
+
+\ifx\PSTricksLoaded\endinput\else\input pstricks.tex \fi
+\ifx\PSTXKeyLoaded\endinput\else \input pst-xkey.tex \fi
+\ifx\PSTnodesLoaded\endinput\else\input pst-node.tex \fi
+\ifx\MultidoLoaded\endinput\else \input multido.tex  \fi
+\ifx\PSTfuncLoaded\endinput\else \input pst-func.tex \fi
+
+\edef\PstAtCode{\the\catcode`\@} \catcode`\@=11\relax
+
+ %\@addtofilelist{pst-intersect.pro}{}%
+\pst@addfams{intersect}
+\pstheader{pst-intersect.pro}
+
+\def\pst@intersectdict{tx@IntersectDict begin }
+\def\PIT@dict#1{\pst@intersectdict #1 end}
+\def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
+
+\def\intersectbeziers{\pst@object{intersectbeziers}}
+\def\intersectbeziers@i{%
+  \@ifnextchar\bgroup
+    {\intersectbeziers@ii}{\intersectbeziers@iii}}%
+\def\intersectbeziers@iii(#1)(#2)(#3)(#4)(#5)(#6)(#7)(#8){%
+  \begin@SpecialObj
+    \addto@pscode{%
+      \pst@intersectdict }%
+      \pst@@getcoor{#1}\addto@pscode{ [[\pst@coor] }%
+      \pst@@getcoor{#2}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#3}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#4}\addto@pscode{ [\pst@coor]] }%
+      \pst@@getcoor{#5}\addto@pscode{ [[\pst@coor] }%
+      \pst@@getcoor{#6}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#7}\addto@pscode{ [\pst@coor] }%
+      \pst@@getcoor{#8}\addto@pscode{ [\pst@coor]] }%
+    \addto@pscode{%
+      IntersectBeziers pop [ exch aload pop }%
+    \psdots@ii
+}%
+\def\intersectbeziers@ii#1#2{%
+  \begin@SpecialObj
+    \addto@pscode{%
+      \pst@intersectdict 
+      #1 #2 IntersectBeziers pop [ exch aload pop }%
+    \psdots@ii
+}%
+
+\def\savebezier#1{%
+  \def\PIT@aftercurve{\let#1\PIT@tmpcurve}%
+  \def\PIT@tmpcurve{[}%
+  \savebezier@i}%
+\def\savebezier@i{%
+  \@ifnextchar(%)
+    {\savebezier@ii}%
+    {\edef\PIT@tmpcurve{\PIT@tmpcurve ]}\PIT@aftercurve}
+}%
+\def\savebezier@ii(#1){%
+  \pst@@getcoor{#1}%
+  \edef\PIT@tmpcurve{\PIT@tmpcurve [\pst@coor]}%
+  \savebezier@i
+}%
+\define@key[psset]{intersect}{tstart}{%
+  \pst@checknum{#1}\PIT@key@tstart
+}
+\define@key[psset]{intersect}{tstop}{%
+  \pst@checknum{#1}\PIT@key@tstop
+}
+\define@key[psset]{intersect}{isectstart}{%
+  \pst@checknum{#1}\PIT@key@isectstart
+}
+\define@key[psset]{intersect}{isectstop}{%
+  \pst@checknum{#1}\PIT@key@isectstop
+}
+\define@key[psset]{intersect}{isectname}{%
+  \def\PIT@key@isectname{#1}%
+}
+\psset[intersect]{%
+  tstart=0,
+  tstop=1,
+  isectstart=0,
+  isectstop=-1,
+  isectname={}
+}%
+\def\showbezier{\pst@object{showbezier}}%
+\def\showbezier@i#1{%
+  \addbefore@par{plotpoints=200}%
+  \begin@OpenObj
+    \addto@pscode{%
+      [#1 dup
+      \PIT@key@tstart\space\PIT@key@tstop\space 
+      \pst@intersectdict ToUnitInterval Portion end
+      { aload pop } forall
+      counttomark 2 sub 2 idiv
+      \psk@plotpoints
+      exch
+      \txFunc@BezierCurve
+      \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+    }%
+  \end@OpenObj
+}%
+\def\PIT@use@pscode{%
+  \pstverb{%
+    \pst@dict
+    \tx@STP
+    \pst@newpath
+    \psk@origin
+    \psk@swapaxes
+    \pst@code
+    end
+    count /ocount exch def
+  }%
+  \gdef\pst@code{}%
+}%
+\let\PIT@pst@stroke@orig\pst@stroke
+\def\PIT@pst@stroke{%
+  \PIT@pst@stroke@orig
+  \addto@pscode{%
+    clear mark
+    { /movetype counttomark 3 roll }
+    { /linetype counttomark 3 roll }
+    { /curvetype counttomark 7 roll }{} pathforall 
+    counttomark 1 add -1 roll pop count }%
+}%
+\def\savepath{\pst@object{savepath}}%
+\long\def\savepath@i#1{%
+  \begin@SpecialObj
+    \let\pst@stroke\PIT@pst@stroke
+    \let\use@pscode\PIT@use@pscode
+    \pscustom{#1}%
+    \PIT@Verb{%
+      \ifx\PIT@key@isectname\@empty
+        /PIT@1
+      \else
+        /PIT@\PIT@key@isectname\space
+      \fi
+      [ 3 -1 roll 2 add 2 roll ] def }%
+  \end@SpecialObj
+\ignorespaces}%
+\def\showpath{\pst@object{showpath}}%
+\def\showpath@i{%
+  \begin@SpecialObj
+    \ifx\PIT@key@isectname\@empty
+      \PackageError{pst-intersect}{You must provide an 'isectname' to show}%
+    \fi
+    \addto@pscode{%
+      \pst@intersectdict 
+      3 dict begin
+        /movetype /moveto load def
+        /linetype /lineto load def
+        /curvetype /curveto load def
+        mark PIT@\PIT@key@isectname\space aload pop
+        {
+          counttomark 0 eq { exit } if
+          load exec
+        } loop
+        pop 
+      end
+    }%
+    \pst@stroke
+  \end@SpecialObj
+\ignorespaces}%
+\def\intersectpaths{\pst@object{intersectpaths}}%
+\def\intersectpaths@i#1#2{%
+  \begin@SpecialObj
+    \addto@pscode{%
+      \pst@intersectdict
+        6 dict begin 
+        /nA -1 def /nB -1 def
+        /isectA [] def /isectB [] def
+        /tA [] def /tB [] def
+        PIT@#1 PreparePath PIT@#2 PreparePath
+        { 
+          /nB nB 1 add def
+          exch dup 3 1 roll
+          {
+            /nA nA 1 add def
+            exch dup 3 1 roll
+            IntersectBeziers pop
+            [ exch isectA aload pop ] /isectA exch def
+          } forall
+          pop
+          /nA -1 def
+        } forall
+        pop
+        [ isectA { aload pop } forall
+      end
+    }%
+    \psdots@ii
+    %\end@SpecialObj
+\ignorespaces}%
+\catcode`\@=\PstAtCode\relax
+%    \end{macrocode}
+%</texfile> 
+%
+% \chapter{The Postscript header file}
+% \makeatletter
+%^^A Copied this definition from doc.sty and changed it not to add a
+%^^A backslash to the Postscript procedure name in the index.
+% \def\SpecialIndex@#1#2{%
+%    \@SpecialIndexHelper@#1\@nil
+%    \def\@tempb{ }%
+%    \ifcat \@tempb\@gtempa
+%       \special@index{\quotechar\space\actualchar
+%                      \string\verb\quotechar*\verbatimchar
+%                      \quotechar\space\verbatimchar#2}%
+%    \else
+%      \def\@tempb##1##2\relax{\ifx\relax##2\relax
+%           \def\@tempc{\special@index{\quotechar##1\actualchar
+%                       \string\verb\quotechar*\verbatimchar
+%                       \quotechar##1\verbatimchar#2}}%
+%         \else
+%           \def\@tempc{\special@index{##1##2\actualchar
+%                        \string\verb\quotechar*\verbatimchar##1##2\verbatimchar#2}}%
+%         \fi}%
+%      \expandafter\@tempb\@gtempa\relax
+%      \@tempc
+%    \fi}
+% \makeatother
+%
+%<*prolog>
+%    \begin{macrocode}
+/tx@IntersectDict 200 dict def
+tx@IntersectDict begin
+
+/VecAdd {
+    3 -1 roll add 3 1 roll add exch
+} bind def
+/VecSub {
+    neg 3 -1 roll add 3 1 roll neg add exch
+} bind def
+/VecScale {
+  dup 4 -1 roll mul 3 1 roll mul
+} bind def
+/ToVec {
+    [ 3 1 roll ]
+} bind def
+
+/MaxPrecision 1e-6 def
+/H1Interval [0 0.5] def
+/H2Interval [0.5 MaxPrecision add 1] def
+/Epsilon 1e-4 def
+/MinClippedSizeThreshold 0.8 def
+%
+/IntersectBeziers {
+    2 copy [0 1] [0 1] MaxPrecision IterateIntersection
+    exch TArray dup /lt exch quicksort
+    exch TArray dup /lt exch quicksort
+    3 -1 roll exch LoadIntersectionPoints 
+    3 1 roll LoadIntersectionPoints
+} bind def
+
+%
+/TArray {
+    [ exch
+    { dup type /nulltype eq { pop exit } if
+	aload pop add 0.5 mul
+    } forall ] % -> array of tvalues
+} bind def
+%
+/movetype { /moveto load } bind def
+/linetype { /lineto load } bind def
+/curvetype { /curveto load } bind def
+% [ ... /movetype ... /linetype .../curvetype ]
+/PreparePath {
+    [ exch aload pop
+    {
+	dup type /nametype eq not { exit } if
+	dup /movetype eq {
+	    pop ToVec /@mycp exch def
+	} {
+	    dup /linetype eq {
+		pop [ @mycp 4 2 roll 2 copy ToVec /@mycp exch def ToVec ]
+	    } {
+		pop [ @mycp 8 2 roll 2 copy ToVec /@mycp exch def
+		ToVec 5 1 roll ToVec 4 1 roll ToVec 3 1 roll ]
+	    } ifelse
+	    counttomark 1 roll	
+	} ifelse
+    } loop ]
+} bind def
+%
+% Curve t
+/LoadIntersectionPoints {
+    % prepare Curve for use with tx@Func
+    exch [ exch { aload pop } forall ]
+    tx@Dict begin tx@FuncDict begin 2 dict begin
+	dup length 2 idiv 1 sub /BezierType exch def /Points exch def
+	[ exch {
+	    GetBezierCoor
+	} forall ]
+    end end end
+} bind def
+%
+% Iteration procedure to compute all intersections of CurveA and CurveB.
+% This contains the
+%
+% [CurveA] [CurveB] [intervalA] [intervalB] precision -> domsA domsB
+/IterateIntersection {
+    (IterateIntersection) DebugBegin
+    11 dict begin
+	/precision exch def
+	% in order to limit recursion
+        /counter 0 def
+	/depth 0 def
+	/domsA InitInterval
+	/domsB InitInterval
+	/domsA /domsB 6 2 roll _IterateIntersection
+	domsB domsA
+    end
+    DebugEnd
+} bind def
+%
+% This is the iteration part which is called recursively.
+% Before this one must push domA domB CurveA CurveB iter on the stack, so that
+% after the recursive call, the previous state of these five variables can be restored.
+%
+% /domsA /domsB CurveA CurveB domA domB
+/_IterateIntersection {
+    (_IterateIntersection) DebugBegin
+    CloneVec /domB exch def
+    CloneVec /domA exch def
+    CloneCurve /CurveB exch def
+    CloneCurve /CurveA exch def
+    /iter 0 def
+    /depth depth 1 add def
+    /dom null def
+    /counter counter 1 add def
+
+    CheckIT {
+	(>> curve subdivision performed: dom(A) = ) domA CurveToString strcat
+	(, dom(B) = ) strcat domB CurveToString strcat ( <<) strcat ==
+    } if
+    CurveA IsConstant CurveB IsConstant and {
+	CurveA MiddlePoint ToVec
+	CurveB MiddlePoint ToVec AreNear {
+	    domA domB 4 -1 roll exch PutInterval PutInterval
+	} {
+	    pop pop
+	} ifelse
+    }{
+	counter 100 lt {
+	    % use a loop to simulate some kind of return to exit at different
+	    % positions.
+	    {
+		/iter iter 1 add def
+		iter 100 lt
+		domA Extent precision ge
+		domB Extent precision ge or and not {
+		    iter 100 ge {
+			false 
+		    } {
+			CurveA MiddlePoint ToVec
+			CurveB MiddlePoint ToVec AreNear {
+			    domA domB true
+			}{
+			    false
+			} ifelse
+		    } ifelse
+		    exit
+		} if
+		% iter < 100 && (dompA.extent() >= precision || dompB.extent() >= precision)
+		CheckIT {
+		    (counter: ) counter 20 string cvs strcat
+		    (, iter: ) iter 20 string cvs strcat strcat
+		    (, depth: ) depth 20 string cvs strcat strcat ==
+		} if
+	
+		CurveA CurveB ClipCurve /dom exch def
+	
+		CheckIT {(dom : ) dom CurveToString strcat == } if		
+		dom IsEmptyInterval {
+		    CheckIT { (empty interval, exit) == } if
+		    false exit
+		} if
+		% dom[0] > dom[1], invalid. How to handle?	
+		dom aload pop 2 copy min 3 1 roll max gt {
+		    CheckIT {
+			(dom[0] > dom[1], invalid!) ==
+		    } if
+		    false exit
+		} if
+
+		domB dom MapTo /domB exch def
+		CurveB dom Portion
+
+		CurveB IsConstant CurveA IsConstant and {
+		    CheckIT {
+          		(both curves are constant: ) ==	
+			(C1: [ ) CurveA { CurveToString ( ) strcat strcat } forall (]) strcat ==
+			(C2: [ ) CurveB { CurveToString ( ) strcat strcat } forall (]) strcat ==
+		    } if
+		    CurveA MiddlePoint ToVec
+		    CurveB MiddlePoint ToVec AreNear {
+			domA domB true
+		    } {
+			false
+		    } ifelse
+		    exit
+		} if
+		% if we have clipped less than 20%, we need to subdivide the
+		% curve with the largest domain into two sub-curves.
+		dom Extent MinClippedSizeThreshold gt {
+		    CheckIT {
+			(clipped less than 20% : ) ==
+			(angle(A) = ) CurveA dup length 1 sub get aload pop
+				      CurveA 0 get aload pop VecSub
+   				      exch 2 copy 0 eq exch 0 eq and {
+					  pop pop (NaN)
+				      } {
+					  atan 20 string cvs
+				      } ifelse strcat ==
+		        (angle(B) = ) CurveB dup length 1 sub get aload pop
+		                      CurveB 0 get aload pop VecSub
+				      exch 2 copy 0 eq exch 0 eq and {
+					  pop pop (NaN)
+				      } {
+					  atan 20 string cvs
+				      } ifelse strcat ==
+		        (dom : ) == dom == (domB :) == domB ==
+		    } if
+
+		    CurveA CurveB domA domB iter% leave those values on the stack to revert to this state after the recursive calls
+     		    7 -2 roll 2 copy 9 2 roll 2 copy % /domsA /domsB CurveA CurveB domA domB iter /domsA /domsB /domsA /domsB
+	    
+		    domA Extent domB Extent gt {
+			CurveA CloneCurve dup H1Interval Portion % pC1
+			CurveA CloneCurve dup H2Interval Portion % pC2
+			domA H1Interval MapTo                    % dompC1
+			domA H2Interval MapTo                    % dompC2
+			% need: /domsA /domsB pC2 CurveB dompC2 domB   /domsA /domsB pC1 CurveB dompC1 domB
+			3 -1 roll exch % /domsA /domsB /domsA /domsB pC1 dompC1 pC2 dompC2
+			CurveB exch domB 8 4 roll % /domsA /domsB pC2 CurveB dompC2 domB /domsA /domsB pC1 dompC1
+			CurveB exch domB % /domsA /domsB pC2 CurveB dompC2 domB /domsA /domsB pC1 CurveB dompC1 domB
+		    } {
+			CurveB CloneCurve dup H1Interval Portion % pC1
+			CurveB CloneCurve dup H2Interval Portion % pC2
+			domB H1Interval MapTo                    % dompC1
+			domB H2Interval MapTo                    % dompC2
+			% need: /domsB /domsA pC2 CurveA dompC2 domA   /domsB /domsA pC1 CurveA dompC1 domA
+			8 -2 roll exch 8 2 roll 6 -2 roll exch 6 2 roll % /domsB /domsA /domsB /domsA pC1 pC2 dompC1 dompC2
+			3 -1 roll exch % /domsB /domsA /domsB /domsA pC1 dompC1 pC2 dompC2
+			CurveA exch domA 8 4 roll % /domsB /domsA pC2 CurveA dompC2 domA /domsB /domsA pC1 dompC1
+			CurveA exch domA          % /domsB /domsA pC2 CurveA dompC2 domA /domsB /domsA pC1 CurveA dompC1 domA
+		    } ifelse
+
+		    _IterateIntersection
+		    _IterateIntersection
+		    
+		    % restore the state before the recursive calls.
+		    /iter exch def
+		    /domB exch def
+		    /domA exch def
+		    /CurveB exch def
+		    /CurveA exch def
+		    false exit
+		} if
+		CurveA CurveB /CurveA exch def /CurveB exch def
+		domA domB /domA exch def /domB exch def
+		% exchange /domsA and /domsB on the stack!
+		exch
+	    } loop	
+
+	    % boolean on stack
+	    {
+		4 -1 roll exch PutInterval PutInterval
+		CheckIT {
+		    (found an intersection ============================) ==
+		} if
+	    } { pop pop } ifelse
+	} {
+	    pop pop
+	} ifelse
+    } ifelse
+    /depth depth 1 sub def
+    DebugEnd
+} bind def
+%
+% Add a new interval [newinterval] to the array stored in /Intervals
+% /Intervals [newinterval] PutInterval
+/PutInterval {
+    % create new array to be pushed into /Intervals
+    CloneVec exch
+    dup load 3 -1 roll exch
+    dup dup length dup 3 1 roll 1 sub get % Arr L Arr[L-1]
+    2 copy 2 add eq { % array is full, create a new one which is twice as long
+	% Arr L Arr[L-1]
+	exch 2 mul dup % Arr Arr[L-1] 2L 2L
+	array dup 0 6 -1 roll putinterval % Arr[L-1] 2L Arr2
+	exch 3 -1 roll % Arr2 2L Arr[L-1]
+	3 copy exch 1 sub exch put % Arr2 2L Arr[L-1]
+    } if
+    % [newinterval] Arr L Arr[L-1]
+    1 add 3 copy % [newinterval] Arr L Arr[L-1]+1 Arr L Arr[L-1]+1
+    exch 1 sub exch put % [newinterval] Arr L Arr[L-1]+1
+    exch pop exch dup 4 2 roll exch put
+    def
+} bind def
+%
+% /IntervalName InitInterval
+/InitInterval {
+    10 array dup 9 -1 put def
+} bind def
+%
+% CheckIT if an interval is empty, which is represented by a [1 0] interval.
+%
+% [interval] -> empty?
+/IsEmptyInterval {
+    aload pop 0 eq exch 1 eq and
+} bind def
+%
+%
+% start stop -> 
+/ToUnitInterval {
+    ToUnitRange exch ToUnitRange 2 copy gt {
+	exch
+    } if
+    ToVec
+} bind def
+/ToUnitRange {
+    dup 0 lt {
+	pop 0
+    }{
+	dup 1 gt {
+	    pop 1
+	} if
+    } ifelse
+} bind def
+%
+% Does a deep copy of the array [Curve].
+%
+% [Curve] CloneCurve -> [newCurve]
+/CloneCurve {
+    [ exch {
+	CloneVec
+    } forall ]
+} bind def
+%
+% Does a deep copy of the vector [X Y]
+%
+% [X Y] CloneVec -> [Xnew Ynew]
+/CloneVec {
+    aload pop ToVec
+} bind def
+%
+% Map the sub-interval I in [0,1] into the interval J. Returns a new array.
+%
+% [J] [I] MapTo -> [Jnew]
+/MapTo {
+    (MapTo) DebugBegin
+    exch aload 0 get 3 1 roll exch sub 2 copy % [I] J0 Jextent J0 Jextent
+    5 -1 roll aload aload pop % J0 Jextent J0 Jextent I0 I1 I0 I1
+    min 4 -1 roll mul % J0 Jextent J0 I0 I1 min(I0,I1)*Jextent
+    4 -1 roll add [ exch % J0 Jextent I0 I1 [ J0new
+    6 2 roll max mul add ]
+    DebugEnd
+} bind def
+%
+% Compute the portion of the Bezier curve "B" wrt the interval "I"
+%
+% [CurveB] [I] Portion
+/Portion {
+    (Portion) DebugBegin
+    dup Min 0 eq { % [CurveB] [I]
+	% I.min() == 0
+	Max dup 1 eq {% [CurveB] I.max()
+	    % I.max() == 1
+	    pop pop	    
+	} { % [CurveB] I.max()
+	    LeftPortion
+	} ifelse
+    } { % [CurveB] [I]
+	2 copy Min % [CurveB] [I] [CurveB] I.min()
+	RightPortion
+	dup Max 1 eq {
+	    % I.max() == 1
+	    pop pop
+	} {% [CurveB] [I]
+	    dup aload pop exch sub 1 3 -1 roll Min sub div % [CurveB] (I1-I0)/(1-I.min())
+	    LeftPortion
+	} ifelse
+    } ifelse
+    DebugEnd
+} bind def
+%
+% Compute the portion of the Bezier curve "B" wrt the interval [0,t].
+%
+% [CurveB] t LeftPortion
+/LeftPortion {
+    (LeftPortion) DebugBegin
+    exch dup length 1 sub dup 4 1 roll % L-1 t [CurveB] L-1
+    1 1 3 -1 roll { % L-1 t [CurveB] i
+	4 -1 roll dup 5 1 roll % L-1 t [CurveB] i L-1
+	-1 3 -1 roll % L-1 t [CurveB] L-1 -1 i
+	{ % L-1 t [CurveB] j
+	    2 copy 5 copy % L-1 t [CurveB] j [CurveB] j t [CurveB] j [CurveB] j 
+	    1 sub get 3 1 roll get % L-1 t [CurveB] j [CurveB] j t B[j-1] B[j]
+	    Lerp put pop % L-1 t [CurveB]
+	} for
+    } for
+    pop pop pop
+    DebugEnd
+} bind def
+%
+% Compute the portion of the Bezier curve "B" wrt the interval [t,1].
+%
+% [CurveB] t RightPortion
+/RightPortion {
+    (RightPortion) DebugBegin
+    exch dup length 1 sub dup 4 1 roll % L-1 t [CurveB] L-1
+    1 1 3 -1 roll {% L-1 t [CurveB] i
+	4 -1 roll dup 5 1 roll % L-1 t [CurveB] i L-1
+	exch sub 0 1 3 -1 roll  % L-1 t [CurveB] 0 1 L-i-1
+	{% L-1 t [CurveB] j
+	    2 copy 5 copy
+	    get 3 1 roll 1 add get Lerp put pop
+	} for
+    } for
+    pop pop pop
+    DebugEnd
+} bind def
+%
+% Given two points and a parameter t \in [0, 1], return a point
+% proportionally from A to B by t. Akin to 1 degree bezier.
+%
+% t [A] [B] Lerp -> [newpoint]
+/Lerp {
+    (Lerp) DebugBegin
+    3 -1 roll dup 1 exch sub 3 1 roll % [A] (1-t) [B] t
+    exch aload pop 3 -1 roll VecScale % [A] (1-t) B.x*t B.y*t
+    4 2 roll
+    exch aload pop 3 -1 roll VecScale VecAdd ToVec % [A.x*(1-t)+B.x*t A.y*(1-t)+B.y*t]
+    DebugEnd
+} bind def
+%
+% Test if all points of a curve are near to each other.
+%
+% [Curve]
+/IsConstant {
+    aload length [ exch 1 roll ] true 3 1 roll % true [P0] [[P1] ... [Pn]]
+    {
+	exch dup 4 1 roll % [P0] near? [P0] [Pi]
+	AreNear and exch
+    } forall
+    pop
+} bind def
+%
+% [P1] [P2] AreNear -> bool
+/AreNear {
+    (AreNear) DebugBegin
+    aload pop 3 -1 roll aload pop
+    4 copy abs 3 { exch abs max } repeat Epsilon mul
+    dup 6 2 roll VecSub abs 4 -1 roll lt exch abs 3 -1 roll lt and
+    DebugEnd
+} bind def
+%
+% [P] Min -> min(P.x, P.y)
+/Min {
+    aload pop min
+} bind def
+% [P] Max -> max(P.x, P.y)
+/Max {
+    aload pop max
+} bind def
+%
+% [P] Extent -> P1 - P0
+/Extent {
+    aload pop exch sub
+} bind def
+%
+% Compute the middle point of the first and last point of [Curve]
+% [Curve] -> X Y
+/MiddlePoint {
+    dup dup length 1 sub get aload pop % [Curve] XN YN
+    3 -1 roll 0 get aload pop
+    VecAdd 0.5 VecScale
+} bind def
+%
+% MiddlePointA [CurveB] -> A B C
+/OrthogonalOrientationLine {
+    (OrthogonalOrientationLine) DebugBegin
+    dup dup length 1 sub get aload pop 3 -1 roll 0 get aload pop VecSub
+    neg exch % rotate by +90 degrees
+    4 2 roll 2 copy 6 2 roll VecAdd % MiddlePointA CalcPoint
+    ImplicitLine
+    DebugEnd
+} bind def
+%
+% Pick an orientation line for a Bezier curve. This uses the first pair of coordinates which are not near.
+%
+% [Curve] -> A B C
+/PickOrientationLine {
+    (PickOrientationLine) DebugBegin
+    dup dup length 1 sub exch 0 get% [Curve] L-1 P0
+    exch -1 1 {% [Curve] P0 i
+	3 -1 roll dup 4 1 roll exch get % [Curve] P0 Pi
+	2 copy AreNear {
+	    pop
+	} {
+	    exit
+	} ifelse
+    } for
+    3 -1 roll pop
+    exch aload pop 3 -1 roll aload pop ImplicitLine
+    DebugEnd
+} bind def
+%
+%
+% Compute the coefficients A, B, C of the normalized implicit equation
+% of the line which goes through the points (X1, Y1) and (X2, Y2).
+% (equivalent to orientation_line).
+%
+% Xi Yi Xj Yj ImplicitLine -> A B C
+/ImplicitLine {
+    4 copy % Xi Yi Xj Yj Xi Yi Xj Yj
+    3 -1 roll sub 7 1 roll sub 5 1 roll % Yj-Yi Xi-Xj Xi Yi Xj Yj
+    % Yi*Xj - Xi*Yj
+    4 -1 roll mul neg % Yj-Yi Xi-Xj Yi Xj -Yj*Xi
+    3 1 roll mul add % Yj-Yi Xi-Xj Yi*Xj-Yj*Xi | l0 l1 l2
+    3 1 roll 2 copy tx@Dict begin Pyth end dup dup % l2 l0 l1 L L L
+    5 -1 roll exch % l2 l1 L L l0 L
+    div 5 1 roll % l0/L l2 l1 L L
+    3 1 roll div % l0/L l2 L l1/L
+    3 1 roll div % l0/L l1/L l2/L
+} bind def
+%
+% Compute the distance of point (X, Y) from the implicit line given
+% by A*x + B*y + C = 0, (A²+B² = 1)
+%
+% X Y A B C
+/distance {
+    5 1 roll 3 -1 roll mul 3 1 roll mul add add
+} bind def
+%
+% convert [A.x A.y ... N.x N.y] to [[A.x A.y] ... [N.x N.y]]
+/ArrayToPointArray {
+    aload length dup 2 idiv {
+	3 1 roll [ 3 1 roll ] exch % A.x A.y ... [N.x N.y] L
+	dup 1 sub 3 1 roll 1 roll
+    } repeat 1 add [ exch 1 roll ]
+} bind def
+%
+% convert [[A.x A.y] ... [N.x N.y]] to [A.x A.y ... N.x N.y]
+/PointArrayToArray {
+    aload length dup {
+	1 add dup 3 -1 roll aload pop 4 -1 roll 1 add 2 roll
+    } repeat 1 add [ exch 1 roll ]
+} bind def
+%
+% Clip the Bezier curve B with respect to the Bezier curve A for
+% individuating intersection points. The new parameter interval for the
+% clipped curve is pushed on the stack.
+%
+% [CurveA] [CurveB] ClipCurve -> [newinterval]
+/ClipCurve {
+    (ClipCurve) DebugBegin
+    4 dict begin 
+    /CurveB exch def /CurveA exch def
+    CurveA IsConstant {
+    	CurveA MiddlePoint CurveB OrthogonalOrientationLine
+    } {
+	CurveA PickOrientationLine
+    } ifelse
+    CheckIT {
+	3 copy exch 3 -1 roll (OrientationLine : )
+	3 { exch 20 string cvs ( ) strcat strcat } repeat ==
+    } if
+    CurveA FatLineBounds
+    CheckIT { dup (FatLineBounds : ) exch aload pop exch 20 string cvs (, ) strcat exch 20 string cvs strcat strcat == } if
+    CurveB ClipCurveInterval
+    end % end local dictionary
+    DebugEnd
+} bind def
+%
+% A B C [Curve] -> A B C [dmin dmax]
+/FatLineBounds {
+    (FatLineBounds) DebugBegin
+    /dmin 0 def /dmax 0 def
+    { 
+	4 copy aload pop 5 2 roll distance
+	dup dmin lt { dup /dmin exch def } if
+	dup dmax gt { dup /dmax exch def } if
+	pop pop
+    } forall
+    [dmin dmax]
+    DebugEnd
+} bind def
+%
+% Clip the Bezier curve wrt the fat line defined by the orientation
+% line (given by A, B, C) and the interval range "bound". The new parameter interval
+% for the clipped curve is pushed on the stack.
+%
+% A B C [bound] [curve] -> [newinterval]
+/ClipCurveInterval {
+    (ClipCurveInterval) DebugBegin
+    15 dict begin
+    /curve exch def
+    aload pop 2 copy min /boundMin exch def max /boundMax exch def
+    [ 4 1 roll ] cvx /fatline exch def
+    % number of sub-intervals
+    /n curve length 1 sub def
+    % distance curve control points
+    /D n 1 add array def
+    0 1 n { % i
+	dup curve exch get aload pop % i Pi.x Pi.y
+	fatline distance % distance d of Point i from the orientation line, on stack; i d
+	exch dup n div % d i i/n
+	[ exch 4 -1 roll ] % i [ i/n d ]
+	D 3 1 roll put 
+    } for
+    D ConvexHull /D exch def
+    % get the x-coordinate of the i-th point, i getX -> D[i][X]
+    /getX { D exch get 0 get } def
+    % get the y-coordinate of the i-th point, i getY -> D[i][Y]
+    /getY { D exch get 1 get } def
+    /tmin 1 def /tmax 0 def
+    0 getY dup
+    boundMin lt /plower exch def
+    boundMax gt /phigher exch def
+    plower phigher or not {
+	% inside the fat line
+	tmin 0 getX gt { /tmin 0 getX def } if
+	tmax 0 getX lt { /tmax 0 getX def } if	
+    } if
+    1 1 D length 1 sub {
+	/i exch def
+	/clower i getY boundMin lt def
+	/chigher i getY boundMax gt def
+	clower chigher or not {
+	    % inside the fat line
+	    tmin i getX gt { /tmin i getX def } if
+	    tmax i getX lt { /tmax i getX def } if
+	} if
+	clower plower eq not {
+	    % cross the lower bound
+	    boundMin i 1 sub i D Intersect % t on stack
+	    dup tmin lt { dup /tmin exch def } if
+	    dup tmax gt { dup /tmax exch def } if
+	    pop 
+	    /plower clower def
+	} if
+	chigher phigher eq not {
+	    % cross the upper bound
+	    boundMax i 1 sub i D Intersect
+	    dup tmin lt { dup /tmin exch def } if
+	    dup tmax gt { dup /tmax exch def } if
+	    pop 
+	    /phigher chigher def
+	} if
+    } for
+    % we have to test the closing segment for intersection
+    /i D length 1 sub def
+    /clower 0 getY boundMin lt def
+    /chigher 0 getY boundMax gt def
+    clower plower eq not {
+	% cross the lower bound
+	boundMin i 0 D Intersect
+	dup tmin lt { dup /tmin exch def } if
+	dup tmax gt { dup /tmax exch def } if
+	pop
+    } if
+    chigher phigher eq not {
+	% cross the lower bound
+	boundMax i 0 D Intersect
+	dup tmin lt { dup /tmin exch def } if
+	dup tmax gt { dup /tmax exch def } if
+	pop
+    } if
+    [tmin tmax]
+    end % end of local dictionary
+    DebugEnd
+} bind def
+%
+% Get the x component of the intersection point between the line passing
+% through points (Xi, Yi) and (Xj, Yj) and the horizonal line Y = "y"
+%
+% y i j [Curve] -> Xisect
+/Intersect {
+    % load the coordinates of the i-th and j-th point
+    dup 4 -1 roll get aload pop % y j [Curve] Xi Yi
+    4 2 roll exch get aload pop % y Xi Yi Xj Yj
+    % (Xj - Xi) * (y - Yi)/(Yj - Yi) + Xi
+    % We are sure, that Yi != Yj, because this procedure is called only
+    % when the lower or upper bound is crossed.
+    4 2 roll 2 copy 6 2 roll VecSub % y Xi Yi (Xj-Xi) (Yj-Yi)
+    5 2 roll % (Xj-Xi) (Yj-Yi) y Xi Yi
+    neg 3 -1 roll add % (Xj-Xi) (Yj-Yi) Xi (y - Yi)
+    3 -1 roll div % (Xj-Xi) Xi (y-Yi)/(Yj-Yi)
+    3 -1 roll mul add
+} bind def
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMPLEX HULL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Graham Scal algorithm to compute the convex hull of a set of
+% points. Code written by Bill Casselman,
+% http://www.math.ubc.ca/~cass/graphics/text/www/
+%
+% [[X1 Y1] [X2 Y2] ... [Xn Yn]] hull -> [[...] ... [...]]
+%
+/hulldict 32 dict def
+
+hulldict begin
+
+% u - v 
+
+/vsub { 2 dict begin
+/v exch def
+/u exch def
+[ 
+  u 0 get v 0 get sub
+  u 1 get v 1 get sub
+]
+end } def
+
+% u - v rotated 90 degrees
+
+/vperp { 2 dict begin
+/v exch def
+/u exch def
+[ 
+  v 1 get u 1 get sub
+  u 0 get v 0 get sub
+]
+end } def
+
+/dot { 2 dict begin
+/v exch def
+/u exch def
+  v 0 get u 0 get mul
+  v 1 get u 1 get mul
+  add
+end } def 
+
+% P Q
+% tests whether P < Q in lexicographic order
+% i.e xP < xQ, or yP < yQ if xP = yP
+
+/comp { 2 dict begin
+/Q exch def
+/P exch def
+P 0 get Q 0 get lt 
+  P 0 get Q 0 get eq
+  P 1 get Q 1 get lt 
+  and 
+or 
+end } def
+
+end
+
+% args: an arrya of points C
+% effect: returns the array of points on the boundary of
+%     the convex hull of C, in clockwise order 
+
+/ConvexHull {
+(ConvexHull) DebugBegin
+hulldict begin
+/C exch def
+/comp C quicksort
+/n C length def
+% Q might circle around to the start
+/Q n 1 add array def
+Q 0 C 0 get put
+Q 1 C 1 get put
+/i 2 def
+/k 2 def
+% i is next point in C to be looked at
+% k is next point in Q to be added
+% [ Q[0] Q[1] ... ]
+% scan the points to make the top hull
+n 2 sub {
+  % P is the current point at right
+  /P C i get def
+  /i i 1 add def
+  {
+    % if k = 1 then just add P 
+    k 2 lt { exit } if
+    % now k is 2 or more
+    % look at Q[k-2] Q[k-1] P: a left turn (or in a line)?
+    % yes if (P - Q[k-1])*(Q[k-1] - Q[k-2])^perp >= 0
+    P Q k 1 sub get vsub 
+    Q k 1 sub get Q k 2 sub get vperp 
+    dot 0 lt {
+      % not a left turn
+      exit
+    } if
+    /k k 1 sub def
+  } loop
+  Q k P put
+  /k k 1 add def
+} repeat
+
+% done with top half
+% K is where the right hand point is
+/K k 1 sub def
+
+/i n 2 sub def
+Q k C i get put
+/i i 1 sub def
+/k k 1 add def
+n 2 sub {
+  % P is the current point at right
+  /P C i get def
+  /i i 1 sub def
+  {
+    % in this pass k is always 2 or more
+    k K 2 add lt { exit } if
+    % look at Q[k-2] Q[k-1] P: a left turn (or in a line)?
+    % yes if (P - Q[k-1])*(Q[k-1] - Q[k-2])^perp >= 0
+    P Q k 1 sub get vsub 
+    Q k 1 sub get Q k 2 sub get vperp 
+    dot 0 lt {
+      % not a left turn
+      exit
+    } if
+    /k k 1 sub def
+  } loop
+  Q k P put
+  /k k 1 add def
+} repeat
+
+% strip Q down to [ Q[0] Q[1] ... Q[k-2] ]
+% excluding the doubled initial point
+[ 0 1 k 2 sub {
+  Q exch get
+} for ] 
+end
+DebugEnd
+} def
+
+/qsortdict 8 dict def
+
+qsortdict begin
+
+% args: /comp a L R x
+% effect: effects a partition into two pieces [L j] [i R]
+%     leaves i j on stack
+
+/partition { 8 dict begin
+/x exch def
+/j exch def
+/i exch def
+/a exch def
+load /comp exch def
+{
+  {
+    a i get x comp exec not {
+      exit
+    } if
+    /i i 1 add def
+  } loop
+  {
+    x a j get comp exec not {
+      exit
+    } if
+    /j j 1 sub def
+  } loop
+  
+  i j le {
+    % swap a[i] a[j]
+    a j a i get
+    a i a j get 
+    put put
+    /i i 1 add def
+    /j j 1 sub def
+  } if
+  i j gt {
+    exit
+  } if
+} loop
+i j
+end } def
+
+% args: /comp a L R
+% effect: sorts a[L .. R] according to comp
+
+/subsort {
+% /c a L R
+[ 3 1 roll ] 3 copy
+% /c a [L R] /c a [L R]
+aload aload pop 
+% /c a [L R] /c a L R L R
+add 2 idiv
+% /c a [L R] /c a L R (L+R)/2
+3 index exch get
+% /c a [L R] /c a L R x
+partition
+% /c a [L R] i j
+% if j > L subsort(a, L, j)
+dup 
+% /c a [L R] i j j
+3 index 0 get gt {
+  % /c a [L R] i j
+  5 copy 
+  % /c a [L R] i j /c a [L R] i j
+  exch pop
+  % /c a [L R] i j /c a [L R] j
+  exch 0 get exch
+  % ... /c a L j 
+  subsort
+} if
+% /c a [L R] i j
+pop dup
+% /c a [L R] i i
+% if i < R subsort(a, i, R)
+2 index 1 get lt {
+  % /c a [L R] i
+  exch 1 get 
+  % /c a i R
+  subsort
+}{
+  4 { pop } repeat
+} ifelse
+} def
+
+end % qsortdict
+
+% args: /comp a
+% effect: sorts the array a 
+% comp returns truth of x < y for entries in a
+
+/quicksort { qsortdict begin
+dup length 1 gt {
+% /comp a
+dup 
+% /comp a a 
+length 1 sub 
+% /comp a n-1
+0 exch subsort
+} {
+pop pop
+} ifelse
+end } def
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEBUGGING STUFF %%%%%%%%%%%%%%%%%
+/debug {
+    dup 1 add copy {==} repeat pop
+} bind def
+/DebugIT false def
+/CheckIT false def
+/DebugDepth 0 def
+/DebugBegin {
+  DebugIT {
+    /DebugProcName exch def
+    DebugDepth 2 mul string
+    0 1 DebugDepth 2 mul 1 sub {
+      dup 2 mod 0 eq { (|) }{( )} ifelse
+      3 -1 roll dup 4 2 roll
+      putinterval
+    } for
+    DebugProcName strcat ==
+    /DebugDepth DebugDepth 1 add def
+  }{
+    pop
+  } ifelse
+} bind def
+/DebugEnd {
+  DebugIT {
+    /DebugDepth DebugDepth 1 sub def
+    DebugDepth 2 mul 2 add string
+    0 1 DebugDepth 2 mul 1 sub {
+      dup 2 mod 0 eq { (|) }{ ( ) } ifelse
+      3 -1 roll dup 4 2 roll
+      putinterval
+    } for
+    dup DebugDepth 2 mul (+-) putinterval
+    ( done) strcat ==
+  } if
+} bind def
+/strcat {
+    exch 2 copy
+    length exch length add
+    string dup dup 5 2 roll
+    copy length exch
+    putinterval
+} bind def
+/ShowCurve {
+    { aload pop } forall
+    8 -2 roll moveto curveto
+} bind def
+ % A B C
+/ShowLine {
+    exch neg dup 3 1 roll div dup 0 exch moveto 3 1 roll div 200 mul add 200 exch lineto
+} bind def
+/CurveToString {
+    (CurveToString) DebugBegin
+    aload pop ([) 3 -1 roll 20 string cvs strcat (, ) strcat exch 20 string cvs strcat (]) strcat
+    DebugEnd
+} bind def
+end % tx@IntersectDict
+%    \end{macrocode}
+%</prolog> 
+% \Finale
+% \endinput
