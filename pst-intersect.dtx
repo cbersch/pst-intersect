@@ -1148,7 +1148,7 @@ tx@IntersectDict begin
 %    \begin{macrocode}
 /TArray {
     [ exch
-    { dup type /nulltype eq { pop exit } if
+    { %dup type /nulltype eq { pop exit } if
 	aload pop add 0.5 mul
     } forall ]
     dup /lt exch quicksort
@@ -1224,8 +1224,8 @@ tx@IntersectDict begin
 %    \begin{macrocode}
         /counter 0 def
 	/depth 0 def
-	/domsA InitInterval
-	/domsB InitInterval
+	/domsA [] def
+	/domsB [] def
 	/domsA /domsB 6 2 roll _IterateIntersection
 	domsB domsA
     end
@@ -1424,43 +1424,22 @@ tx@IntersectDict begin
 % \end{macro}
 % 
 % \begin{macro}{PutInterval}
-% Add a new interval [newinterval] to the array stored in /Intervals
-% /Intervals [newinterval] PutInterval
+%   Add a new interval \PSarray{newinterval} to the array stored in
+%   \PSname{/Intervals}. The new interval is "cloned" before storing it.
+% \begin{pssyntax}
+% \PSname{Intervals} \PSarray{newinterval} \PSop{PutInterval}
+% \end{pssyntax}
 %    \begin{macrocode}
 /PutInterval {
-    % create new array to be pushed into /Intervals
-    CloneVec exch
-    dup load 3 -1 roll exch
-    dup dup length dup 3 1 roll 1 sub get % Arr L Arr[L-1]
-    2 copy 2 add eq { % array is full, create a new one which is twice as long
-	% Arr L Arr[L-1]
-	exch 2 mul dup % Arr Arr[L-1] 2L 2L
-	array dup 0 6 -1 roll putinterval % Arr[L-1] 2L Arr2
-	exch 3 -1 roll % Arr2 2L Arr[L-1]
-	3 copy exch 1 sub exch put % Arr2 2L Arr[L-1]
-    } if
-    % [newinterval] Arr L Arr[L-1]
-    1 add 3 copy % [newinterval] Arr L Arr[L-1]+1 Arr L Arr[L-1]+1
-    exch 1 sub exch put % [newinterval] Arr L Arr[L-1]+1
-    exch pop exch dup 4 2 roll exch put
-    def
-} bind def
-%    \end{macrocode}
-% \end{macro}
-% 
-% \begin{macro}{InitInterval}
-% /IntervalName InitInterval
-%    \begin{macrocode}
-/InitInterval {
-    10 array dup 9 -1 put def
+    CloneVec [ exch 3 -1 roll dup 4 1 roll load aload pop ] def
 } bind def
 %    \end{macrocode}
 % \end{macro}
 % 
 % \begin{macro}{IsEmptyInterval}
 % Check if an interval is empty, which is represented by a [1 0] interval.
-%
-% [interval] -> empty?
+% \begin{pssyntx}
+% \PSarray{interval} \PSop{IsEmptyInterval} \PSvar{boolean}
 %    \begin{macrocode}
 /IsEmptyInterval {
     aload pop 0 eq exch 1 eq and
@@ -1468,7 +1447,11 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 %
-% start stop -> 
+% \begin{macro}{ToUnitInterval}
+% Limit an interval \PSvar{a b} to the unit interval \PSarray{0 1}.
+% \begin{pssyntax}
+% \PSvar{a b} \PSop{ToUnitInterval} \PSarray{a|0 b|1}
+% \end{pssyntax}
 %    \begin{macrocode}
 /ToUnitInterval {
     ToUnitRange exch ToUnitRange 2 copy gt {
@@ -1476,6 +1459,11 @@ tx@IntersectDict begin
     } if
     ToVec
 } bind def
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{ToUnitRange}
+% Limit a number to the range \PSarray{0 1}.
+%    \begin{macrocode}
 /ToUnitRange {
     dup 0 lt {
 	pop 0
@@ -1486,25 +1474,39 @@ tx@IntersectDict begin
     } ifelse
 } bind def
 %    \end{macrocode}
-% Does a deep copy of the array [Curve].
-%
-% [Curve] CloneCurve -> [newCurve]
+% \end{macro}
+% 
+% \begin{macro}{CloneCurve}
+% Does a deep copy of the array \PSarray{Curve}. This also involved deep copies of the contained point arrays.
+% \begin{pssyntax}
+% \PSarray{Curve} \PSop{CloneCurve} \PSarray{newCurve}
+%    \begin{macrocode}
 /CloneCurve {
     [ exch {
 	CloneVec
     } forall ]
 } bind def
+%    \end{macrocode}
+% \end{macro}
 %
-% Does a deep copy of the vector [X Y]
-%
-% [X Y] CloneVec -> [Xnew Ynew]
+% \begin{macro}{CloneVec}
+% Does a deep copy of the vector \PSarray{X Y}
+% \begin{pssyntax}
+% \PSarray{X Y} \PSop{CloneVec} \PSarray{Xnew Ynew}
+% \end{pssyntax}
+%    \begin{macrocode}
 /CloneVec {
     aload pop ToVec
 } bind def
-%
-% Map the sub-interval I in [0,1] into the interval J. Returns a new array.
-%
-% [J] [I] MapTo -> [Jnew]
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{MapTo}
+% Map the sub-interval \PSarray{I} in \PSarray{0 1} into the interval \PSarray{J}. Returns a new array.
+% \begin{pssyntax}
+% \PSarray{J} \PSarray{I} \PSop{MapTo} \PSarray{Jnew}
+% \end{pssyntax}
+%    \begin{macrocode}
 /MapTo {
     (MapTo) DebugBegin
     exch aload 0 get 3 1 roll exch sub 2 copy % [I] J0 Jextent J0 Jextent
@@ -1514,10 +1516,15 @@ tx@IntersectDict begin
     6 2 roll max mul add ]
     DebugEnd
 } bind def
-%
-% Compute the portion of the Bezier curve "B" wrt the interval "I"
-%
-% [CurveB] [I] Portion
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{Portion}
+% Compute the portion of the Bezier curve \PSarray{CurveB} wrt the interval \PSarray{I}.
+% \begin{pssyntax}
+% \PSarray{CurveB} \PSarray{I} \PSop{Portion} \PSarray{CurvePartB}
+% \end{pssyntax}
+%    \begin{macrocode}
 /Portion {
     (Portion) DebugBegin
     dup Min 0 eq { % [CurveB] [I]
@@ -1541,10 +1548,16 @@ tx@IntersectDict begin
     } ifelse
     DebugEnd
 } bind def
-%
-% Compute the portion of the Bezier curve "B" wrt the interval [0,t].
-%
-% [CurveB] t LeftPortion
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{LeftPortion}
+%   Compute the portion of the Bezier curve \PSarray{CurveB} wrt the
+%   interval \PSarray{0 t}.
+% \begin{pssyntax}
+% \PSarray{CurveB} \PSvar{t} \PSop{LeftPortion} \PSarray{CurvePartB}
+% \end{pssyntax}
+%    \begin{macrocode}
 /LeftPortion {
     (LeftPortion) DebugBegin
     exch dup length 1 sub dup 4 1 roll % L-1 t [CurveB] L-1
@@ -1560,10 +1573,16 @@ tx@IntersectDict begin
     pop pop pop
     DebugEnd
 } bind def
+%    \end{macrocode}
+% \end{macro}
 %
-% Compute the portion of the Bezier curve "B" wrt the interval [t,1].
-%
-% [CurveB] t RightPortion
+% \begin{macro}{RightPortion}
+%   Compute the portion of the Bezier curve \PSarray{CurveB} wrt the
+%   interval \PSarray{t 1}.
+% \begin{pssyntax}
+% \PSarray{CurveB} \PSvar{t} \PSop{RightPortion} \PSarray{CurvePartB}
+% \end{pssyntax}
+%    \begin{macrocode}
 /RightPortion {
     (RightPortion) DebugBegin
     exch dup length 1 sub dup 4 1 roll % L-1 t [CurveB] L-1
@@ -1578,11 +1597,16 @@ tx@IntersectDict begin
     pop pop pop
     DebugEnd
 } bind def
-%
-% Given two points and a parameter t \in [0, 1], return a point
-% proportionally from A to B by t. Akin to 1 degree bezier.
-%
-% t [A] [B] Lerp -> [newpoint]
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{Lerp}
+% Given two points and a parameter \PSvar{t} $\in$ \PSarray{0 1}, return a point
+% proportionally from \PSarray{A} to \PSarray{B} by \PSvar{t}. Akin to 1 degree Bezier.
+% \begin{pssyntax}
+% \PSvar{t} \PSarray{A} \PSarray{B} \PSop{Lerp} \PSarray{newpoint}
+% \end{pssyntax}
+%    \begin{macrocode}
 /Lerp {
     (Lerp) DebugBegin
     3 -1 roll dup 1 exch sub 3 1 roll % [A] (1-t) [B] t
@@ -1591,20 +1615,31 @@ tx@IntersectDict begin
     exch aload pop 3 -1 roll VecScale VecAdd ToVec % [A.x*(1-t)+B.x*t A.y*(1-t)+B.y*t]
     DebugEnd
 } bind def
-%
-% Test if all points of a curve are near to each other.
-%
-% [Curve]
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{IsConstant}
+% Test if all points of a curve are near to each other. This is used as termination criterium for the intersection procedure.
+% \begin{pssyntax}
+% \PSarray{Curve} \PSop{IsConstant} \PSvar{boolean}
+% \end{pssyntax}
+%    \begin{macrocode}
 /IsConstant {
-    aload length [ exch 1 roll ] true 3 1 roll % true [P0] [[P1] ... [Pn]]
+    aload length [ exch 1 roll ] true 3 1 roll
     {
-	exch dup 4 1 roll % [P0] near? [P0] [Pi]
+	exch dup 4 1 roll
 	AreNear and exch
     } forall
     pop
 } bind def
-%
-% [P1] [P2] AreNear -> bool
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{AreNear}
+% Test if two points are near to each other.
+% \begin{pssyntax}
+% \PSarray{P1} \PSarray{P2} \PSop{AreNear} \PSvar{boolean}
+% \end{pssyntax}
+%    \begin{macrocode}
 /AreNear {
     (AreNear) DebugBegin
     aload pop 3 -1 roll aload pop
@@ -1612,42 +1647,83 @@ tx@IntersectDict begin
     dup 6 2 roll VecSub abs 4 -1 roll lt exch abs 3 -1 roll lt and
     DebugEnd
 } bind def
-%
-% [P] Min -> min(P.x, P.y)
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{Min}
+% Get the minimum value of the vector \PSarray{P}.
+% \begin{pssyntax}
+% \PSarray{P} \PSop{Min} \PSvar{minimum}
+% \end{pssyntax}
+%    \begin{macrocode}
 /Min {
     aload pop min
 } bind def
-% [P] Max -> max(P.x, P.y)
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{Min}
+% Get the maximum value of the vector \PSarray{P}.
+% \begin{pssyntax}
+% \PSarray{P} \PSop{Max} \PSvar{maximum}
+% \end{pssyntax}
+%    \begin{macrocode}
 /Max {
     aload pop max
 } bind def
-%
-% [P] Extent -> P1 - P0
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{Min}
+% Get the extent of the interval \PSarray{I}.
+% \begin{pssyntax}
+% \PSarray{I} \PSop{Extent} \PSvar{I1-I0}
+% \end{pssyntax}
+%    \begin{macrocode}
 /Extent {
     aload pop exch sub
 } bind def
+%    \end{macrocode}
+% \end{macro}
 %
-% Compute the middle point of the first and last point of [Curve]
-% [Curve] -> X Y
+% \begin{macro}{MiddlePoint}
+% Compute the middle point of the first and last point of \PSarray{Curve}.
+% \begin{pssyntax}
+% \PSarray{Curve} \PSop{MiddlePoint} \PSvar{X Y}
+% \end{pssyntax}
+%    \begin{macrocode}
 /MiddlePoint {
-    dup dup length 1 sub get aload pop % [Curve] XN YN
+    dup dup length 1 sub get aload pop
     3 -1 roll 0 get aload pop
     VecAdd 0.5 VecScale
 } bind def
-%
-% MiddlePointA [CurveB] -> A B C
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{OrthogonalOrientationLine}
+% \begin{pssyntax}
+% \PSvar{MiddlePointA} \PSarray{CurveB} \PSop{OrthogonalOrientationLine} \PSvar{A B C}
+% \end{pssyntax}
+%    \begin{macrocode}
 /OrthogonalOrientationLine {
     (OrthogonalOrientationLine) DebugBegin
     dup dup length 1 sub get aload pop 3 -1 roll 0 get aload pop VecSub
-    neg exch % rotate by +90 degrees
-    4 2 roll 2 copy 6 2 roll VecAdd % MiddlePointA CalcPoint
+%    \end{macrocode}
+% rotate by +90 degrees
+%    \begin{macrocode}
+    neg exch
+    4 2 roll 2 copy 6 2 roll VecAdd
     ImplicitLine
     DebugEnd
 } bind def
-%
-% Pick an orientation line for a Bezier curve. This uses the first pair of coordinates which are not near.
-%
-% [Curve] -> A B C
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{PickOrientationLine}
+%   Pick an orientation line for a Bezier curve. This uses the first
+%   point and the lastmost point, which is not near to it.
+% \begin{pssyntax}
+% \PSarray{Curve} \PSop{PickOrientationLine} \PSvar{A B C}
+% \end{pssyntax}
+%    \begin{macrocode}
 /PickOrientationLine {
     (PickOrientationLine) DebugBegin
     dup dup length 1 sub exch 0 get% [Curve] L-1 P0
@@ -1663,13 +1739,17 @@ tx@IntersectDict begin
     exch aload pop 3 -1 roll aload pop ImplicitLine
     DebugEnd
 } bind def
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{ImplicitLine}
+% Compute the coefficients \PSvar{A}, \PSvar{B}, \PSvar{C} of the normalized implicit equation
+% of the line which goes through the points \PSarray{Xi Yi} and \PSarray{Xj Yj}.
 %
-%
-% Compute the coefficients A, B, C of the normalized implicit equation
-% of the line which goes through the points (X1, Y1) and (X2, Y2).
-% (equivalent to orientation_line).
-%
-% Xi Yi Xj Yj ImplicitLine -> A B C
+% \begin{pssyntax}
+% \PSvar{Xi Yi Xj Yj} \PSop{ImplicitLine} \PSvar{A B C}
+% \end{pssyntax}
+%    \begin{macrocode}
 /ImplicitLine {
     4 copy % Xi Yi Xj Yj Xi Yi Xj Yj
     3 -1 roll sub 7 1 roll sub 5 1 roll % Yj-Yi Xi-Xj Xi Yi Xj Yj
@@ -1682,35 +1762,57 @@ tx@IntersectDict begin
     3 1 roll div % l0/L l2 L l1/L
     3 1 roll div % l0/L l1/L l2/L
 } bind def
-%
-% Compute the distance of point (X, Y) from the implicit line given
-% by A*x + B*y + C = 0, (A²+B² = 1)
-%
-% X Y A B C
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{distance}
+% Compute the distance of point \PSarray{X Y} from the implicit line given
+% by $Ax + By + C = 0,\quad (A^2+B^2 = 1)$.
+% \begin{pssyntax}
+% \PSvar{X Y A B C} \PSop{distance} \PSvar{d}
+% \end{pssyntax}
+%    \begin{macrocode}
 /distance {
     5 1 roll 3 -1 roll mul 3 1 roll mul add add
 } bind def
+%    \end{macrocode}
+% \end{macro}
 %
-% convert [A.x A.y ... N.x N.y] to [[A.x A.y] ... [N.x N.y]]
+% \begin{macro}{ArrayToPointArray}
+% \begin{pssyntax}
+% \PSarray{A.x A.y ... N.x N.y} \PSop{ArrayToPointArray} \PSarray{\PSarray{A.x A.y} \ldots \PSarray{N.x N.y}}
+% \end{pssyntax}
+%    \begin{macrocode}
 /ArrayToPointArray {
     aload length dup 2 idiv {
-	3 1 roll [ 3 1 roll ] exch % A.x A.y ... [N.x N.y] L
+	3 1 roll [ 3 1 roll ] exch
 	dup 1 sub 3 1 roll 1 roll
     } repeat 1 add [ exch 1 roll ]
 } bind def
+%    \end{macrocode}
+% \end{macro}
 %
-% convert [[A.x A.y] ... [N.x N.y]] to [A.x A.y ... N.x N.y]
+% \begin{macro}{PointArrayToArray}
+% \begin{pssyntax}
+% \PSarray{\PSarray{A.x A.y} \ldots \PSarray{N.x N.y}} \PSop{PointArrayToArray} \PSarray{A.x A.y ... N.x N.y}
+% \end{pssyntax}
+%    \begin{macrocode}
 /PointArrayToArray {
     aload length dup {
 	1 add dup 3 -1 roll aload pop 4 -1 roll 1 add 2 roll
     } repeat 1 add [ exch 1 roll ]
 } bind def
-%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{ClipCurve}
 % Clip the Bezier curve B with respect to the Bezier curve A for
 % individuating intersection points. The new parameter interval for the
 % clipped curve is pushed on the stack.
-%
-% [CurveA] [CurveB] ClipCurve -> [newinterval]
+% \begin{pssyntax}
+% \PSarray{CurveA} \PSarray{CurveB} \PSop{ClipCurve} \PSarray{newinterval}
+% \end{pssyntax}
+%    \begin{macrocode}
 /ClipCurve {
     (ClipCurve) DebugBegin
     4 dict begin 
@@ -1727,11 +1829,18 @@ tx@IntersectDict begin
     CurveA FatLineBounds
     CheckIT { dup (FatLineBounds : ) exch aload pop exch 20 string cvs (, ) strcat exch 20 string cvs strcat strcat == } if
     CurveB ClipCurveInterval
-    end % end local dictionary
+    end
     DebugEnd
 } bind def
-%
-% A B C [Curve] -> A B C [dmin dmax]
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{FatLineBounds}
+% Compute the boundary of the fat line given by \PSvar{A B C}
+% \begin{pssyntax}
+% \PSvar{A B C} \PSarray{Curve} \PSop{FatLineBounds} \PSvar{A B C} \PSarray{dmin dmax}
+% \end{pssyntax}
+%    \begin{macrocode}
 /FatLineBounds {
     (FatLineBounds) DebugBegin
     /dmin 0 def /dmax 0 def
@@ -1744,12 +1853,18 @@ tx@IntersectDict begin
     [dmin dmax]
     DebugEnd
 } bind def
-%
-% Clip the Bezier curve wrt the fat line defined by the orientation
-% line (given by A, B, C) and the interval range "bound". The new parameter interval
-% for the clipped curve is pushed on the stack.
-%
-% A B C [bound] [curve] -> [newinterval]
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{ClipCurveInterval}
+%   Clip the Bezier curve wrt the fat line defined by the orientation
+%   line (given by \PSvar{A B C}) and the interval range
+%   \PSarray{bound}. The new parameter interval \PSarray{newinterval}
+%   for the clipped curve is pushed on the stack.
+% \begin{pssyntax}
+% \PSvar{A B C} \PSarray{bound} \PSarray{curve} \PSop{ClipCurveInterval} \PSarray{newinterval}
+% \end{pssyntax}
+%    \begin{macrocode}
 /ClipCurveInterval {
     (ClipCurveInterval) DebugBegin
     15 dict begin
@@ -1768,16 +1883,22 @@ tx@IntersectDict begin
 	D 3 1 roll put 
     } for
     D ConvexHull /D exch def
-    % get the x-coordinate of the i-th point, i getX -> D[i][X]
+%    \end{macrocode}
+% get the x-coordinate of the i-th point, i getX -> D[i][X]
+%    \begin{macrocode}
     /getX { D exch get 0 get } def
-    % get the y-coordinate of the i-th point, i getY -> D[i][Y]
+%    \end{macrocode}
+% get the y-coordinate of the i-th point, i getY -> D[i][Y]
+%    \begin{macrocode}
     /getY { D exch get 1 get } def
     /tmin 1 def /tmax 0 def
     0 getY dup
     boundMin lt /plower exch def
     boundMax gt /phigher exch def
     plower phigher or not {
-	% inside the fat line
+%    \end{macrocode}
+% inside the fat line
+%    \begin{macrocode}
 	tmin 0 getX gt { /tmin 0 getX def } if
 	tmax 0 getX lt { /tmax 0 getX def } if	
     } if
@@ -1786,12 +1907,16 @@ tx@IntersectDict begin
 	/clower i getY boundMin lt def
 	/chigher i getY boundMax gt def
 	clower chigher or not {
-	    % inside the fat line
+%    \end{macrocode}
+% inside the fat line
+%    \begin{macrocode}
 	    tmin i getX gt { /tmin i getX def } if
 	    tmax i getX lt { /tmax i getX def } if
 	} if
 	clower plower eq not {
-	    % cross the lower bound
+%    \end{macrocode}
+% cross the lower bound
+%    \begin{macrocode}
 	    boundMin i 1 sub i D Intersect % t on stack
 	    dup tmin lt { dup /tmin exch def } if
 	    dup tmax gt { dup /tmax exch def } if
@@ -1799,7 +1924,9 @@ tx@IntersectDict begin
 	    /plower clower def
 	} if
 	chigher phigher eq not {
-	    % cross the upper bound
+%    \end{macrocode}
+% cross the upper bound
+%    \begin{macrocode}
 	    boundMax i 1 sub i D Intersect
 	    dup tmin lt { dup /tmin exch def } if
 	    dup tmax gt { dup /tmax exch def } if
@@ -1807,61 +1934,74 @@ tx@IntersectDict begin
 	    /phigher chigher def
 	} if
     } for
-    % we have to test the closing segment for intersection
+%    \end{macrocode}
+% we have to test the closing segment for intersection
+%    \begin{macrocode}
     /i D length 1 sub def
     /clower 0 getY boundMin lt def
     /chigher 0 getY boundMax gt def
     clower plower eq not {
-	% cross the lower bound
+%    \end{macrocode}
+% cross the lower bound
+%    \begin{macrocode}
 	boundMin i 0 D Intersect
 	dup tmin lt { dup /tmin exch def } if
 	dup tmax gt { dup /tmax exch def } if
 	pop
     } if
     chigher phigher eq not {
-	% cross the lower bound
+%    \end{macrocode}
+% cross the lower bound
+%    \begin{macrocode}
 	boundMax i 0 D Intersect
 	dup tmin lt { dup /tmin exch def } if
 	dup tmax gt { dup /tmax exch def } if
 	pop
     } if
     [tmin tmax]
-    end % end of local dictionary
+    end
     DebugEnd
 } bind def
-%
-% Get the x component of the intersection point between the line passing
-% through points (Xi, Yi) and (Xj, Yj) and the horizonal line Y = "y"
-%
-% y i j [Curve] -> Xisect
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{Intersect}
+%   Get the x component of the intersection point between the line
+%   passing through $i$-th and $j$-th points of \PSarray{Curve} and the
+%   horizonal line through \PSvar{y}.
+% \begin{pssyntax}
+% \PSvar{y i j} \PSarray{Curve} \PSop{Intersect} \PSvar{Xisect}
+% \end{pssyntax}
+%    \begin{macrocode}
 /Intersect {
-    % load the coordinates of the i-th and j-th point
-    dup 4 -1 roll get aload pop % y j [Curve] Xi Yi
-    4 2 roll exch get aload pop % y Xi Yi Xj Yj
-    % (Xj - Xi) * (y - Yi)/(Yj - Yi) + Xi
-    % We are sure, that Yi != Yj, because this procedure is called only
-    % when the lower or upper bound is crossed.
-    4 2 roll 2 copy 6 2 roll VecSub % y Xi Yi (Xj-Xi) (Yj-Yi)
-    5 2 roll % (Xj-Xi) (Yj-Yi) y Xi Yi
-    neg 3 -1 roll add % (Xj-Xi) (Yj-Yi) Xi (y - Yi)
-    3 -1 roll div % (Xj-Xi) Xi (y-Yi)/(Yj-Yi)
+    dup 4 -1 roll get aload pop
+    4 2 roll exch get aload pop
+%    \end{macrocode}
+% On the stack: \PSvar{y Xi Yi Xj Yj}, Compute (Xj - Xi) * (y - Yi)/(Yj - Yi) + Xi
+%
+% We are sure, that Yi != Yj, because this procedure is called only
+% when the lower or upper bound is crossed.
+%    \begin{macrocode}
+    4 2 roll 2 copy 6 2 roll VecSub
+    5 2 roll
+    neg 3 -1 roll add
+    3 -1 roll div
     3 -1 roll mul add
 } bind def
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMPLEX HULL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    \end{macrocode}
+% \end{macro}
 %
-% Graham Scal algorithm to compute the convex hull of a set of
-% points. Code written by Bill Casselman,
-% http://www.math.ubc.ca/~cass/graphics/text/www/
-%
-% [[X1 Y1] [X2 Y2] ... [Xn Yn]] hull -> [[...] ... [...]]
-%
+%    \begin{macrocode}
+ % Graham Scal algorithm to compute the convex hull of a set of
+ % points. Code written by Bill Casselman,
+ %  http://www.math.ubc.ca/~cass/graphics/text/www/
+ %
+ % [[X1 Y1] [X2 Y2] ... [Xn Yn]] hull -> [[...] ... [...]]
+ %
 /hulldict 32 dict def
-
 hulldict begin
 
-% u - v 
-
+ % u - v 
 /vsub { 2 dict begin
 /v exch def
 /u exch def
@@ -1871,8 +2011,7 @@ hulldict begin
 ]
 end } def
 
-% u - v rotated 90 degrees
-
+ % u - v rotated 90 degrees
 /vperp { 2 dict begin
 /v exch def
 /u exch def
@@ -1890,10 +2029,9 @@ end } def
   add
 end } def 
 
-% P Q
-% tests whether P < Q in lexicographic order
-% i.e xP < xQ, or yP < yQ if xP = yP
-
+ % P Q
+ % tests whether P < Q in lexicographic order
+ % i.e xP < xQ, or yP < yQ if xP = yP
 /comp { 2 dict begin
 /Q exch def
 /P exch def
@@ -1906,9 +2044,9 @@ end } def
 
 end
 
-% args: an arrya of points C
-% effect: returns the array of points on the boundary of
-%     the convex hull of C, in clockwise order 
+ % args: an array of points C
+ % effect: returns the array of points on the boundary of
+ %     the convex hull of C, in clockwise order 
 
 /ConvexHull {
 (ConvexHull) DebugBegin
@@ -1916,16 +2054,16 @@ hulldict begin
 /C exch def
 /comp C quicksort
 /n C length def
-% Q might circle around to the start
+ % Q might circle around to the start
 /Q n 1 add array def
 Q 0 C 0 get put
 Q 1 C 1 get put
 /i 2 def
 /k 2 def
-% i is next point in C to be looked at
-% k is next point in Q to be added
-% [ Q[0] Q[1] ... ]
-% scan the points to make the top hull
+ % i is next point in C to be looked at
+ % k is next point in Q to be added
+ % [ Q[0] Q[1] ... ]
+ % scan the points to make the top hull
 n 2 sub {
   % P is the current point at right
   /P C i get def
@@ -1948,8 +2086,8 @@ n 2 sub {
   /k k 1 add def
 } repeat
 
-% done with top half
-% K is where the right hand point is
+ % done with top half
+ % K is where the right hand point is
 /K k 1 sub def
 
 /i n 2 sub def
@@ -1977,8 +2115,8 @@ n 2 sub {
   /k k 1 add def
 } repeat
 
-% strip Q down to [ Q[0] Q[1] ... Q[k-2] ]
-% excluding the doubled initial point
+ % strip Q down to [ Q[0] Q[1] ... Q[k-2] ]
+ % excluding the doubled initial point
 [ 0 1 k 2 sub {
   Q exch get
 } for ] 
@@ -1990,9 +2128,9 @@ DebugEnd
 
 qsortdict begin
 
-% args: /comp a L R x
-% effect: effects a partition into two pieces [L j] [i R]
-%     leaves i j on stack
+ % args: /comp a L R x
+ % effect: effects a partition into two pieces [L j] [i R]
+ %     leaves i j on stack
 
 /partition { 8 dict begin
 /x exch def
@@ -2029,24 +2167,23 @@ load /comp exch def
 i j
 end } def
 
-% args: /comp a L R
-% effect: sorts a[L .. R] according to comp
-
+ % args: /comp a L R
+ % effect: sorts a[L .. R] according to comp
 /subsort {
-% /c a L R
+ % /c a L R
 [ 3 1 roll ] 3 copy
-% /c a [L R] /c a [L R]
+ % /c a [L R] /c a [L R]
 aload aload pop 
-% /c a [L R] /c a L R L R
+ % /c a [L R] /c a L R L R
 add 2 idiv
-% /c a [L R] /c a L R (L+R)/2
+ % /c a [L R] /c a L R (L+R)/2
 3 index exch get
-% /c a [L R] /c a L R x
+ % /c a [L R] /c a L R x
 partition
-% /c a [L R] i j
-% if j > L subsort(a, L, j)
+ % /c a [L R] i j
+ % if j > L subsort(a, L, j)
 dup 
-% /c a [L R] i j j
+ % /c a [L R] i j j
 3 index 0 get gt {
   % /c a [L R] i j
   5 copy 
@@ -2057,10 +2194,10 @@ dup
   % ... /c a L j 
   subsort
 } if
-% /c a [L R] i j
+ % /c a [L R] i j
 pop dup
-% /c a [L R] i i
-% if i < R subsort(a, i, R)
+ % /c a [L R] i i
+ % if i < R subsort(a, i, R)
 2 index 1 get lt {
   % /c a [L R] i
   exch 1 get 
@@ -2073,24 +2210,26 @@ pop dup
 
 end % qsortdict
 
-% args: /comp a
-% effect: sorts the array a 
-% comp returns truth of x < y for entries in a
+ % args: /comp a
+ % effect: sorts the array a 
+ % comp returns truth of x < y for entries in a
 
 /quicksort { qsortdict begin
 dup length 1 gt {
-% /comp a
+ % /comp a
 dup 
-% /comp a a 
+ % /comp a a 
 length 1 sub 
-% /comp a n-1
+ % /comp a n-1
 0 exch subsort
 } {
 pop pop
 } ifelse
 end } def
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEBUGGING STUFF %%%%%%%%%%%%%%%%%
+%    \end{macrocode}
+% 
+% Debugging stuff
+%    \begin{macrocode}
 /debug {
     dup 1 add copy {==} repeat pop
 } bind def
@@ -2135,10 +2274,6 @@ end } def
 /ShowCurve {
     { aload pop } forall
     8 -2 roll moveto curveto
-} bind def
- % A B C
-/ShowLine {
-    exch neg dup 3 1 roll div dup 0 exch moveto 3 1 roll div 200 mul add 200 exch lineto
 } bind def
 /CurveToString {
     (CurveToString) DebugBegin
