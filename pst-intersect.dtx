@@ -763,10 +763,7 @@
 % beeinflusst, oder das es für ältere Versionen kompatibel ist. Einträge, die
 % als \emph{deprecated}, \emph{modified}, \emph{renamed}, oder \emph{removed}
 % deklariert sind, verlangen besondere Aufmerksamkeit. Diese bedeuten, dass eine
-% Modifikation Änderungen in existierenden Dokumenten mit sich ziehen kann. Die
-% Zahlen an der rechten Seite stehen für die relevante Stelle dieser
-% Dokumentation, zusätzliche Informationen zur Migration von älteren Dokumenten
-% sind in \prettyref{sec:bwd-comp} zu finden.
+% Modifikation Änderungen in existierenden Dokumenten mit sich ziehen kann. 
 % \fi
 % \ifENGLISH
 % \chapter{Revision history}
@@ -781,10 +778,8 @@
 % optional argument to an existing command). Entries stating that a
 % feature has been \emph{deprecated}, \emph{modified}, \emph{fixed},
 % \emph{renamed}, or \emph{removed} demand attention. They indicate a
-% modification which may require changes to existing documents. The
-% numbers on the right indicate the relevant section of this manual,
-% more information regarding backward compatibility can be found in
-% \prettyref{sec:bwd-comp}.  \fi
+% modification which may require changes to existing documents.
+% \fi
 %
 % \begin{changelog}
 %\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
@@ -1045,46 +1040,134 @@
 %    \begin{macrocode}
 /tx@IntersectDict 200 dict def
 tx@IntersectDict begin
-
+%    \end{macrocode}
+% These are some helper procedures for vector operations.
+%
+% \begin{macro}{VecAdd}
+% Addition of two vectors.
+% \begin{pssyntax}
+%   \PSvar{Xa Ya Xb Yb} \PSop{VecAdd} \PSvar{Xa+Xb Ya+Yb}
+% \end{pssyntax}
+%    \begin{macrocode}
 /VecAdd {
     3 -1 roll add 3 1 roll add exch
 } bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{VecSub}
+% Subtraction of two vectors.
+% \begin{pssyntax}
+%   \PSvar{Xa Ya Xb Yb} \PSop{VecSub} \PSvar{Xa-Xb Ya-Yb}
+% \end{pssyntax}
+%    \begin{macrocode}
 /VecSub {
     neg 3 -1 roll add 3 1 roll neg add exch
 } bind def
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{VecScale}
+% Scale a vector by a factor \PSvar{fac}.
+% \begin{pssyntax}
+%   \PSvar{Xa Ya fac} \PSop{VecScale} \PSvar{fac}$\cdot$\PSvar{Xa} \PSvar{fac}$\cdot$\PSvar{Ya}
+% \end{pssyntax}
+%    \begin{macrocode}
 /VecScale {
   dup 4 -1 roll mul 3 1 roll mul
 } bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{ToVec}
+%   Convert two numbers to a procedure holding the two values. This
+%   representation is used to save coordinate values of nodes and vectors.
+%   \begin{pssyntax}
+%     \PSvar{X Y} \PSop{ToVec} \PSarray{X Y}
+%   \end{pssyntax}
+%    \begin{macrocode}
 /ToVec {
     [ 3 1 roll ]
 } bind def
-
+%    \end{macrocode}
+% \end{macro}
+%
+% \PSvar{MaxPrecision} gives the precision of the curve parameter t for the
+% intersection. This shouldn't be lower than $10^{-6}$, because
+% PostScript uses single precision.
+%    \begin{macrocode}
 /MaxPrecision 1e-6 def
+%    \end{macrocode}
+%
+% \PSvar{Epsilon} gives the allowed relative error of the intersection point. 
+%    \begin{macrocode}
+/Epsilon 1e-4 def
+%    \end{macrocode}
+% 
+% The threshold for curve subdivision, see below.
+%    \begin{macrocode}
+/MinClippedSizeThreshold 0.8 def
+%    \end{macrocode}
+%
+% The predefined intervals for the subdivision of the curves.
+%    \begin{macrocode}
 /H1Interval [0 0.5] def
 /H2Interval [0.5 MaxPrecision add 1] def
-/Epsilon 1e-4 def
-/MinClippedSizeThreshold 0.8 def
+%    \end{macrocode}
+% 
+% \begin{macro}{IntersectBeziers}
+%   The main procedure, which computes the intersection of two bezier
+%   curves of arbitrary order.  This, and most of the following
+%   procedures operate on curves, which are stored as arrays of points,
+%   the points are also arrays with two elements -- \PSvar{X} and
+%   \PSvar{Y}. A Bezier curve of $n$-th order is then givesn by
+%   \PSarray{\PSarray{X0 Y0} \PSarray{X1 Y1} \ldots \PSarray{XN YN}}.
 %
+% \begin{pssyntax}
+%   \PSvar{curveA} \PSvar{curveB} \PSop{IntersectBeziers}
+% \end{pssyntax}
+%    \begin{macrocode}
 /IntersectBeziers {
-    2 copy [0 1] [0 1] MaxPrecision IterateIntersection
-    exch TArray dup /lt exch quicksort
-    exch TArray dup /lt exch quicksort
+    2 copy [0 1] [0 1] IterateIntersection
+    exch TArray exch TArray
     3 -1 roll exch LoadIntersectionPoints 
     3 1 roll LoadIntersectionPoints
 } bind def
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{TArray}
+%   The curve parameters \PSvar{t} as determined by
+%   \PSvar{IntersectBeziers} are given in a special array
+%   construct. \PSvar{TArray} creates a simple array with the
+%   \PSvar{t}-values given in ascending order.
 %
+% \begin{pssyntax}
+% \PSarray{\PSarray{t0a t0b} \ldots \PSvar{null}\ldots \PSvar{integer}}
+% \PSop{TArray} \PSarray{t0 t1 \ldots tN}
+% \end{pssyntax}
+%    \begin{macrocode}
 /TArray {
     [ exch
     { dup type /nulltype eq { pop exit } if
 	aload pop add 0.5 mul
-    } forall ] % -> array of tvalues
+    } forall ]
+    dup /lt exch quicksort
 } bind def
-%
+%    \end{macrocode}
+% \end{macro} 
+% 
+% We can save arbitrary paths using \PSvar{pathforall}. The saved path
+% contains the commands \PSname{movetype}, \PSname{linetype} and
+% \PSname{curvetype}. By default, these are defined as the respective
+% original procedures.
+%    \begin{macrocode}
 /movetype { /moveto load } bind def
 /linetype { /lineto load } bind def
 /curvetype { /curveto load } bind def
+%    \end{macrocode}
+%
 % [ ... /movetype ... /linetype .../curvetype ]
+%    \begin{macrocode}
 /PreparePath {
     [ exch aload pop
     {
@@ -1102,10 +1185,16 @@ tx@IntersectDict begin
 	} ifelse
     } loop ]
 } bind def
+%    \end{macrocode}
 %
-% Curve t
+% \begin{macro}{LoadIntersectionPoints}
+% Prepare \PSarray{Curve} for use with tx@Func
+% \begin{pssyntax}
+% \PSarray{curve} \PSarray{t} \PSop{LoadIntersectionPoints}
+% \PSarray{I0.x I0.y \ldots IN.x YN.x}
+% \end{pssyntax}
+%    \begin{macrocode}
 /LoadIntersectionPoints {
-    % prepare Curve for use with tx@Func
     exch [ exch { aload pop } forall ]
     tx@Dict begin tx@FuncDict begin 2 dict begin
 	dup length 2 idiv 1 sub /BezierType exch def /Points exch def
@@ -1114,16 +1203,25 @@ tx@IntersectDict begin
 	} forall ]
     end end end
 } bind def
-%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{IterateIntersection}
 % Iteration procedure to compute all intersections of CurveA and CurveB.
 % This contains the
-%
-% [CurveA] [CurveB] [intervalA] [intervalB] precision -> domsA domsB
+% 
+% \begin{pssyntax}
+% \PSarray{CurveA} \PSarray{CurveB} \PSarray{intervalA} \PSarray{intervalB}
+% \PSop{IterateIntersection} \PSarray{domsA} \PSarray{domsB}
+% \end{pssyntax}
+%    \begin{macrocode}
 /IterateIntersection {
     (IterateIntersection) DebugBegin
     11 dict begin
-	/precision exch def
-	% in order to limit recursion
+	/precision MaxPrecision def
+%    \end{macrocode}
+% in order to limit recursion
+%    \begin{macrocode}
         /counter 0 def
 	/depth 0 def
 	/domsA InitInterval
@@ -1133,12 +1231,17 @@ tx@IntersectDict begin
     end
     DebugEnd
 } bind def
-%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{_IterateIntersection}
 % This is the iteration part which is called recursively.
-% Before this one must push domA domB CurveA CurveB iter on the stack, so that
-% after the recursive call, the previous state of these five variables can be restored.
 %
-% /domsA /domsB CurveA CurveB domA domB
+% \begin{pssyntax}
+%   \PSname{domsA} \PSname{domsB} \PSarray{CurveA} \PSarray{CurveB}
+%   \PSarray{domA} \PSarray{domB} \PSop{_IterateIntersection}
+% \end{pssyntax}
+%    \begin{macrocode}
 /_IterateIntersection {
     (_IterateIntersection) DebugBegin
     CloneVec /domB exch def
@@ -1163,8 +1266,9 @@ tx@IntersectDict begin
 	} ifelse
     }{
 	counter 100 lt {
-	    % use a loop to simulate some kind of return to exit at different
-	    % positions.
+%    \end{macrocode}
+% Use a loop to simulate some kind of return to exit at different positions.
+%    \begin{macrocode}
 	    {
 		/iter iter 1 add def
 		iter 100 lt
@@ -1182,7 +1286,9 @@ tx@IntersectDict begin
 		    } ifelse
 		    exit
 		} if
-		% iter < 100 && (dompA.extent() >= precision || dompB.extent() >= precision)
+%    \end{macrocode}
+% iter < 100 && (dompA.extent() >= precision || dompB.extent() >= precision)
+%    \begin{macrocode}
 		CheckIT {
 		    (counter: ) counter 20 string cvs strcat
 		    (, iter: ) iter 20 string cvs strcat strcat
@@ -1196,7 +1302,9 @@ tx@IntersectDict begin
 		    CheckIT { (empty interval, exit) == } if
 		    false exit
 		} if
-		% dom[0] > dom[1], invalid. How to handle?	
+%    \end{macrocode}
+% dom[0] > dom[1], invalid.
+%    \begin{macrocode}
 		dom aload pop 2 copy min 3 1 roll max gt {
 		    CheckIT {
 			(dom[0] > dom[1], invalid!) ==
@@ -1221,8 +1329,10 @@ tx@IntersectDict begin
 		    } ifelse
 		    exit
 		} if
-		% if we have clipped less than 20%, we need to subdivide the
-		% curve with the largest domain into two sub-curves.
+%    \end{macrocode}
+% If we have clipped less than 20%, we need to subdivide the
+% curve with the largest domain into two sub-curves.
+%    \begin{macrocode} 
 		dom Extent MinClippedSizeThreshold gt {
 		    CheckIT {
 			(clipped less than 20% : ) ==
@@ -1242,16 +1352,22 @@ tx@IntersectDict begin
 				      } ifelse strcat ==
 		        (dom : ) == dom == (domB :) == domB ==
 		    } if
-
-		    CurveA CurveB domA domB iter% leave those values on the stack to revert to this state after the recursive calls
-     		    7 -2 roll 2 copy 9 2 roll 2 copy % /domsA /domsB CurveA CurveB domA domB iter /domsA /domsB /domsA /domsB
-	    
+%    \end{macrocode}
+% Leave those five values on the stack to revert to the current state after the recursive calls.
+%    \begin{macrocode}
+		    CurveA CurveB domA domB iter
+     		    7 -2 roll 2 copy 9 2 roll 2 copy 
+%    \end{macrocode}
+% On the stack: /domsA /domsB CurveA CurveB domA domB iter /domsA /domsB /domsA /domsB
+%    \begin{macrocode}
 		    domA Extent domB Extent gt {
 			CurveA CloneCurve dup H1Interval Portion % pC1
 			CurveA CloneCurve dup H2Interval Portion % pC2
 			domA H1Interval MapTo                    % dompC1
 			domA H2Interval MapTo                    % dompC2
-			% need: /domsA /domsB pC2 CurveB dompC2 domB   /domsA /domsB pC1 CurveB dompC1 domB
+%    \end{macrocode}
+% Need on the stack: /domsA /domsB pC2 CurveB dompC2 domB   /domsA /domsB pC1 CurveB dompC1 domB
+%    \begin{macrocode}
 			3 -1 roll exch % /domsA /domsB /domsA /domsB pC1 dompC1 pC2 dompC2
 			CurveB exch domB 8 4 roll % /domsA /domsB pC2 CurveB dompC2 domB /domsA /domsB pC1 dompC1
 			CurveB exch domB % /domsA /domsB pC2 CurveB dompC2 domB /domsA /domsB pC1 CurveB dompC1 domB
@@ -1260,7 +1376,9 @@ tx@IntersectDict begin
 			CurveB CloneCurve dup H2Interval Portion % pC2
 			domB H1Interval MapTo                    % dompC1
 			domB H2Interval MapTo                    % dompC2
-			% need: /domsB /domsA pC2 CurveA dompC2 domA   /domsB /domsA pC1 CurveA dompC1 domA
+%    \end{macrocode}
+% Need on the stack: /domsB /domsA pC2 CurveA dompC2 domA   /domsB /domsA pC1 CurveA dompC1 domA
+%    \begin{macrocode}
 			8 -2 roll exch 8 2 roll 6 -2 roll exch 6 2 roll % /domsB /domsA /domsB /domsA pC1 pC2 dompC1 dompC2
 			3 -1 roll exch % /domsB /domsA /domsB /domsA pC1 dompC1 pC2 dompC2
 			CurveA exch domA 8 4 roll % /domsB /domsA pC2 CurveA dompC2 domA /domsB /domsA pC1 dompC1
@@ -1269,8 +1387,9 @@ tx@IntersectDict begin
 
 		    _IterateIntersection
 		    _IterateIntersection
-		    
-		    % restore the state before the recursive calls.
+%    \end{macrocode}		    
+% Restore the state before the recursive calls.
+%    \begin{macrocode}
 		    /iter exch def
 		    /domB exch def
 		    /domA exch def
@@ -1280,11 +1399,14 @@ tx@IntersectDict begin
 		} if
 		CurveA CurveB /CurveA exch def /CurveB exch def
 		domA domB /domA exch def /domB exch def
-		% exchange /domsA and /domsB on the stack!
+%    \end{macrocode}
+% exchange /domsA and /domsB on the stack!
+%    \begin{macrocode}
 		exch
 	    } loop	
-
-	    % boolean on stack
+%    \end{macrocode}
+% boolean on stack
+%    \begin{macrocode}
 	    {
 		4 -1 roll exch PutInterval PutInterval
 		CheckIT {
@@ -1298,9 +1420,13 @@ tx@IntersectDict begin
     /depth depth 1 sub def
     DebugEnd
 } bind def
-%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{PutInterval}
 % Add a new interval [newinterval] to the array stored in /Intervals
 % /Intervals [newinterval] PutInterval
+%    \begin{macrocode}
 /PutInterval {
     % create new array to be pushed into /Intervals
     CloneVec exch
@@ -1319,21 +1445,31 @@ tx@IntersectDict begin
     exch pop exch dup 4 2 roll exch put
     def
 } bind def
-%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{InitInterval}
 % /IntervalName InitInterval
+%    \begin{macrocode}
 /InitInterval {
     10 array dup 9 -1 put def
 } bind def
-%
-% CheckIT if an interval is empty, which is represented by a [1 0] interval.
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{IsEmptyInterval}
+% Check if an interval is empty, which is represented by a [1 0] interval.
 %
 % [interval] -> empty?
+%    \begin{macrocode}
 /IsEmptyInterval {
     aload pop 0 eq exch 1 eq and
 } bind def
-%
+%    \end{macrocode}
+% \end{macro}
 %
 % start stop -> 
+%    \begin{macrocode}
 /ToUnitInterval {
     ToUnitRange exch ToUnitRange 2 copy gt {
 	exch
@@ -1349,7 +1485,7 @@ tx@IntersectDict begin
 	} if
     } ifelse
 } bind def
-%
+%    \end{macrocode}
 % Does a deep copy of the array [Curve].
 %
 % [Curve] CloneCurve -> [newCurve]
