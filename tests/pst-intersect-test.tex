@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{pst-intersect}
+\usepackage{pst-intersect, pst-plot}
 \SpecialCoor
 \setlength{\parindent}{0pt}
 \begin{document}
@@ -8,8 +8,8 @@
 \psset{showpoints}
 \savebezier{A}(0,0)(0,5)(5,2)(5,5)
 \savebezier{B}(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)\psdot(0,0)
-\showbezier[linecolor=red]{A}
-\showbezier{B}
+\psshowcurve[linecolor=red]{A}
+\psshowcurve{B}
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \end{pspicture} }%
 
@@ -17,9 +17,9 @@
 \begin{pspicture}[showgrid](5,5)
   \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \savebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
-  \showbezier[linewidth=2\pslinewidth, showpoints]{A}
-  \showbezier[linecolor=red, linewidth=2\pslinewidth]{B}
-  \showbezier[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
+  \psshowcurve[linewidth=2\pslinewidth, showpoints]{A}
+  \psshowcurve[linecolor=red, linewidth=2\pslinewidth]{B}
+  \psshowcurve[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
   \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \end{pspicture}
 
@@ -27,7 +27,7 @@
 \begin{pspicture}[showgrid](5,5)
   \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
-    \showbezier[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
+    \psshowcurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
 \end{pspicture}
 
@@ -37,8 +37,8 @@
   \savepath{Second}{\psline(0,5)(2,0)(5,5)}
 \end{pspicture}
 \begin{pspicture}[showgrid](5,5)
-  \showpath[linecolor=red]{First}
-  \showpath[linecolor=green]{Second}
+  \psshowcurve[linecolor=red]{First}
+  \psshowcurve[linecolor=green]{Second}
   \psintersect[showpoints]{First}{Second}
 \end{pspicture}
 
@@ -47,5 +47,12 @@
   \savepath[linecolor=blue]{B}{\pscurve(0,0)(1,3)(2,1)(3,1)(4,3)}
   \psintersect[name=C, showpoints]{A}{B}
   \multido{\i=1+1}{3}{\uput[0](C\i){\i}}
+\end{pspicture}
+
+\begin{pspicture}[showgrid](10,5)
+  \savepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin}}
+  \savepath{B}{\psplot{0}{10}{2 x neg exp}}
+  \psintersect[name=C, showpoints]{A}{B}
+  \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
 \end{pspicture}
 \end{document}
