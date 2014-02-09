@@ -1072,13 +1072,51 @@ tx@IntersectDict begin
 % \end{pssyntax}
 %    \begin{macrocode}
 /IntersectBeziers {
-  2 copy [0 1] [0 1] IterateIntersection
-  exch TArray exch TArray
+  2 copy length 2 eq exch length 2 eq and {
+    IntersectLines
+  }{ 
+    2 copy [0 1] [0 1] IterateIntersection
+    exch TArray exch TArray
+  } ifelse
   3 -1 roll exch
 } bind def
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{IntersectLines}
+% 
+%   \begin{pssyntax}
+%     \PSarray{lineA} \PSarray{lineB} \PSop{IntersectLines}
+%     \PSarray{lineA} \PSarray{tA} \PSarray{lineB} \PSarray{tB}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IntersectLines {
+  (IntersectLines) DebugBegin
+  2 copy
+  exch { aload pop } forall 5 -1 roll { aload pop } forall
+  8 -2 roll 2 copy 10 4 roll 4 2 roll 2 copy 6 2 roll 10 2 roll
+  VecSub
+  6 2 roll 4 2 roll VecSub
+  8 4 roll 4 2 roll VecSub % X3-X4 Y3-Y4 X2-X1 Y2-Y1 X3-X1 Y3-Y1 % b1 b2 a1 a2 c1 c2
+  6 copy 12 -4 roll 
+  neg 4 -1 roll mul 3 1 roll mul add
+  dup 0 eq {
+    % no intersections
+    9 { pop } repeat [] []
+  } {
+    dup 10 1 roll 5 1 roll
+     4 -1 roll mul 3 1 roll mul sub exch div
+     6 1 roll 4 -1 roll mul 3 1 roll mul sub exch div
+     2 copy 2 copy 0 ge exch 0 ge and 3 1 roll 1 le exch 1 le and and {
+       [ exch ] exch [ exch ]
+     } {
+       pop pop [] []
+     } ifelse
+  } ifelse
+  DebugEnd
+} bind def
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{IntersectPaths}
 %   \begin{pssyntax}
 %     \PSarray{pathA} \PSarray{pathB} \PSop{IntersectPaths}

@@ -51,7 +51,7 @@
 
 \begin{pspicture}[showgrid](10,5)
   \savepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin}}
-  \savepath{B}{\psplot{0}{10}{2 x neg exp}}
+  \savepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp}}
   \psintersect[name=C, showpoints]{A}{B}
   \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
 \end{pspicture}
