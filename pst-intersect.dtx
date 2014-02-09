@@ -86,7 +86,7 @@
   prebreak = {\raisebox{-0.5ex}[\ht\strutbox]{\kern0.5ex\large\Righttorque}},
   rulecolor=\color{black!20}, 
   texcsstyle = [20]\color{DDOrange},
-  moretexcs = [20]{savebezier, showbezier, savepath, showpath, intersectpaths, intersectbeziers},
+  moretexcs = [20]{savebezier, showbezier, savepath, showpath, psintersect},
   explpreset={%
     pos=l, width=-99pt, hsep=5mm, overhang=\codeoverhang, varwidth,
     vsep=\bigskipamount, rframe={}}, extendedchars=true
@@ -781,16 +781,6 @@
 \def\PIT@dict#1{\pst@intersectdict #1 end}
 \def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
 
-\def\intersectbeziers{\pst@object{intersectbeziers}}
-\def\intersectbeziers@i#1#2{%
-  \begin@SpecialObj
-    \addto@pscode{%
-      \pst@intersectdict 
-      \PIT@name{#1} \PIT@name{#2} IntersectBeziers 
-      pop pop LoadIntersectionPoints
-      [ exch aload pop }%
-    \psdots@ii
-}%
 \def\savebezier{\pst@object{savebezier}}
 \def\savebezier@i#1{%
   \begin@SpecialObj
@@ -823,11 +813,15 @@
 \define@key[psset]{intersect}{isectstop}{%
   \pst@checknum{#1}\PIT@key@isectstop
 }
+\define@key[psset]{intersect}{name}{%
+  \def\PIT@key@name{#1}%
+}%
 \psset[intersect]{%
   tstart=0,
   tstop=1,
   isectstart=0,
-  isectstop=-1
+  isectstop=-1,
+  name={}
 }%
 \def\showbezier{\pst@object{showbezier}}%
 \def\showbezier@i#1{%
@@ -902,37 +896,51 @@
     }%
   \end@OpenObj
 }%
-\def\intersectpaths{\pst@object{intersectpaths}}%
-\def\intersectpaths@i#1#2{%
+%
+% \begin{macro}{\psintersect}
+%    \begin{macrocode}
+\def\psintersect{\pst@object{psintersect}}
+\def\psintersect@i#1#2{%
   \begin@SpecialObj
+  \def\PIT@@name{%
+    \ifx\PIT@key@name\@empty
+      \PIT@name{@tmp}
+    \else
+      \PIT@name{\PIT@key@name} 
+    \fi}%
+  \PIT@Verb{%
+    \PIT@name{#1} \PIT@name{#2}
+    \PIT@name{#1} IsPath {
+      \PIT@name{#2} IsPath {
+        IntersectPaths
+      }{
+        IntersectPathCurve
+      } ifelse
+    }{
+      \PIT@name{#2} IsPath {
+        IntersectCurvePath
+      }{
+        IntersectBeziers
+        2 copy LoadIntersectionPoints 5 1 roll
+      } ifelse
+    } ifelse
+    /\PIT@@name\space /\PIT@name{#1} /\PIT@name{#2} 8 3 roll 
+    SaveIntersection
+  }%
+  \ifshowpoints
     \addto@pscode{%
       \pst@intersectdict
-        6 dict begin 
-        /nA -1 def /nB -1 def
-        /isectA [] def /isectB [] def
-        /tA [] def /tB [] def
-        \PIT@name{#1} PreparePath \PIT@name{#2} PreparePath
-        { 
-          /nB nB 1 add def
-          exch dup 3 1 roll
-          {
-            /nA nA 1 add def
-            exch dup 3 1 roll
-            IntersectBeziers 
-            LoadIntersectionPoints
-            [ exch isectB aload pop ] /isectB exch def
-            LoadIntersectionPoints
-            [ exch isectA aload pop ] /isectA exch def
-          } forall
-          pop
-          /nA -1 def
-        } forall
-        pop
-        [ isectA { aload pop } forall
-      end
-    }%
+        [ \PIT@@name\space /Points get aload pop 
+      end }%
     \psdots@ii
-\ignorespaces}%
+  \else
+    \end@SpecialObj
+  \fi
+}%
+%    \end{macrocode}
+% \end{macro}
+% 
+%    \begin{macrocode}
 \catcode`\@=\PstAtCode\relax
 %    \end{macrocode}
 %</texfile> 
@@ -1050,17 +1058,109 @@ tx@IntersectDict begin
 %   \PSarray{\PSarray{X0 Y0} \PSarray{X1 Y1} \ldots \PSarray{XN YN}}.
 %
 % \begin{pssyntax}
-%   \PSvar{curveA} \PSvar{curveB} \PSop{IntersectBeziers} 
+%   \PSarray{curveA} \PSarray{curveB} \PSop{IntersectBeziers} 
 %   \PSarray{curveA} \PSarray{tA} \PSarray{curveB} \PSarray{tB}
 % \end{pssyntax}
 %    \begin{macrocode}
 /IntersectBeziers {
-    2 copy [0 1] [0 1] IterateIntersection
-    exch TArray exch TArray
-    3 -1 roll exch
+  2 copy [0 1] [0 1] IterateIntersection
+  exch TArray exch TArray
+  3 -1 roll exch
 } bind def
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{IntersectPaths}
+%   \begin{pssyntax}
+%     \PSarray{pathA} \PSarray{pathB} \PSop{IntersectPaths}
+%     \PSarray{intersections} \PSarray{pathA} \PSarray{tA} \PSarray{pathB} \PSarray{tB}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IntersectPaths {
+  2 copy exch PreparePath exch PreparePath
+  5 dict begin 
+    /nA -1 def /nB -1 def
+    /isect [] def
+    /tA [] def /tB [] def
+    { % [pathA] [Bi]
+      /nB nB 1 add def
+      exch dup 3 1 roll % [pathA] [Bi] [pathA]
+      {
+        /nA nA 1 add def
+        exch dup 3 1 roll % [pathA] [Bi] [Aj] [Bi]
+        IntersectBeziers 
+        dup 3 1 roll % [curveA] [tA] [tB] [curveB] [tB]
+        LoadIntersectionPoints
+        [ exch isect aload pop ] /isect exch def
+        [ tB aload length 2 add -1 roll { nB add } forall ] /tB exch def
+        exch pop
+        [ tA aload length 2 add -1 roll { nA add } forall ] /tA exch def
+      } forall
+      pop % remove [Bi]
+      /nA -1 def
+    } forall
+    pop % remove [pathA]
+    [ isect { aload pop } forall ] 3 1 roll tA exch tB
+    % [intersections] [pathA] [tA] [pathB] [tB]
+  end
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{IntersectPaths}
+%   \begin{pssyntax}
+%     \PSarray{curveA} \PSarray{pathB} \PSop{IntersectBezierPath}
+%     \PSarray{intersections} \PSarray{curveA} \PSarray{tA} \PSarray{pathB} \PSarray{tB}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IntersectCurvePath {
+  2 copy exch PreparePath
+  5 dict begin 
+    /n -1 def
+    /isect [] def
+    /tA [] def /tB [] def
+    { % [curveA] [Bi]
+      /n n 1 add def
+      exch dup 3 -1 roll % [curveA] [curveA] [Bi] 
+      IntersectBeziers 
+      dup 3 1 roll % [curveA] [tA] [tB] [curveB] [tB]
+      LoadIntersectionPoints
+      [ exch isect aload pop ] /isect exch def
+      [ tB aload length 2 add -1 roll { n add } forall ] /tB exch def
+      exch pop
+      [ tA aload length 2 add -1 roll aload pop ] /tA exch def
+    } forall
+    pop % remove [curveA]
+    [ isect { aload pop } forall ] 3 1 roll tA exch tB
+    % [intersections] [curveA] [tA] [pathB] [tB]
+  end
+} bind def
+/IntersectPathCurve {
+  exch IntersectCurvePath 4 2 roll
+} bind def
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{SaveIntersection}
+%   \begin{pssyntax}
+%     \PSname{isectname} \PSname{nameA} \PSname{nameB} 
+%     \PSarray{intersectionpoints} \PSarray{A} \PSarray{tA} \PSarray{B} \PSarray{tB} 
+%     \PSop{SaveIntersection}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/SaveIntersection {
+  4 dict dup 10 -1 roll exch def
+  begin %
+    /Points 6 -1 roll def
+    5 -1 roll dup 4 -1 roll def % /curveA [curveA] [tA] [tB] /curveB /curveB [curveB] def
+    nametostr (@t) strcat cvn exch def % /curveA [curveA] [tA] /curveB@t [tB] def
+    3 -1 roll dup 4 -1 roll def
+    nametostr (@t) strcat cvn exch def
+  end
+} bind def
+%    \end{macrocode}
+% \end{macro}
+% 
 % \begin{macro}{TArray}
 %   The curve parameters \PSvar{t} as determined by
 %   \PSvar{IntersectBeziers} are given in a special array
@@ -1917,6 +2017,22 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{IsPath}
+%   Check if an array is a path. A path is represented as array, which
+%   contains other arrays which represent native Postscript
+%   operations. Those can be \PSarray{X Y /@m}, \PSarray{X Y /@l}, or
+%   \PSarray{X1 Y1 X2 Y2 X3 Y3 /@c}.
+%
+%   \begin{pssyntax}
+%     \PSarray{array} \PSop{IsPath} \PSvar{boolean}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IsPath {
+  dup length 1 sub get type /nametype eq { true } { false } ifelse
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
 %    \begin{macrocode}
  % Graham Scal algorithm to compute the convex hull of a set of
  % points. Code written by Bill Casselman,
@@ -2196,6 +2312,9 @@ end } def
     string dup dup 5 2 roll
     copy length exch
     putinterval
+} bind def
+/nametostr {
+    dup length string cvs
 } bind def
 /ShowCurve {
     { aload pop } forall
