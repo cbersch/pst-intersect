@@ -36,7 +36,7 @@
 \usepackage[dvipsnames,x11names,svgnames]{xcolor}
 \usepackage{array,booktabs,paralist,tabularx}
 \usepackage{ragged2e, calc}
-\usepackage{nicefrac}
+\usepackage{nicefrac, multido}
 \usepackage{pst-intersect}
 \usepackage{hypdoc}
 \hypersetup{%
@@ -570,7 +570,7 @@
 % \ifGERMAN
 %   \section{Anforderungen}
 %   \LPack{pst-intersect} aktuelle Versionen der
-%   Pakete \LPack{pstricks}, \LPack{pst-node}, \LPack{pst-func} und \LPack{multido}.
+%   Pakete \LPack{pstricks}, \LPack{pst-node} und \LPack{pst-func}.
 %
 %   Alle PSTricks-Pakete machen regen Gebrauch von der Postscript-Sprache, so
 %   dass der typische Arbeitsfluss \opt{latex}, \opt{dvips} und
@@ -581,7 +581,7 @@
 % \ifENGLISH
 %   \section{Requirements}
 %   \LPack{pst-intersect} requires recent versions of
-%   \LPack{pstricks}, \LPack{pst-node}, \LPack{pst-func}, and \LPack{multido}.
+%   \LPack{pstricks}, \LPack{pst-node}, and \LPack{pst-func}.
 %
 %   All PSTricks package rely heavily on the Postscript language so that the
 %   typical workflow involves \opt{latex}, \opt{dvips}, and \opt{ps2pdf}. Of
@@ -769,7 +769,6 @@
 \ifx\PSTricksLoaded\endinput\else\input pstricks.tex \fi
 \ifx\PSTXKeyLoaded\endinput\else \input pst-xkey.tex \fi
 \ifx\PSTnodesLoaded\endinput\else\input pst-node.tex \fi
-\ifx\MultidoLoaded\endinput\else \input multido.tex  \fi
 \ifx\PSTfuncLoaded\endinput\else \input pst-func.tex \fi
 
 \edef\PstAtCode{\the\catcode`\@} \catcode`\@=11\relax
