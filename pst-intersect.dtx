@@ -86,7 +86,7 @@
   prebreak = {\raisebox{-0.5ex}[\ht\strutbox]{\kern0.5ex\large\Righttorque}},
   rulecolor=\color{black!20}, 
   texcsstyle = [20]\color{DDOrange},
-  moretexcs = [20]{savebezier, showbezier, savepath, showpath, psintersect},
+  moretexcs = [20]{savebezier, savepath, psshowcurve, psintersect},
   explpreset={%
     pos=l, width=-99pt, hsep=5mm, overhang=\codeoverhang, varwidth,
     vsep=\bigskipamount, rframe={}}, extendedchars=true
@@ -687,7 +687,7 @@
 \begin{pspicture}(5,5)
   \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
-    \showbezier[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
+    \psshowcurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
 \end{pspicture}
 \end{LTXexample}
@@ -826,25 +826,6 @@
   name={},
   saveintersections
 }%
-\def\showbezier{\pst@object{showbezier}}%
-\def\showbezier@i#1{%
-  \addbefore@par{plotpoints=200}%
-  \begin@OpenObj
-    \addto@pscode{%
-      \pst@intersectdict
-        [\PIT@name{#1} dup
-        \PIT@key@tstart\space\PIT@key@tstop\space 
-        ToUnitInterval Portion 
-      end
-      { aload pop } forall
-      counttomark 2 sub 2 idiv
-      \psk@plotpoints
-      exch
-      \txFunc@BezierCurve
-      \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
-    }%
-  \end@OpenObj
-}%
 \def\PIT@use@pscode{%
   \pstverb{%
     \pst@dict
@@ -880,21 +861,28 @@
       [ 3 -1 roll 2 add 2 roll ] def }%
   \end@SpecialObj
 }%
-\def\showpath{\pst@object{showpath}}%
-\def\showpath@i#1{%
+\def\psshowcurve{\pst@object{psshowcurve}}%
+\def\psshowcurve@i#1{%
+  \addbefore@par{plotpoints=200}%
   \begin@OpenObj
     \addto@pscode{%
-      \pst@intersectdict 
-      3 dict begin
-        /movetype /moveto load def
-        /linetype /lineto load def
-        /curvetype /curveto load def
-        mark \PIT@name{#1} aload pop
-        {
-          counttomark 0 eq { exit } if
-          load exec
-        } loop
-        pop 
+      \pst@intersectdict
+        \PIT@name{#1} dup IsPath {
+%    \end{macrocode}
+% This local dictionary limits the definition of the \PSname{*type} procedures.
+%    \begin{macrocode}
+          ShowFullPath
+        }{
+          [\PIT@name{#1} dup
+          \PIT@key@tstart\space\PIT@key@tstop\space 
+          ToUnitInterval Portion 
+          { aload pop } forall
+          counttomark 2 sub 2 idiv
+          \psk@plotpoints
+          exch
+          \txFunc@BezierCurve
+          \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+        } ifelse
       end
     }%
   \end@OpenObj
@@ -2050,6 +2038,24 @@ tx@IntersectDict begin
 %    \begin{macrocode}
 /IsPath {
   dup length 1 sub get type /nametype eq { true } { false } ifelse
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{ShowFullPath}
+%    \begin{macrocode}
+/ShowFullPath {
+  3 dict begin
+  /movetype /moveto load def
+  /linetype /lineto load def
+  /curvetype /curveto load def
+  mark exch aload pop
+  {
+    counttomark 0 eq { exit } if
+    load exec
+  } loop
+  pop 
+  end
 } bind def
 %    \end{macrocode}
 % \end{macro}
