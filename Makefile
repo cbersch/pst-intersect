@@ -8,13 +8,14 @@ ARCHNAME = $(PACKAGE)-$(shell date +"%y%m%d")
 ARCHNAME_TDS = $(PACKAGE).tds
 
 ARCHFILES = $(PACKAGE).dtx $(PACKAGE).ins Makefile \
-            README Changes $(PACKAGE).pdf
+            README Changes $(PACKAGE).pdf $(PACKAGE)-DE.pdf
 
 PS2PDF = GS_OPTIONS=-dPDFSETTINGS=/prepress ps2pdf
 
-all : doc
+all : doc doc-DE
 
 doc : $(PACKAGE).pdf
+doc-DE : $(PACKAGE)-DE.pdf
 
 dist : doc Changes
 	mkdir -p $(PACKAGE)
@@ -25,6 +26,7 @@ dist : doc Changes
 	@ echo $(ARCHNAME).tar.gz
 
 $(PACKAGE).dvi: L = english
+$(PACKAGE)-DE.dvi: L = ngerman
 %.dvi: $(PACKAGE).dtx $(PACKAGE).sty $(PACKAGE).tex $(PACKAGE).pro
 	$(LATEX) -jobname=$(basename $@) '\newcommand*{\mainlang}{$(L)}\input{$(PACKAGE).dtx}'
 	$(LATEX) -jobname=$(basename $@) '\newcommand*{\mainlang}{$(L)}\input{$(PACKAGE).dtx}'
@@ -64,7 +66,9 @@ ctan : dist arch-tds
 	tar cf $(PACKAGE).tar $(ARCHNAME_TDS).zip $(ARCHNAME).tar.gz
 
 clean :
-	$(RM) $(addprefix $(PACKAGE), .dvi .ps .log .aux .bbl .blg .out .tmp .toc .hd))
+	$(RM) $(foreach prefix, $(PACKAGE) $(PACKAGE)-DE, \
+	        $(addprefix $(prefix), .dvi .ps .log .aux .bbl .blg .out .tmp \
+	           .toc .hd))
 
 veryclean : clean
 	$(RM) $(addprefix $(PACKAGE), .pdf .tex .sty .pro) Changes
