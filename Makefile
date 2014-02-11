@@ -71,4 +71,4 @@ clean :
 	           .toc .hd))
 
 veryclean : clean
-	$(RM) $(addprefix $(PACKAGE), .pdf .tex .sty .pro) Changes
+	$(RM) $(addprefix $(PACKAGE), .pdf .tex .sty .pro) $(PACKAGE)-DE.pdf Changes
