@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/09 v0.1alpha package wrapper for pst-intersect.tex]
+    [2014/02/11 v0.1alpha package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -369,22 +369,22 @@
 \def\Lcs{\@ifstar{\Lcs@nobm}{\Lcs@bm}}
 \def\Lcs@nobm#1{\nxLcs{#1}\xLcs{#1}}
 \def\Lcs@bm#1{\hyperref[cs:#1]{\Lcs@nobm{#1}}}
-\def\xLcs#1{}%\docindex{#1=\nxLcs{#1}}\docindex{\PITindexMacro!#1=\nxLcs{#1}}}
+\def\xLcs#1{}
 \def\nxLcs#1{\texttt{\textbackslash#1}}
 
 \def\Lcomp{\@ifstar{\Lcomp@nobm}{\Lcomp@bm}}
 \def\Lcomp@nobm#1{\nxLcomp{#1}\xLcomp{#1}}
 \def\Lcomp@bm#1{\hyperref[comp:#1]{\Lcomp@nobm{#1}}}
-\def\xLcomp#1{}%\docindex{#1=\nxLcomp{#1}}\docindex{\PITindexComp!#1=\nxLcomp{#1}}}
+\def\xLcomp#1{}
 \def\nxLcomp#1{\texttt{\textbackslash#1}}
 
-\def\LPack#1{\nxLPack{#1}}%\docindex{#1=\nxLPack{#1}}\docindex{\PITindexPack!#1=\nxLPack{#1}}}
+\def\LPack#1{\nxLPack{#1}}
 \def\nxLPack#1{\texttt{#1}}
 
 \def\Lenv{\@ifstar{\Lenv@nobm}{\Lenv@bm}}
 \def\Lenv@nobm#1{\nxLenv{#1}\xLenv{#1}}
 \def\Lenv@bm#1{\hyperref[env:#1]{\Lenv@nobm{#1}}}
-\def\xLenv#1{}%\docindex{#1=\nxLenv{#1}}\docindex{\PITindexEnv!#1=\nxLenv{#1}}}
+\def\xLenv#1{}
 \def\nxLenv#1{\texttt{#1}}
 \let\orig@ltd@envitem\ltd@envitem
 \def\ltd@envitem#1{\orig@ltd@envitem{#1}\label{env:#1}\xLenv{#1}}
@@ -392,19 +392,19 @@
 \def\Lkeyword{\@ifstar{\Lkeyword@nobm}{\Lkeyword@bm}}
 \def\Lkeyword@nobm#1{\nxLkeyword{#1}\xLkeyword{#1}}
 \def\Lkeyword@bm#1{\hyperref[prm:#1]{\Lkeyword@nobm{#1}}}
-\def\xLkeyword#1{}%\docindex{#1=\nxLkeyword{#1}}\docindex{\PITindexKeyword!#1=\nxLkeyword{#1}}}
-\def\xdefLkeyword#1{}%\docindexdef{#1=\nxLkeyword{#1}}\docindexdef{\PITindexKeyword!#1=\nxLkeyword{#1}}}
+\def\xLkeyword#1{}
+\def\xdefLkeyword#1{}
 \def\nxLkeyword#1{\texttt{#1}}
 
-\def\xLoption#1{}%\docindex{#1=\texttt{#1}}}
+\def\xLoption#1{}
 \def\Loption#1{\texttt{#1}\xLoption{#1}}
 \def\nxLoption#1{\texttt{#1}}
 
 \def\Lstyle{\@ifstar{\Lstyle@nobm}{\Lstyle@bm}}
 \def\Lstyle@nobm#1{\nxLstyle{#1}\xLstyle{#1}}
 \def\Lstyle@bm#1{\hyperref[sty:#1]{\Lstyle@nobm{#1}}}
-\def\xLstyle#1{}%\docindex{#1=\nxLstyle{#1}}\docindex{\PITindexStyle!#1=\nxLstyle{#1}}}
-\def\xdefLstyle#1{}%\docindexdef{#1=\nxLstyle{#1}}\docindexdef{\PITindexStyle!#1=\nxLstyle{#1}}}
+\def\xLstyle#1{}
+\def\xdefLstyle#1{}
 \def\nxLstyle#1{\texttt{#1}}
 
 \makeatother
@@ -531,7 +531,7 @@
 % \makeatother
 % 
 % \ifGERMAN
-%   \title{\texttt{pst-intersect}\\ Berechnen der Schnittpunkte von Kurven\\[0.5ex] \small \fileversion}
+%   \title{\texttt{pst-intersect}\\ Berechnen der Schnittpunkte beliebiger Kurven\\[0.5ex] \small \fileversion}
 %   \hypersetup{pdftitle={Schnittpunkte von Bezierkurven}}
 % \fi
 % \ifENGLISH
@@ -569,7 +569,7 @@
 %
 % \ifGERMAN
 %   \section{Anforderungen}
-%   \LPack{pst-intersect} aktuelle Versionen der
+%   \LPack{pst-intersect} benötigt aktuelle Versionen der
 %   Pakete \LPack{pstricks}, \LPack{pst-node} und \LPack{pst-func}.
 %
 %   Alle PSTricks-Pakete machen regen Gebrauch von der Postscript-Sprache, so
@@ -593,7 +593,7 @@
 %   \section{Verbreitung und Installation}
 %   %Dieses Paket ist auf
 %   %CTAN\fnurl{http://mirror.ctan.org/help/Catalogue/entries/pst-intersect.html}
-%   %erhältlich und in \TeX Live and MiK\TeX{} enthalten.
+%   %erhältlich.^^A und in \TeX Live and MiK\TeX{} enthalten.
 % 
 %   Das \LPack{pst-intersect}-Paket umfasst die zwei Hauptdateien
 %   \texttt{pst-intersect.ins} und \texttt{pst-intersect.dtx}. Durch Aufrufen
@@ -602,7 +602,7 @@
 %   \begin{itemize}
 %   \item \texttt{pst-intersect.pro}: die Postscript Prologdatei
 %   \item \texttt{pst-intersect.sty}: die \LaTeX-Stildatei
-%   \item \texttt{pst-intersect.sty}: die \TeX-Datei
+%   \item \texttt{pst-intersect.tex}: die \TeX-Datei
 %   \end{itemize}
 %   Speichern Sie diese Dateien in einem Verzeichnis der Teil Ihres
 %   lokalen \TeX-Baums ist.
@@ -618,8 +618,8 @@
 % \ifENGLISH
 %   \section{Distribution and installation}
 %   This package is available on
-%   CTAN\fnurl{http://mirror.ctan.org/help/Catalogue/entries/pst-intersect.html} and
-%   is included in \TeX Live and MiK\TeX.
+%   CTAN\fnurl{http://mirror.ctan.org/help/Catalogue/entries/pst-intersect.html}.
+%   ^^A and is included in \TeX Live and MiK\TeX.
 % 
 %   The \LPack{pst-intersect} package consists of the two main files
 %   \texttt{pst-intersect.ins} and \texttt{pst-intersect.dtx}. By running \texttt{tex
@@ -663,17 +663,46 @@
 %   \section{Acknowledgements}
 % \fi
 % \ifGERMAN
-% Ich danke Marco Cecchetti, dessen lib2geom-Bibliothek mir als Vorlage
-% für einen Großteil des Postscript-Kodes für den
+% Ich danke Marco Cecchetti, dessen
+% \opt{lib2geom}-Bibliothek\fnurl{http://lib2geom.sourceforge.net/}
+% mir als Vorlage für einen Großteil des Postscript-Kodes für den
 % Bezier-Clipping-Algorithmus diente. Außerdem gilt mein Dank William
 % A. Casselman, für seine Erlaubnis, den Quicksort-Kode und den Kode zur
-% Berechung der konvexen Hüllen aus seinem Buch »Mathematical
-% Illustration« verwenden zu dürfen. Der Dokumentationsstil ist eine
-% Mischung aus der \opt{pst-doc} Klasse (Herbert Voß) und dem
-% \opt{ltxdockit} Paket für die \opt{biblatex} Dokumentation (Philipp
-% Lehmann).
+% Berechung der konvexen Hüllen aus seinem Buch «Mathematical
+% Illustration» verwenden zu
+% dürfen\fnurl{http://www.math.ubc.ca/~cass/graphics/text/www/}. Der
+% Dokumentationsstil ist eine Mischung aus der \opt{pst-doc} Klasse
+% (Herbert Voß) und dem \opt{ltxdockit} Paket für die \opt{biblatex}
+% Dokumentation (Philipp Lehmann).
+% \fi
+% \ifENGLISH
+% I thank Marco Cecchetti, for his
+% \opt{lib2geom}-library\fnurl{http://lib2geom.sourceforge.net/} from
+% which I derived great parts of the Postscript code for the B\`ezier
+% clipping algorithm. Also I want to thank William A. Casselman for the
+% Postscript code of the quicksort procedure and the procedure for
+% calculating the convex hull from his book «Mathematical
+% Illustration»\fnurl{http://www.math.ubc.ca/~cass/graphics/text/www/},
+% and the permission to use it. The documentation style is a mixture of
+% the \opt{pst-doc} class (Herbert Voß) and the \opt{ltxdockit} package
+% for the \opt{biblatex} documentation (Philipp Lehman).
 % \fi
 %
+%
+% \ifGERMAN
+% \chapter{Benutzung}
+% \fi
+% \ifENGLISH
+% \chapter{Usage}
+% \fi
+%
+% \begin{ltxsyntax}
+%   \cmditem{savebezier}{name}($X_0$)\ldots($X_n$)
+% \end{ltxsyntax}
+%
+% \ifGERMAN
+%
+% \fi
 % \ifGERMAN
 % \chapter{Beispiele}
 % \fi
@@ -806,11 +835,11 @@
 \define@key[psset]{intersect}{tstop}{%
   \pst@checknum{#1}\PIT@key@tstop
 }
-\define@key[psset]{intersect}{isectstart}{%
-  \pst@checknum{#1}\PIT@key@isectstart
+\define@key[psset]{intersect}{istart}{%
+  \pst@checknum{#1}\PIT@key@istart
 }
-\define@key[psset]{intersect}{isectstop}{%
-  \pst@checknum{#1}\PIT@key@isectstop
+\define@key[psset]{intersect}{istop}{%
+  \pst@checknum{#1}\PIT@key@istop
 }
 \define@key[psset]{intersect}{name}{%
   \def\PIT@key@name{#1}%
@@ -818,10 +847,10 @@
 \newif\PIT@saveintersections
 \define@boolkey[psset]{intersect}[PIT@]{saveintersections}[true]{}
 \psset[intersect]{%
-  tstart=0,
-  tstop=1,
-  isectstart=0,
-  isectstop=-1,
+  tstart=-1,
+  tstop=-1,
+  istart=-1,
+  istop=-1,
   name={},
   saveintersections
 }%
@@ -863,17 +892,63 @@
 \def\psshowcurve{\pst@object{psshowcurve}}%
 \def\psshowcurve@i#1{%
   \addbefore@par{plotpoints=200}%
+   \@ifnextchar\bgroup
+     {\PIT@traceintersection{#1}}%
+     {\PIT@tracecurve{#1}}%
+}%
+\def\PIT@tracecurve#1{%
   \begin@OpenObj
     \addto@pscode{%
       \pst@intersectdict
         \PIT@name{#1} dup IsPath {
-%    \end{macrocode}
-% This local dictionary limits the definition of the \PSname{*type} procedures.
-%    \begin{macrocode}
-          ShowFullPath
+          \PIT@key@tstart\space\PIT@key@tstop\space
+          ShowPathPortion
         }{
-          [\PIT@name{#1} dup
+          [exch dup
           \PIT@key@tstart\space\PIT@key@tstop\space 
+          dup 0 lt { pop 1 } if
+          ToUnitInterval Portion 
+          { aload pop } forall
+          counttomark 2 sub 2 idiv
+          \psk@plotpoints
+          exch
+          \txFunc@BezierCurve
+          \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+        } ifelse
+      end
+    }%
+  \end@OpenObj
+}%
+\def\PIT@traceintersection#1#2{%
+  \begin@OpenObj
+    \addto@pscode{%
+      \pst@intersectdict
+        \ifx\\#1\\%
+          \PIT@name{@tmp}
+        \else
+          \PIT@name{#1}
+        \fi dup /\PIT@name{#2} get
+        exch /\PIT@name{#2}@t get
+        dup length \PIT@key@istart\space ge 0 \PIT@key@istart\space lt and {
+          dup \PIT@key@istart\space cvi 1 sub get
+        } {
+          \PIT@key@tstart
+        } ifelse
+        exch % [curve] t_istart|tstart [ts]
+        %
+        dup length \PIT@key@istop\space ge 0 \PIT@key@istop\space lt and {
+          \PIT@key@istop\space cvi 1 sub get
+        } {
+          pop \PIT@key@tstop
+        } ifelse
+        2 copy gt { exch } if 
+        3 -1 roll dup
+        IsPath {
+          3 1 roll
+          ShowPathPortion
+        }{
+          [ exch dup 5 -2 roll
+          dup 0 lt { pop 1 } if
           ToUnitInterval Portion 
           { aload pop } forall
           counttomark 2 sub 2 idiv
@@ -1123,16 +1198,16 @@ tx@IntersectDict begin
 %   \end{pssyntax}
 %    \begin{macrocode}
 /IntersectPaths {
-  2 copy exch PreparePath exch PreparePath
-  5 dict begin 
-    /nA -1 def /nB -1 def
+  6 dict begin 
+    2 copy exch PreparePath dup length /nA exch def 
+    exch PreparePath dup length /nB exch def
     /isect [] def
     /tA [] def /tB [] def
     { % [pathA] [Bi]
-      /nB nB 1 add def
+      /nB nB 1 sub def
       exch dup 3 1 roll % [pathA] [Bi] [pathA]
       {
-        /nA nA 1 add def
+        /nA nA 1 sub def
         exch dup 3 1 roll % [pathA] [Bi] [Aj] [Bi]
         IntersectBeziers 
         dup 3 1 roll % [curveA] [tA] [tB] [curveB] [tB]
@@ -1143,7 +1218,7 @@ tx@IntersectDict begin
         [ tA aload length 2 add -1 roll { nA add } forall ] /tA exch def
       } forall
       pop % remove [Bi]
-      /nA -1 def
+      dup length /nA exch def
     } forall
     pop % remove [pathA]
     [ isect { aload pop } forall ] 3 1 roll tA exch tB
@@ -1160,13 +1235,12 @@ tx@IntersectDict begin
 %   \end{pssyntax}
 %    \begin{macrocode}
 /IntersectCurvePath {
-  2 copy exch PreparePath
-  5 dict begin 
-    /n -1 def
+  6 dict begin 
+    2 copy exch PreparePath dup length /n exch def
     /isect [] def
     /tA [] def /tB [] def
     { % [curveA] [Bi]
-      /n n 1 add def
+      /n n 1 sub def
       exch dup 3 -1 roll % [curveA] [curveA] [Bi] 
       IntersectBeziers 
       dup 3 1 roll % [curveA] [tA] [tB] [curveB] [tB]
@@ -2082,7 +2156,7 @@ tx@IntersectDict begin
 % \begin{macro}{ShowFullPath}
 %    \begin{macrocode}
 /ShowFullPath {
-  3 dict begin
+  4 dict begin
   /movetype /moveto load def
   /linetype /lineto load def
   /curvetype /curveto load def
@@ -2092,6 +2166,58 @@ tx@IntersectDict begin
     load exec
   } loop
   pop 
+  end
+} bind def
+/ShowPathPortion {
+  6 dict begin
+  exch dup 0 lt { pop 0 } if /tstart exch def
+  % if tstart is < 0, use the array length
+  dup 0 lt { pop dup length } if /tstop exch def
+  tstop tstart gt {
+    /movetype /moveto load def
+    /linetype /lineto load def
+    /curvetype /curveto load def
+    /n 0 def
+    mark exch aload pop
+    {
+      counttomark 0 eq { pop exit } if
+      dup /movetype eq not { /n n 1 add def } if
+      % current section is after tstart
+      n tstop sub 1 ge { cleartomark exit } if
+
+      dup /movetype eq {
+        load exec
+      } {
+        tstart n gt {
+          % current path section is before tstart
+          /curvetype eq { 6 2 roll 4 { pop } repeat } if
+          movetype
+        } {
+          tstart n 1 sub gt tstop n lt or {
+            % draw a truncated section
+            tstart n sub 1 add tstop n sub 1 add
+            ToUnitInterval exch
+            /linetype eq {
+              3 1 roll ToVec currentpoint ToVec exch ToVec
+              dup 3 -1 roll Portion
+              aload pop exch 
+              tstart n 1 sub gt { aload pop moveto } { pop } ifelse
+              aload pop lineto
+            } {
+              7 1 roll [ currentpoint 9 3 roll ] ArrayToPointArray
+              dup 3 -1 roll Portion 
+              { aload pop } forall
+              8 -2 roll
+              tstart n 1 sub gt { moveto } { pop pop } ifelse
+              curveto
+            } ifelse
+          }{
+            load exec
+          } ifelse
+        } ifelse
+      } ifelse
+    } loop
+  } if
   end
 } bind def
 %    \end{macrocode}
