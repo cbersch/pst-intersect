@@ -696,10 +696,27 @@
 % \chapter{Usage}
 % \fi
 %
+%
 % \begin{ltxsyntax}
-%   \cmditem{savebezier}{name}($X_0$)\ldots($X_n$)
+%   \cmditem{savebezier}[options]{curvename}($X_0$)\ldots(\prm{$X_n$})
+%   \cmditem{savepath}[options]{curvename}{commands}
 % \end{ltxsyntax}
 %
+% \begin{ltxsyntax}
+%   \cmditem{psshowcurve}[options]{curvename}
+%   \cmditem{psshowcurve}[options]{intersection}{curvename}
+%   \cmditem{psintersect}{curveA}{curveB}
+% \end{ltxsyntax}
+% 
+% \begin{optionlist}
+% \boolitem{saveintersections}
+% \numitem{tstart}
+% \numitem{tstop}
+% \numitem{istart}
+% \numitem{istop}
+% \optitem{name}{string}
+% \end{optionlist}
+% 
 % \ifGERMAN
 %
 % \fi
@@ -812,6 +829,7 @@
 \def\savebezier{\pst@object{savebezier}}
 \def\savebezier@i#1{%
   \begin@SpecialObj
+    \PIT@checkname{#1}%
     \addto@pscode{ /\PIT@name{#1} }%
     \pst@getcoors[\savebezier@ii%]
 }%
@@ -877,10 +895,17 @@
     { /curvetype counttomark 7 roll }{} pathforall 
     counttomark 1 add -1 roll pop count }%
 }%
+\def\PIT@name@default{@tmp}%
 \def\PIT@name#1{PIT@#1}%
+\def\PIT@checkname#1{%
+  \ifx\@empty#1\@empty
+    \@pstrickserr{Unexpected empty argument!}\@ehpb
+  \fi
+}%
 \def\savepath{\pst@object{savepath}}%
 \long\def\savepath@i#1#2{%
   \begin@SpecialObj
+    \PIT@checkname{#1}%
     \let\pst@stroke\PIT@save@path
     \let\use@pscode\PIT@use@pscode
     \pscustom{#2}%
@@ -897,6 +922,7 @@
      {\PIT@tracecurve{#1}}%
 }%
 \def\PIT@tracecurve#1{%
+  \PIT@checkname{#1}%
   \begin@OpenObj
     \addto@pscode{%
       \pst@intersectdict
@@ -920,14 +946,27 @@
   \end@OpenObj
 }%
 \def\PIT@traceintersection#1#2{%
+  \PIT@checkname{#2}%
   \begin@OpenObj
     \addto@pscode{%
       \pst@intersectdict
         \ifx\\#1\\%
-          \PIT@name{@tmp}
+          /\PIT@name{\PIT@name@default}
         \else
-          \PIT@name{#1}
-        \fi dup /\PIT@name{#2} get
+          /\PIT@name{#1}
+        \fi 
+        dup currentdict exch known not {
+          \ifx\\#1\\%
+            (You haven't defined an intersection!) ==
+          \else
+            (You haven't defined the intersection '#1') ==
+          \fi
+        } if 
+        load
+        dup dup type /dicttype eq exch /\PIT@name{#2} known and not {
+          (You haven't defined the intersection '#2') ==
+        } if
+        dup /\PIT@name{#2} get
         exch /\PIT@name{#2}@t get
         dup length \PIT@key@istart\space ge 0 \PIT@key@istart\space lt and {
           dup \PIT@key@istart\space cvi 1 sub get
@@ -966,14 +1005,22 @@
 %    \begin{macrocode}
 \def\psintersect{\pst@object{psintersect}}
 \def\psintersect@i#1#2{%
+  \PIT@checkname{#1}%
+  \PIT@checkname{#2}%
   \begin@SpecialObj
   \def\PIT@@name{%
     \ifx\PIT@key@name\@empty
-      \PIT@name{@tmp}
+      \PIT@name{\PIT@name@default}
     \else
       \PIT@name{\PIT@key@name} 
     \fi}%
   \PIT@Verb{%
+    currentdict /\PIT@name{#1} known not {
+      (You haven't defined the curve or path '#1') ==
+    } if
+    currentdict /\PIT@name{#2} known not {
+      (You haven't defined the curve or path '#2') ==
+    } if
     \PIT@name{#1} \PIT@name{#2}
     \PIT@name{#1} IsPath {
       \PIT@name{#2} IsPath {
