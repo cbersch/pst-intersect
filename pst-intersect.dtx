@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/11 v0.1alpha package wrapper for pst-intersect.tex]
+    [2014/02/17 v0.1alpha package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -696,6 +696,27 @@
 % \chapter{Usage}
 % \fi
 %
+% \ifGERMAN
+% Das \LPack{pst-intersect}-Paket kann Schnittpunkte von beliebigen
+% Postscript-Pfaden berechnen. Diese setzen sich nur aus drei primitiven
+% Operation zusammen: Linien (\opt{lineto}), B\`ezier-Kurven dritter
+% Ordnung (\opt{curveto}) und Sprüngen (\opt{moveto}). Speziellere
+% Konstruktionen, wie z.B. Kreise werden intern zu
+% \opt{curveto}-Anweisungen umgewandelt. Über diese Kommandos hinaus kann \LPack{pst-intersect} auch Bezier-Kurven beliebiger Ordnung verwenden.
+%
+% Der allgemeine Arbeitsablauf besteht darin eine oder mehrere Kurven oder Pfade zu speichern, und danach die Schnittpunkte zu berechnen. Anschließend können die Schnittpunkte als normale PSTricks-Knoten verwendet werden, oder Abschnitte der Kurven und Pfade nachgezogen werden (z.B. zwischen zwei Schnittpunkten).
+% \fi
+%
+% \ifGERMAN
+% \section{Speichern von Kurven und Pfaden}
+% \fi
+% \ifENGLISH
+% \section{Saving curves and paths}
+% \fi
+%
+% \ifGERMAN
+% 
+% \fi
 %
 % \begin{ltxsyntax}
 %   \cmditem{savebezier}[options]{curvename}($X_0$)\ldots(\prm{$X_n$})
@@ -1033,7 +1054,7 @@
         IntersectCurvePath
       }{
         IntersectBeziers
-        2 copy LoadIntersectionPoints 5 1 roll
+        4 copy LoadIntersectionPoints 5 1 roll
       } ifelse
     } ifelse
     /\PIT@@name\space /\PIT@name{#1} /\PIT@name{#2} 8 3 roll 
@@ -1197,7 +1218,6 @@ tx@IntersectDict begin
     IntersectLines
   }{ 
     2 copy [0 1] [0 1] IterateIntersection
-    exch TArray exch TArray
   } ifelse
   3 -1 roll exch
 } bind def
@@ -1245,6 +1265,7 @@ tx@IntersectDict begin
 %   \end{pssyntax}
 %    \begin{macrocode}
 /IntersectPaths {
+  (IntersectPaths) DebugBegin
   6 dict begin 
     2 copy exch PreparePath dup length /nA exch def 
     exch PreparePath dup length /nB exch def
@@ -1256,13 +1277,12 @@ tx@IntersectDict begin
       {
         /nA nA 1 sub def
         exch dup 3 1 roll % [pathA] [Bi] [Aj] [Bi]
-        IntersectBeziers 
-        dup 3 1 roll % [curveA] [tA] [tB] [curveB] [tB]
-        LoadIntersectionPoints
+        IntersectBeziers % [curveA] [tA] [curveB] [tB]
+        4 copy LoadIntersectionPoints
         [ exch isect aload pop ] /isect exch def
-        [ tB aload length 2 add -1 roll { nB add } forall ] /tB exch def
-        exch pop
-        [ tA aload length 2 add -1 roll { nA add } forall ] /tA exch def
+        exch pop 3 -1 roll pop
+        [ tB aload length 2 add -1 roll TArray { nB add } forall ] /tB exch def
+        [ tA aload length 2 add -1 roll TArray { nA add } forall ] /tA exch def
       } forall
       pop % remove [Bi]
       dup length /nA exch def
@@ -1271,6 +1291,7 @@ tx@IntersectDict begin
     [ isect { aload pop } forall ] 3 1 roll tA exch tB
     % [intersections] [pathA] [tA] [pathB] [tB]
   end
+  DebugEnd
 } bind def
 %    \end{macrocode}
 % \end{macro}
@@ -1282,6 +1303,7 @@ tx@IntersectDict begin
 %   \end{pssyntax}
 %    \begin{macrocode}
 /IntersectCurvePath {
+  (IntersectCurvePath) DebugBegin
   6 dict begin 
     2 copy exch PreparePath dup length /n exch def
     /isect [] def
@@ -1290,17 +1312,17 @@ tx@IntersectDict begin
       /n n 1 sub def
       exch dup 3 -1 roll % [curveA] [curveA] [Bi] 
       IntersectBeziers 
-      dup 3 1 roll % [curveA] [tA] [tB] [curveB] [tB]
-      LoadIntersectionPoints
+      4 copy LoadIntersectionPoints % [curveA] [tA] [curveB] [tB]
       [ exch isect aload pop ] /isect exch def
-      [ tB aload length 2 add -1 roll { n add } forall ] /tB exch def
-      exch pop
-      [ tA aload length 2 add -1 roll aload pop ] /tA exch def
+      pop 3 -1 roll pop
+      [ tB aload length 2 add -1 roll TArray { n add } forall ] /tB exch def
+      [ tA aload length 2 add -1 roll TArray aload pop ] /tA exch def
     } forall
     pop % remove [curveA]
     [ isect { aload pop } forall ] 3 1 roll tA exch tB
     % [intersections] [curveA] [tA] [pathB] [tB]
   end
+  DebugEnd
 } bind def
 /IntersectPathCurve {
   exch IntersectCurvePath 4 2 roll
@@ -1316,14 +1338,16 @@ tx@IntersectDict begin
 %   \end{pssyntax}
 %    \begin{macrocode}
 /SaveIntersection {
+  (SaveIntersection) DebugBegin
   4 dict dup 10 -1 roll exch def
   begin %
     /Points 6 -1 roll def
     5 -1 roll dup 4 -1 roll def % /curveA [curveA] [tA] [tB] /curveB /curveB [curveB] def
-    nametostr (@t) strcat cvn exch def % /curveA [curveA] [tA] /curveB@t [tB] def
+    nametostr (@t) strcat cvn exch TArray def % /curveA [curveA] [tA] /curveB@t [tB] def
     3 -1 roll dup 4 -1 roll def
-    nametostr (@t) strcat cvn exch def
+    nametostr (@t) strcat cvn exch TArray def
   end
+  DebugEnd
 } bind def
 %    \end{macrocode}
 % \end{macro}
@@ -1340,11 +1364,17 @@ tx@IntersectDict begin
 % \end{pssyntax}
 %    \begin{macrocode}
 /TArray {
-    [ exch
-    { %dup type /nulltype eq { pop exit } if
-	aload pop add 0.5 mul
-    } forall ]
+  (TArray) DebugBegin
+  dup length 0 gt {
+    dup 0 get type /arraytype eq {
+      [ exch
+      { %dup type /nulltype eq { pop exit } if
+  	aload pop add 0.5 mul
+      } forall ]
+    } if
     dup /lt exch quicksort
+  } if
+  DebugEnd %1 debug
 } bind def
 %    \end{macrocode}
 % \end{macro} 
@@ -1380,21 +1410,85 @@ tx@IntersectDict begin
 } bind def
 %    \end{macrocode}
 %
-% \begin{macro}{LoadIntersectionPoints}
+% \begin{macro}{LoadLineIntersectionPoints}
 % Prepare \PSarray{Curve} for use with tx@Func
 % \begin{pssyntax}
-% \PSarray{curve} \PSarray{t} \PSop{LoadIntersectionPoints}
+% \PSarray{curve} \PSarray{t} \PSop{LoadLineIntersectionPoints}
 % \PSarray{I0.x I0.y \ldots IN.x YN.x}
 % \end{pssyntax}
 %    \begin{macrocode}
-/LoadIntersectionPoints {
+/LoadLineIntersectionPoints {
+  (LoadLineIntersectionPoints) DebugBegin
+  exch [ exch { aload pop } forall ]
+  tx@Dict begin tx@FuncDict begin 2 dict begin
+    dup length 2 idiv 1 sub /BezierType exch def /Points exch def
+    [ exch { GetBezierCoor } forall ]
+  end end end
+  DebugEnd
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{LoadIntersectionPoints}
+%   Load the intersection points. This loads the same intersection point
+%   from both curves, and chooses the one with the lowest error.
+% \begin{pssyntax}
+% \PSarray{curveA} \PSarray{tA} \PSArray{curveB} \PSarray{tB} \PSop{LoadIntersectionPoints}
+% \PSarray{I0.x I0.y \ldots IN.x YN.x}
+% \end{pssyntax}
+%    \begin{macrocode}
+/LoadCurveIntersectionPoints {
+  (LoadCurveIntersectionPoints) DebugBegin
+  2 {
+    4 2 roll
+    [ exch { aload pop } forall ]
     exch [ exch { aload pop } forall ]
-    tx@Dict begin tx@FuncDict begin 2 dict begin
-	dup length 2 idiv 1 sub /BezierType exch def /Points exch def
-	[ exch {
-	    GetBezierCoor
-	} forall ]
-    end end end
+  } repeat
+  % [A0.x A0.y ... AM.x AM.y] [tA0a tA0b ... tAMa tAMb] [tB0a tB0b ... tBNa tBNb] [B0.x B0.y ... BN.x BN.y]
+  tx@Dict begin tx@FuncDict begin 2 dict begin
+    dup length 2 idiv 1 sub /BezierType exch def /Points exch def
+      [ exch { GetBezierCoor } forall ]
+    3 1 roll 
+    dup length 2 idiv 1 sub /BezierType exch def /Points exch def
+      [ exch { GetBezierCoor } forall ]
+    end
+    %2 debug
+    % [IB0.xa IB0.ya IB0.xb IB0.yb ... IBM.yb] [IA0.xa IA0.ya IA0.xb IA0.yb ... IAM.yb]
+    2 {
+      [ exch aload length 4 idiv {
+        [ 5 1 roll ] counttomark 1 roll
+      } repeat ]
+      exch 
+    } repeat
+    % [[IB0.xa ...] ... [... IBM.yb]] [[IA0.xa IA0.ya IA0.xb IA0.yb] ...[IAM.xa ... IAM.yb]]
+    2 {
+      dup hulldict /comp get exch quicksort exch
+    } repeat
+    2 dict begin
+      /B exch def /A exch def
+      [ 0 1 A length 1 sub {
+        dup A exch get exch B exch get % [IAi] [IBi]
+        2 copy aload pop VecSub Pyth exch 
+        aload pop VecSub Pyth lt { exch } if pop
+        aload pop VecAdd 0.5 VecScale
+      } for ]
+    end
+  end end
+  DebugEnd
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{LoadIntersectionPoints}
+%    \begin{macrocode}
+/LoadIntersectionPoints {
+  (LoadIntersectionPoints) DebugBegin
+  4 copy pop exch pop length 2 eq exch length 2 eq and {
+    pop pop LoadLineIntersectionPoints
+  }{
+    LoadCurveIntersectionPoints
+  } ifelse
+  DebugEnd
 } bind def
 %    \end{macrocode}
 % \end{macro}
@@ -2416,7 +2510,7 @@ qsortdict begin
 /j exch def
 /i exch def
 /a exch def
-load /comp exch def
+dup type /nametype eq { load } if /comp exch def
 {
   {
     a i get x comp exec not {
