@@ -20,7 +20,7 @@
   \psshowcurve[linewidth=2\pslinewidth, showpoints]{A}
   \psshowcurve[linecolor=red, linewidth=2\pslinewidth]{B}
   \psshowcurve[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
-  \psintersect[linecolor=green!70!black, name=C]{A}{B}
+  \psintersect[linecolor=green!70!black, name=C, showpoints]{A}{B}
 \end{pspicture}
 
 \bigskip
@@ -29,6 +29,26 @@
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
     \psshowcurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
+\end{pspicture}
+
+\bigskip
+\begin{pspicture}[showgrid](5,5)
+  \savepath{First}{\psline(0,0)(5,5)}
+  \savepath{Second}{\psline(1,0)(4,5)}
+  \psintersect[showpoints]{First}{Second}
+\end{pspicture}
+\newpage
+
+\begin{pspicture}[showgrid](8,4)
+  \savepath[linewidth=0.1\pslinewidth]{First}{\pscircle(2,2){2}}
+  \savepath[linewidth=0.1\pslinewidth]{Second}{\pscircle(5.99,2){2}}
+  \psintersect[showpoints]{First}{Second}
+\end{pspicture}
+
+\begin{pspicture}[showgrid](8,4)
+  \savepath{First}{\pscircle(2,2){2}}
+  \savepath{Second}{\pscircle(5.99,2){2}}
+  \psintersect[showpoints]{First}{Second}
 \end{pspicture}
 
 \bigskip
@@ -46,6 +66,7 @@
   }
   \psshowcurve[linestyle=dashed, istart=1, istop=2, linewidth=2\pslinewidth, linecolor=blue]{}{Second}
 \end{pspicture}
+
 
 \begin{pspicture}[showgrid](4,3)
   \savepath[linecolor=red]{A}{\pscurve(0,3)(1,1)(2,3)(3,2)(4,0)}
