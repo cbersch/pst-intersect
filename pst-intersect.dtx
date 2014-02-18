@@ -1081,6 +1081,7 @@
 
 \def\savebezier{\pst@object{savebezier}}
 \def\savebezier@i#1{%
+  \addbefore@par{plotpoints=200}%
   \begin@OpenObj
     \PIT@checkname{#1}%
     \addto@pscode{ /\PIT@name{#1} }%
