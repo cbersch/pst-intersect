@@ -101,7 +101,7 @@
   prebreak = {\raisebox{-0.5ex}[\ht\strutbox]{\kern0.5ex\large\Righttorque}},
   rulecolor=\color{black!20}, 
   texcsstyle = [20]\color{DDOrange},
-  moretexcs = [20]{savebezier, savepath, psshowcurve, psintersect},
+  moretexcs = [20]{pssavebezier, pssavepath, psshowcurve, psintersect},
   explpreset={%
     pos=l, width=-99pt, hsep=5mm, overhang=\codeoverhang, varwidth,
     vsep=\bigskipamount, rframe={}}, extendedchars=true
@@ -742,7 +742,7 @@
 % \fi
 %
 % \begin{ltxsyntax}
-%   \cmditem{savepath}[options]{curvename}{commands} 
+%   \cmditem{pssavepath}[options]{curvename}{commands} 
 %   
 %   \ifGERMAN
 %   Speichert den gesamten Pfad, der durch \prm{commands} erstellt wird,
@@ -760,7 +760,7 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(3,2)
-  \savepath[linecolor=DOrange]{MyPath}{%
+  \pssavepath[linecolor=DOrange]{MyPath}{%
     \pscurve(0,2)(0,0.5)(3,1)
   }%
 \end{pspicture}
@@ -770,11 +770,11 @@
 %\fi
 %
 % \begin{ltxsyntax}
-%   \cmditem{savebezier}[options]{curvename}($X_0$)\ldots(\prm{$X_n$})
+%   \cmditem{pssavebezier}[options]{curvename}($X_0$)\ldots(\prm{$X_n$})
 %
 %   \ifGERMAN 
 %   Die Postscript-Sprache unterstützt nur Bézier-Kurven dritter
-%   Ordnung. Mit dem Makro \Lcs{savebezier} können Bézier-Kurven
+%   Ordnung. Mit dem Makro \Lcs{pssavebezier} können Bézier-Kurven
 %   beliebiger Ordnung definiert werden. Die angegebenen Knoten sind die
 %   Kontrollpunkte der Kurve, für eine Kurve $n$-ter Ordnung werden
 %   $(n+1)$ Kontrollpunkte benötigt. Die Darstellung der Kurve erfolgt
@@ -787,7 +787,7 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(3,2)
-  \savebezier[showpoints]{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
+  \pssavebezier[showpoints]{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
 \end{pspicture}
 \end{LTXexample}
 %\iffalse
@@ -818,8 +818,8 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(3,2)
-  \savepath[linecolor=DOrange]{MyPath}{\pscurve(0,2)(0,0.5)(3,1)}
-  \savebezier{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
+  \pssavepath[linecolor=DOrange]{MyPath}{\pscurve(0,2)(0,0.5)(3,1)}
+  \pssavebezier{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
   \psintersect[showpoints]{MyPath}{MyBez}
 \end{pspicture}
 \end{LTXexample}
@@ -852,9 +852,9 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(5,5)
-  \savebezier[linecolor=DOrange]{A}%
+  \pssavebezier[linecolor=DOrange]{A}%
              (0,0)(0,5)(5,5)(5,1)(1,1.5)
-  \savebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \pssavebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
   \psintersect[name=C, showpoints]{A}{B}
   \uput[150](C1){1}
   \uput[85](C2){2}
@@ -887,7 +887,7 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(2,2)
-  \savepath{Circle}{\pscircle(1,1){1}}
+  \pssavepath{Circle}{\pscircle(1,1){1}}
   \psshowcurve[linestyle=dashed, linecolor=green]{Circle}
 \end{pspicture}
 \end{LTXexample}
@@ -902,7 +902,7 @@
 % \ifGERMAN Unter Verwendung dieser beiden Parameter können auch
 % Abschnitte von Pfaden und Kurven gezeichnet werden. Bei Bézier-Kurven
 % ist der Parameterbereich $[0, 1]$, wobei $0$ dem Anfang der Kurve,
-% also dem ersten bei \Lcs{savebezier} angegebenen Knoten entspricht.
+% also dem ersten bei \Lcs{pssavebezier} angegebenen Knoten entspricht.
 % \fi
 %
 %\iffalse
@@ -911,7 +911,7 @@
 \begin{LTXexample}
 \begin{pspicture}(5,5)
   \psset{showpoints}
-  \savebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \pssavebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
   \psshowcurve[linestyle=dashed, linecolor=blue!50,
                tstart=0, tstop=0.5]{B}
 \end{pspicture}
@@ -933,7 +933,7 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(2,2)
-  \savepath[linestyle=none]{Circle}{\pscircle(1,1){1}}
+  \pssavepath[linestyle=none]{Circle}{\pscircle(1,1){1}}
   \psshowcurve[tstart=0, tstop=1, linecolor=green]{Circle}
   \psshowcurve[tstart=2, tstop=3, linecolor=red]{Circle}
   \psshowcurve[tstart=1.25, tstop=1.75, linecolor=blue]{Circle}
@@ -981,8 +981,8 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(5.2,5.2)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{A}(0,0)(0,5)(5,2)(5,5)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{A}(0,0)(0,5)(5,2)(5,5)
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \psshowcurve[linecolor=red, istart=1, istop=2]{C}{A}
 \psshowcurve[linecolor=blue, istart=1, istop=2]{C}{B}
@@ -1005,8 +1005,8 @@
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(5.2,5.2)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{A}(0,0)(0,5)(5,2)(5,5)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{A}(0,0)(0,5)(5,2)(5,5)
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \psshowcurve[linecolor=red, istop=2]{C}{A}
 \psshowcurve[linecolor=blue, istart=1]{C}{B}
@@ -1027,7 +1027,7 @@
 %\fi
 \begin{LTXexample}[caption={caption}]
 \begin{pspicture}(5,5)
-  \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
     \psshowcurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
@@ -1050,8 +1050,8 @@
  geschnitten wird, was zu langen Berechnungen führen kann.
  \fi}]
 \begin{pspicture}(10,4.4)
-  \savepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin 1 add 2 mul}}
-  \savepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
+  \pssavepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin 1 add 2 mul}}
+  \pssavepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
   \psintersect[name=C, showpoints]{A}{B}
   \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
 \end{pspicture}
@@ -1146,14 +1146,14 @@
 \def\PIT@dict#1{\pst@intersectdict #1 end}
 \def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
 
-\def\savebezier{\pst@object{savebezier}}
-\def\savebezier@i#1{%
+\def\pssavebezier{\pst@object{pssavebezier}}
+\def\pssavebezier@i#1{%
   \begin@OpenObj
     \PIT@checkname{#1}%
     \addto@pscode{ /\PIT@name{#1} }%
-    \pst@getcoors[\savebezier@ii%]
+    \pst@getcoors[\pssavebezier@ii%]
 }%
-\def\savebezier@ii{%
+\def\pssavebezier@ii{%
   \addto@pscode{%
     % only 10 points allowed, remove the rest
     counttomark 20 gt { counttomark 20 sub { pop } repeat } if
@@ -1228,8 +1228,8 @@
     \@pstrickserr{Unexpected empty argument!}\@ehpb
   \fi
 }%
-\def\savepath{\pst@object{savepath}}%
-\long\def\savepath@i#1#2{%
+\def\pssavepath{\pst@object{pssavepath}}%
+\long\def\pssavepath@i#1#2{%
   \begin@SpecialObj
     \PIT@checkname{#1}%
     \let\pst@stroke\PIT@save@path

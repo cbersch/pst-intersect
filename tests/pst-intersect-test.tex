@@ -5,30 +5,30 @@
 \begin{document}
 \begin{pspicture}(5.2,5.2)
 \psline[arrows=->](0,0)(1,1)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \psshowcurve[linecolor=red, istart=1, istop=2]{C}{A}
 \psshowcurve[linecolor=blue, istart=1, istop=2]{C}{B}
 \end{pspicture}
 \end{document}
 \begin{pspicture}[showgrid](5,5)
-  \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
-  \savebezier[linecolor=red]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \pssavebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier[linecolor=red]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
   \psintersect[linecolor=green!70!black, name=C, showpoints]{A}{B}
 \end{pspicture}
 
 \begin{pspicture}
-  \savepath{MyPath}{\pscurve(0,2)(0,0.5)(3,1)}
-  \savebezier{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
+  \pssavepath{MyPath}{\pscurve(0,2)(0,0.5)(3,1)}
+  \pssavebezier{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
   \psintersect[showpoints]{MyPath}{MyBez}
 \end{pspicture}
 
 \multido{\r=0+1}{4}{%
 \begin{pspicture}[showgrid](5.2,5.2)
 \psset{showpoints}
-\savebezier{A}(0,0)(0,5)(5,2)(5,5)
-\savebezier{B}(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)\psdot(0,0)
+\pssavebezier{A}(0,0)(0,5)(5,2)(5,5)
+\pssavebezier{B}(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)\psdot(0,0)
 \psshowcurve[linecolor=red]{A}
 \psshowcurve{B}
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
@@ -36,8 +36,8 @@
 
 \bigskip
 \begin{pspicture}[showgrid](5,5)
-  \savebezier[linestyle=none]{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
-  \savebezier[linestyle=none]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \pssavebezier[linestyle=none]{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier[linestyle=none]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
   \psshowcurve[linewidth=2\pslinewidth, showpoints]{A}
   \psshowcurve[linecolor=red, linewidth=2\pslinewidth]{B}
   \psshowcurve[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
@@ -46,7 +46,7 @@
 
 \bigskip
 \begin{pspicture}[showgrid](5,5)
-  \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
     \psshowcurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
@@ -54,29 +54,29 @@
 
 \bigskip
 \begin{pspicture}[showgrid](5,5)
-  \savepath{First}{\psline(0,0)(5,5)}
-  \savepath{Second}{\psline(1,0)(4,5)}
+  \pssavepath{First}{\psline(0,0)(5,5)}
+  \pssavepath{Second}{\psline(1,0)(4,5)}
   \psintersect[showpoints]{First}{Second}
 \end{pspicture}
 \newpage
 
 \begin{pspicture}[showgrid](8,4)
-  \savepath[linewidth=0.1\pslinewidth]{First}{\pscircle(2,2){2}}
-  \savepath[linewidth=0.1\pslinewidth]{Second}{\pscircle(5.99,2){2}}
+  \pssavepath[linewidth=0.1\pslinewidth]{First}{\pscircle(2,2){2}}
+  \pssavepath[linewidth=0.1\pslinewidth]{Second}{\pscircle(5.99,2){2}}
   \psintersect[showpoints]{First}{Second}
 \end{pspicture}
 
 \begin{pspicture}[showgrid](8,4)
   \psset{dimen=inner}
-  \savepath{First}{\pscircle(2,2){2}}
-  \savepath{Second}{\pscircle(5.99,2){2}}
+  \pssavepath{First}{\pscircle(2,2){2}}
+  \pssavepath{Second}{\pscircle(5.99,2){2}}
   \psintersect[showpoints]{First}{Second}
 \end{pspicture}
 
 \bigskip
 \begin{pspicture}[showgrid](5,5)
-  \savepath{First}{\pscurve(0,0)(3,3)(3,0)}
-  \savepath{Second}{\psline(2,3)(2,0)(5,5)}
+  \pssavepath{First}{\pscurve(0,0)(3,3)(3,0)}
+  \pssavepath{Second}{\psline(2,3)(2,0)(5,5)}
 \end{pspicture}
 \begin{pspicture}[showgrid](5,5)
   \psshowcurve[linecolor=red]{First}
@@ -91,15 +91,15 @@
 
 
 \begin{pspicture}[showgrid](4,3)
-  \savepath[linecolor=red]{A}{\pscurve(0,3)(1,1)(2,3)(3,2)(4,0)}
-  \savepath[linecolor=blue]{B}{\pscurve(0,0)(1,3)(2,1)(3,1)(4,3)}
+  \pssavepath[linecolor=red]{A}{\pscurve(0,3)(1,1)(2,3)(3,2)(4,0)}
+  \pssavepath[linecolor=blue]{B}{\pscurve(0,0)(1,3)(2,1)(3,1)(4,3)}
   \psintersect[name=C, showpoints]{A}{B}
   \multido{\i=1+1}{3}{\uput[0](C\i){\i}}
 \end{pspicture}
 
 \begin{pspicture}[showgrid](10,5)
-  \savepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin 1 add 2 mul}}
-  \savepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
+  \pssavepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin 1 add 2 mul}}
+  \pssavepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
   \psintersect[name=C, showpoints]{A}{B}
   \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
 \end{pspicture}
