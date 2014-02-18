@@ -1081,31 +1081,31 @@
 
 \def\savebezier{\pst@object{savebezier}}
 \def\savebezier@i#1{%
-  \addbefore@par{plotpoints=200}%
   \begin@OpenObj
     \PIT@checkname{#1}%
     \addto@pscode{ /\PIT@name{#1} }%
     \pst@getcoors[\savebezier@ii%]
 }%
 \def\savebezier@ii{%
-  \addto@pscode{% reverse the point order
-    counttomark -2 4 { 2 roll } for
-  }%
-  \PIT@Verb{%
-    gsave
-    STV CP T
-    \pst@code
-    ] ArrayToPointArray def
-    grestore
-  }%
   \addto@pscode{%
-    counttomark 2 add -1 roll pop % remove the path name
+    % only 10 points allowed, remove the rest
+    counttomark 20 gt { counttomark 20 sub { pop } repeat } if
+    % reverse the point order
+    counttomark -2 4 { 2 roll } for
+    %\addto@pscode{%
+    %counttomark 2 add -1 roll pop % remove the path name
     counttomark 2 idiv 1 sub dup 9 gt { pop 9 } if
     \psk@plotpoints\space exch
     \txFunc@BezierCurve
     \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+    tx@FuncDict begin Points aload pop end
   }%
-  \end@OpenObj}%
+  \let\use@pscode\PIT@use@pscode
+  \end@OpenObj
+  \PIT@Verb{%
+    [ count 1 sub 1 roll ] ArrayToPointArray def 
+  }%
+\ignorespaces}%
 \define@key[psset]{intersect}{tstart}{%
   \pst@checknum{#1}\PIT@key@tstart
 }
