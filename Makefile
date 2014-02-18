@@ -55,7 +55,7 @@ arch-tds : Changes
 	cp $(PACKAGE).sty tds/tex/latex/$(PACKAGE)/
 	cp $(PACKAGE).tex tds/tex/generic/$(PACKAGE)/
 	cp $(PACKAGE).pro tds/dvips/$(PACKAGE)/
-	cp Changes $(PACKAGE).pdf README tds/doc/latex/$(PACKAGE)/
+	cp Changes $(PACKAGE).pdf $(PACKAGE)-DE.pdf README tds/doc/latex/$(PACKAGE)/
 	cp $(PACKAGE).dtx $(PACKAGE).ins Makefile \
 	  tds/source/latex/$(PACKAGE)/
 	cd tds ; zip -r ../$(ARCHNAME_TDS).zip tex doc source dvips

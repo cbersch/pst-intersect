@@ -8,8 +8,8 @@
 \pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
 \pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
-\psshowcurve[linecolor=red, istart=1, istop=2]{C}{A}
-\psshowcurve[linecolor=blue, istart=1, istop=2]{C}{B}
+\pstracecurve[linecolor=red, istart=1, istop=2]{C}{A}
+\pstracecurve[linecolor=blue, istart=1, istop=2]{C}{B}
 \end{pspicture}
 \end{document}
 \begin{pspicture}[showgrid](5,5)
@@ -29,8 +29,8 @@
 \psset{showpoints}
 \pssavebezier{A}(0,0)(0,5)(5,2)(5,5)
 \pssavebezier{B}(0,2.5)(2.5,2.5)(! \r\space dup neg 5 add exch 2.5 add exch)(\r,4)\psdot(0,0)
-\psshowcurve[linecolor=red]{A}
-\psshowcurve{B}
+\pstracecurve[linecolor=red]{A}
+\pstracecurve{B}
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \end{pspicture} }%
 
@@ -38,9 +38,9 @@
 \begin{pspicture}[showgrid](5,5)
   \pssavebezier[linestyle=none]{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \pssavebezier[linestyle=none]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
-  \psshowcurve[linewidth=2\pslinewidth, showpoints]{A}
-  \psshowcurve[linecolor=red, linewidth=2\pslinewidth]{B}
-  \psshowcurve[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
+  \pstracecurve[linewidth=2\pslinewidth, showpoints]{A}
+  \pstracecurve[linecolor=red, linewidth=2\pslinewidth]{B}
+  \pstracecurve[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
   \psintersect[linecolor=green!70!black, name=C, showpoints]{A}{B}
 \end{pspicture}
 
@@ -48,7 +48,7 @@
 \begin{pspicture}[showgrid](5,5)
   \pssavebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
-    \psshowcurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
+    \pstracecurve[linecolor=red!\i, tstop=\r, arrows=-|, showpoints]{A}
   }%
 \end{pspicture}
 
@@ -79,14 +79,14 @@
   \pssavepath{Second}{\psline(2,3)(2,0)(5,5)}
 \end{pspicture}
 \begin{pspicture}[showgrid](5,5)
-  \psshowcurve[linecolor=red]{First}
-  \psshowcurve[linecolor=green]{Second}
+  \pstracecurve[linecolor=red]{First}
+  \pstracecurve[linecolor=green]{Second}
   \psintersect[showpoints]{First}{Second}
   \pscustom[fillstyle=solid, fillcolor=green!20]{%
-    \psshowcurve[istart=1, istop=2]{}{Second}
-    \psshowcurve[istart=1, istop=2]{}{First}
+    \pstracecurve[istart=1, istop=2]{}{Second}
+    \pstracecurve[istart=1, istop=2]{}{First}
   }
-  \psshowcurve[linestyle=dashed, istart=1, istop=2, linewidth=2\pslinewidth, linecolor=blue]{}{Second}
+  \pstracecurve[linestyle=dashed, istart=1, istop=2, linewidth=2\pslinewidth, linecolor=blue]{}{Second}
 \end{pspicture}
 
 
