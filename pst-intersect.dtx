@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/17 v0.1alpha package wrapper for pst-intersect.tex]
+    [2014/02/18 v0.1alpha package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -532,11 +532,11 @@
 % 
 % \ifGERMAN
 %   \title{\texttt{pst-intersect}\\ Berechnen der Schnittpunkte beliebiger Kurven\\[0.5ex] \small \fileversion}
-%   \hypersetup{pdftitle={Schnittpunkte von Bezierkurven}}
+%   \hypersetup{pdftitle={Berechnen der Schnittpunkte beliebiger Kurven}}
 % \fi
 % \ifENGLISH
 %   \title{\texttt{pst-optexp}\\ Intersecting arbitrary curves\\[0.5ex] \small \fileversion}
-%   \hypersetup{pdftitle={Intersections of Bezier curves}}
+%   \hypersetup{pdftitle={Intersecting arbitrary curves}}
 % \fi
 % \author{Christoph Bersch}
 % \date{\filedate}
@@ -558,12 +558,13 @@
 % \ifGERMAN
 %   \section{Über das Paket}
 %
-%   \LPack{pst-intersect} ist ein PSTricks-Paket zur Berechnung der
-%   Schnittpunkte von beliebigen Kurven und Pfaden.
+%   \LPack{pst-intersect} ist ein PSTricks-Paket zur
+%   Berechnung der Schnittpunkte von Bézier-Kurven und beliebigen
+%   Postscript-Pfaden.
 % \fi 
 % \ifENGLISH
 %   \section{About the package}
-%   The package \LPack{pst-intersect} is a PSTricks package to calculate
+%   \LPack{pst-intersect} is a PSTricks package to calculate
 %   the intersections of Bezier curves and arbitrary Postscript paths.
 % \fi
 %
@@ -666,7 +667,7 @@
 % Ich danke Marco Cecchetti, dessen
 % \opt{lib2geom}-Bibliothek\fnurl{http://lib2geom.sourceforge.net/}
 % mir als Vorlage für einen Großteil des Postscript-Kodes für den
-% Bezier-Clipping-Algorithmus diente. Außerdem gilt mein Dank William
+% Bézier-Clipping-Algorithmus diente. Außerdem gilt mein Dank William
 % A. Casselman, für seine Erlaubnis, den Quicksort-Kode und den Kode zur
 % Berechung der konvexen Hüllen aus seinem Buch «Mathematical
 % Illustration» verwenden zu
@@ -678,7 +679,7 @@
 % \ifENGLISH
 % I thank Marco Cecchetti, for his
 % \opt{lib2geom}-library\fnurl{http://lib2geom.sourceforge.net/} from
-% which I derived great parts of the Postscript code for the B\`ezier
+% which I derived great parts of the Postscript code for the Bézier
 % clipping algorithm. Also I want to thank William A. Casselman for the
 % Postscript code of the quicksort procedure and the procedure for
 % calculating the convex hull from his book «Mathematical
@@ -699,48 +700,279 @@
 % \ifGERMAN
 % Das \LPack{pst-intersect}-Paket kann Schnittpunkte von beliebigen
 % Postscript-Pfaden berechnen. Diese setzen sich nur aus drei primitiven
-% Operation zusammen: Linien (\opt{lineto}), B\`ezier-Kurven dritter
+% Operation zusammen: Linien (\opt{lineto}), Bézier-Kurven dritter
 % Ordnung (\opt{curveto}) und Sprüngen (\opt{moveto}). Speziellere
 % Konstruktionen, wie z.B. Kreise werden intern zu
-% \opt{curveto}-Anweisungen umgewandelt. Über diese Kommandos hinaus kann \LPack{pst-intersect} auch Bezier-Kurven beliebiger Ordnung verwenden.
+% \opt{curveto}-Anweisungen umgewandelt. Über diese Kommandos hinaus
+% kann \LPack{pst-intersect} auch Bézier-Kurven beliebiger Ordnung
+% verwenden. Das diese keine primitiven Postscript-Pfadelemente
+% darstellen, müssen sie gesondert behandelt werden.
 %
-% Der allgemeine Arbeitsablauf besteht darin eine oder mehrere Kurven oder Pfade zu speichern, und danach die Schnittpunkte zu berechnen. Anschließend können die Schnittpunkte als normale PSTricks-Knoten verwendet werden, oder Abschnitte der Kurven und Pfade nachgezogen werden (z.B. zwischen zwei Schnittpunkten).
+% Der allgemeine Arbeitsablauf besteht darin eine oder mehrere Kurven
+% oder Pfade zu speichern, und danach die Schnittpunkte zu
+% berechnen. Anschließend können die Schnittpunkte als normale
+% PSTricks-Knoten verwendet werden, oder Abschnitte der Kurven und Pfade
+% nachgezogen werden (z.B. zwischen zwei Schnittpunkten). 
 % \fi
 %
 % \ifGERMAN
-% \section{Speichern von Kurven und Pfaden}
+% \section{Speichern von Pfaden und Kurven}
 % \fi
 % \ifENGLISH
-% \section{Saving curves and paths}
+% \section{Saving paths and curves}
 % \fi
 %
 % \ifGERMAN
 % 
 % \fi
+%
+% \begin{ltxsyntax}
+%   \cmditem{savepath}[options]{curvename}{commands} 
+%   
+%   \ifGERMAN
+%   Speichert den gesamten Pfad, der durch \prm{commands} erstellt wird,
+%   unter Verwendung des Namens \prm{curvename}. Das Makro funktioniert
+%   genauso wie \cs{pscustom}, und kann daher auch nur die darin
+%   erlaubten Kommandos verarbeiten.
+%
+%   In den Standardeinstellungen wird der entsprechende Pfad auch gleich
+%   gezeichnet, was mit \prm{options} beeinflusst werden kann. Mit
+%   \opt{linestyle=none} wird das unterbunden.
+%   \fi
+% \end{ltxsyntax}
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(3,2)
+  \savepath[linecolor=DOrange]{MyPath}{%
+    \pscurve(0,2)(0,0.5)(3,1)
+  }%
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
 %
 % \begin{ltxsyntax}
 %   \cmditem{savebezier}[options]{curvename}($X_0$)\ldots(\prm{$X_n$})
-%   \cmditem{savepath}[options]{curvename}{commands}
+%
+%   \ifGERMAN 
+%   Die Postscript-Sprache unterstützt nur Bézier-Kurven dritter
+%   Ordnung. Mit dem Makro \Lcs{savebezier} können Bézier-Kurven
+%   beliebiger Ordnung definiert werden. Die angegebenen Knoten sind die
+%   Kontrollpunkte der Kurve, für eine Kurve $n$-ter Ordnung werden
+%   $(n+1)$ Kontrollpunkte benötigt. Die Darstellung der Kurve erfolgt
+%   mit dem Makro \cs{psBezier} aus dem \LPack{pst-func}-Paket, welches
+%   nur Kurven bis neunter Ordnung darstellen kann.
+%   \fi
 % \end{ltxsyntax}
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(3,2)
+  \savebezier[showpoints]{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \ifGERMAN
+% \section{Schnittpunkte berechnen}
+% \fi
+% \ifENGLISH
+% \section{Calculating intersections}
+% \fi
 %
 % \begin{ltxsyntax}
-%   \cmditem{psshowcurve}[options]{curvename}
-%   \cmditem{psshowcurve}[options]{intersection}{curvename}
 %   \cmditem{psintersect}{curveA}{curveB}
 % \end{ltxsyntax}
 % 
+% \ifGERMAN
+% Nachdem Sie nun Pfade oder Kurven gespeichert haben, können Sie deren
+% Schnittpunkte berechnen. Das geschieht mit dem Makro
+% \Lcs{psintersect}. Dieses benötigt als Argumente zwei Namen von Pfaden
+% oder Kurven (Das Argument \prm{curvename} der beiden \cs{save*}
+% Makros).
+% \fi
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(3,2)
+  \savepath[linecolor=DOrange]{MyPath}{\pscurve(0,2)(0,0.5)(3,1)}
+  \savebezier{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
+  \psintersect[showpoints]{MyPath}{MyBez}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \ifGERMAN
+% Der PSTricks-Parameter \opt{showpoints} steuert dabei, ob die Schnittpunkte angezeigt werden.
+% \fi
+%
 % \begin{optionlist}
-% \boolitem{saveintersections}
+% \valitem[@tmp]{name}{string}
+% \ifGERMAN
+% Die berechneten Schnittpunkte können unter einem hier angegebenen
+% Namen gespeichert und zu einem späteren Zeitpunkt verwendet werden
+% (siehe \prettyref{sec:psshowcurve}). 
+% \fi
+%
+% \boolitem[true]{saveintersections}
+% \ifGERMAN
+% Ist dieser Schalter gesetzt, dann werden die Schnittpunkte als
+% PSTricks-Knoten unter den Namen \prm{name}1, \prm{name}2 \ldots
+% gespeichert. Die Nummerierung erfolgt aufsteigend nach dem Wert der
+% $x$-Koordinate.
+% \fi
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5,5)
+  \savebezier[linecolor=DOrange]{A}%
+             (0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \savebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \psintersect[name=C, showpoints]{A}{B}
+  \uput[150](C1){1}
+  \uput[85](C2){2}
+  \uput[90](C3){3}
+  \uput[-20](C4){4}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+% \end{optionlist}
+%
+% \ifGERMAN
+% \section{Darstellung gespeicherter Pfade}
+% \fi
+% \ifENGLISH
+% \section{Visualization of saved paths}
+% \fi
+%
+% \begin{ltxsyntax}
+%   \cmditem{psshowcurve}[options]{curvename}
+%
+% \ifGERMAN
+% Gespeicherte Pfade und Kurven können mit diesem Makro nachträglich gezeichnet werden.
+% \fi
+% \end{ltxsyntax}
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(2,2)
+  \savepath{Circle}{\pscircle(1,1){1}}
+  \psshowcurve[linestyle=dashed, linecolor=green]{Circle}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \begin{optionlist}
 % \numitem{tstart}
 % \numitem{tstop}
+%
+% \ifGERMAN Unter Verwendung dieser beiden Parameter können auch
+% Abschnitte von Pfaden und Kurven gezeichnet werden. Bei Bézier-Kurven
+% ist der Parameterbereich $[0, 1]$, wobei $0$ dem Anfang der Kurve,
+% also dem ersten bei \Lcs{savebezier} angegebenen Knoten entspricht.
+% \fi
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5,5)
+  \psset{showpoints}
+  \savebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \psshowcurve[linestyle=dashed, linecolor=blue!50,
+               tstart=0, tstop=0.5]{B}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \medskip
+% \ifGERMAN 
+% Pfaden können aus mehr als einem Abschnitt bestehen, der Bereich ist
+% also $[0, n]$, wobei $n$ die Anzahl der Pfadabschnitte ist. Dabei ist
+% zu beachten, dass z.B. \cs{pscurve}-Pfade oder auch Kreise und
+% Kreisbögen aus mehreren Abschnitten bestehen.
+% \fi
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(2,2)
+  \savepath[linestyle=none]{Circle}{\pscircle(1,1){1}}
+  \psshowcurve[tstart=0, tstop=1, linecolor=green]{Circle}
+  \psshowcurve[tstart=2, tstop=3, linecolor=red]{Circle}
+  \psshowcurve[tstart=1.25, tstop=1.75, linecolor=blue]{Circle}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \end{optionlist}
+%
+% \ifGERMAN
+% Beachten Sie, dass in der Version 0.1 die Reihenfolge von
+% \Lkeyword{tstart} und \Lkeyword{tstop} noch keine Rolle spielt. Für
+% kommende Versionen ist geplant, dass bei \Lkeyword{tstart}
+% \textgreater{} \Lkeyword{tstop} die Pfadrichtung umgekehrt wird. Zur
+% Zeit werden auch noch keine Pfeile für \Lcs{psshowcurve} unterstützt.
+% \fi
+%
+% \ifGERMAN
+% \section{Darstellung gespeicherter Schnitte}
+% \fi
+% \ifENGLISH
+% \section{Visualization of saved intersections}
+% \fi
+%
+% \begin{ltxsyntax}
+% \cmditem{psshowcurve}[options]{intersection}{curvename}
+% \end{ltxsyntax}
+% 
+% \begin{optionlist}
 % \numitem{istart}
 % \numitem{istop}
-% \optitem{name}{string}
 % \end{optionlist}
 % 
 % \ifGERMAN
 %
 % \fi
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5.2,5.2)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\psintersect[linecolor=green!70!black, name=C]{A}{B}
+\psshowcurve[linecolor=red, istart=1, istop=2]{C}{A}
+\psshowcurve[linecolor=blue, istart=1, istop=2]{C}{B}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
 % \ifGERMAN
 % \chapter{Beispiele}
 % \fi
@@ -849,25 +1081,30 @@
 
 \def\savebezier{\pst@object{savebezier}}
 \def\savebezier@i#1{%
-  \begin@SpecialObj
+  \begin@OpenObj
     \PIT@checkname{#1}%
     \addto@pscode{ /\PIT@name{#1} }%
     \pst@getcoors[\savebezier@ii%]
 }%
 \def\savebezier@ii{%
-  \addto@pscode{%
-    % reverse the point order
+  \addto@pscode{% reverse the point order
     counttomark -2 4 { 2 roll } for
-    ] ArrayToPointArray def }%
+  }%
   \PIT@Verb{%
     gsave
     STV CP T
     \pst@code
+    ] ArrayToPointArray def
     grestore
   }%
-  \gdef\pst@code{}%
-  \endgroup
-\ignorespaces}%
+  \addto@pscode{%
+    counttomark 2 add -1 roll pop % remove the path name
+    counttomark 2 idiv 1 sub dup 9 gt { pop 9 } if
+    \psk@plotpoints\space exch
+    \txFunc@BezierCurve
+    \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+  }%
+  \end@OpenObj}%
 \define@key[psset]{intersect}{tstart}{%
   \pst@checknum{#1}\PIT@key@tstart
 }
@@ -1296,16 +1533,16 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{IntersectPaths}
+% \begin{macro}{IntersectCurvePath}
 %   \begin{pssyntax}
-%     \PSarray{curveA} \PSarray{pathB} \PSop{IntersectBezierPath}
+%     \PSarray{curveA} \PSarray{pathB} \PSop{IntersectCurvePath}
 %     \PSarray{intersections} \PSarray{curveA} \PSarray{tA} \PSarray{pathB} \PSarray{tB}
 %   \end{pssyntax}
 %    \begin{macrocode}
 /IntersectCurvePath {
   (IntersectCurvePath) DebugBegin
   6 dict begin 
-    2 copy exch PreparePath dup length /n exch def
+    2 copy PreparePath dup length /n exch def
     /isect [] def
     /tA [] def /tB [] def
     { % [curveA] [Bi]
@@ -1429,11 +1666,12 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{LoadIntersectionPoints}
+% \begin{macro}{LoadCurveIntersectionPoints}
 %   Load the intersection points. This loads the same intersection point
 %   from both curves, and chooses the one with the lowest error.
 % \begin{pssyntax}
-% \PSarray{curveA} \PSarray{tA} \PSArray{curveB} \PSarray{tB} \PSop{LoadIntersectionPoints}
+% \PSarray{curveA} \PSarray{tA} \PSArray{curveB} \PSarray{tB} 
+%  \PSop{LoadCurveIntersectionPoints}
 % \PSarray{I0.x I0.y \ldots IN.x YN.x}
 % \end{pssyntax}
 %    \begin{macrocode}
@@ -1471,7 +1709,16 @@ tx@IntersectDict begin
         2 copy aload pop VecSub Pyth exch 
         aload pop VecSub Pyth lt { exch } if pop
         aload pop VecAdd 0.5 VecScale
-      } for ]
+      } for 
+      % merge near intersection points
+      %counttomark 2 idiv 1 1 3 -1 roll {
+      %  pop
+      %  counttomark 4 lt { exit } if
+      %  4 copy 4 2 roll ToVec 3 1 roll ToVec AreNear {
+
+      %  }
+      %} for
+      ]
     end
   end end
   DebugEnd
@@ -1516,7 +1763,30 @@ tx@IntersectDict begin
 	/domsA /domsB 6 2 roll _IterateIntersection
 	domsB domsA
     end
+    dup length 0 gt {
+      TArraysRemoveDup
+    } if
     DebugEnd
+} bind def
+/TArraysRemoveDup {
+  4 dict begin
+    /tB exch def
+    /tA exch def
+    /j 0 def
+    [ tA 0 get tB 0 get
+    1 1 tA length 1 sub {
+      /i exch def
+      tA j get aload pop tA i get aload pop tx@Dict begin Pyth2 end MaxPrecision gt
+      tB j get aload pop tB i get aload pop tx@Dict begin Pyth2 end MaxPrecision gt and {
+        % keep the current parameter point
+        /j i def
+        tB i get tA i get
+        counttomark 2 idiv 1 add 1 roll 
+      } if
+    } for
+    counttomark 2 idiv 1 add [ exch 1 roll ] % [ ... [tB]
+    counttomark 1 add 1 roll ] exch % [tA] [tB]
+  end 
 } bind def
 %    \end{macrocode}
 % \end{macro}

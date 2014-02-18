@@ -3,6 +3,18 @@
 \SpecialCoor
 \setlength{\parindent}{0pt}
 \begin{document}
+\begin{pspicture}[showgrid](5,5)
+  \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \savebezier[linecolor=red]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \psintersect[linecolor=green!70!black, name=C, showpoints]{A}{B}
+\end{pspicture}
+
+\begin{pspicture}
+  \savepath{MyPath}{\pscurve(0,2)(0,0.5)(3,1)}
+  \savebezier{MyBez}(0,0)(0,1)(1,2)(3,2)(1,0)(3,0)
+  \psintersect[showpoints]{MyPath}{MyBez}
+\end{pspicture}
+
 \multido{\r=0+1}{4}{%
 \begin{pspicture}[showgrid](5.2,5.2)
 \psset{showpoints}
@@ -15,8 +27,8 @@
 
 \bigskip
 \begin{pspicture}[showgrid](5,5)
-  \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
-  \savebezier{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \savebezier[linestyle=none]{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \savebezier[linestyle=none]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
   \psshowcurve[linewidth=2\pslinewidth, showpoints]{A}
   \psshowcurve[linecolor=red, linewidth=2\pslinewidth]{B}
   \psshowcurve[tstop=0.5, linecolor=blue!40, linestyle=dashed, showpoints]{A}
@@ -46,6 +58,7 @@
 \end{pspicture}
 
 \begin{pspicture}[showgrid](8,4)
+  \psset{dimen=inner}
   \savepath{First}{\pscircle(2,2){2}}
   \savepath{Second}{\pscircle(5.99,2){2}}
   \psintersect[showpoints]{First}{Second}
