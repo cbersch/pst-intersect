@@ -6,8 +6,8 @@ Released under the LaTeX Project Public License v1.3c or later
 See http://www.latex-project.org/lppl.txt
 ------------------------------------------------------------------------
 
-The package pst-intersect computes the intersections between two
-arbitrary Bézier curves using the Bézier clipping algorithm.
+The package pst-intersect computes the intersections between arbitrary
+Postscript paths or Bézier curves using the Bézier clipping algorithm.
 
 Installation
 ------------
@@ -20,5 +20,5 @@ yourself you must run "tex pst-intersect.ins", to typeset the
 documentation run "latex pst-intersect.dtx", or preferably use the
 provided Makefile.
 
-The package requires recent versions of pstricks, pst-node, multido, and
+The package requires recent versions of pstricks, pst-node, and
 pst-func.
