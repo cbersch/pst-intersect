@@ -36,6 +36,21 @@
 \usepackage[dvipsnames,x11names,svgnames]{xcolor}
 \usepackage{array,booktabs,paralist,tabularx}
 \usepackage{ragged2e, calc}
+\newlength{\PITcaptionmargin}
+\newlength{\PITcaptionheight}
+\usepackage[labelfont={color=DOrange}, 
+            singlelinecheck=false, 
+            justification=raggedright]{caption} 
+\DeclareCaptionFormat{pitnocaption}{%
+  \setlength{\PITcaptionmargin}{\widthof{#1}+7pt}%
+  \setlength{\PITcaptionheight}{\heightof{#1}+3pt}%
+  \hspace*{-\PITcaptionmargin}#1\par\vspace*{-\PITcaptionheight}%
+}%
+\DeclareCaptionFormat{pitcaption}{%
+  \setlength{\PITcaptionmargin}{\widthof{#1}+7pt}%
+  \hspace*{-\PITcaptionmargin}#1#2#3\par
+}%
+\captionsetup[lstlisting]{format=pitnocaption}
 \usepackage{nicefrac, multido}
 \usepackage{pst-intersect}
 \usepackage{hypdoc}
@@ -821,7 +836,7 @@
 % \ifGERMAN
 % Die berechneten Schnittpunkte können unter einem hier angegebenen
 % Namen gespeichert und zu einem späteren Zeitpunkt verwendet werden
-% (siehe \prettyref{sec:psshowcurve}). 
+% (siehe \prettyref{sec:psshowcurve-int}). 
 % \fi
 %
 % \boolitem[true]{saveintersections}
@@ -944,29 +959,57 @@
 % \ifENGLISH
 % \section{Visualization of saved intersections}
 % \fi
+% \label{sec:psshowcurve-int}
 %
 % \begin{ltxsyntax}
-% \cmditem{psshowcurve}[options]{intersection}{curvename}
+% \cmditem*{psshowcurve}[options]{intersection}{curvename}
 % \end{ltxsyntax}
 % 
 % \begin{optionlist}
 % \numitem{istart}
 % \numitem{istop}
-% \end{optionlist}
-% 
-% \ifGERMAN
 %
+% \ifGERMAN Dieser beiden Parameter können auch verwendet werden um
+% Abschnitte von Pfaden und Kurven zwischen Schnittpunkten zu
+% zeichnen. Die Schnittpunkte werden dabei angefangen bei $1$ in
+% aufsteigender Reihenfolge entlang der Kurve durchnummeriert.
 % \fi
+% \end{optionlist}
+%
 %\iffalse
 %<*ignore>
 %\fi
 \begin{LTXexample}
 \begin{pspicture}(5.2,5.2)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
-\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{A}(0,0)(0,5)(5,2)(5,5)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
 \psintersect[linecolor=green!70!black, name=C]{A}{B}
 \psshowcurve[linecolor=red, istart=1, istop=2]{C}{A}
 \psshowcurve[linecolor=blue, istart=1, istop=2]{C}{B}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \ifGERMAN Wird nur ein Wert angegeben, beispielsweise
+% \Lkeyword{istop}, dann wird die Kurve vom Anfang bis zum
+% entsprechenden Schnittpunkt gezeichnet. Wird nur \Lkeyword{istart}
+% angegeben, dann endet die Kurve am Ende. Die Parameter
+% \Lkeyword{istart} bzw. \Lkeyword{istop} können mit \Lkeyword{tstart}
+% bzw. \Lkeyword{tstop} kombiniert werden. 
+% \fi
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5.2,5.2)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{A}(0,0)(0,5)(5,2)(5,5)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\psintersect[linecolor=green!70!black, name=C]{A}{B}
+\psshowcurve[linecolor=red, istop=2]{C}{A}
+\psshowcurve[linecolor=blue, istart=1]{C}{B}
 \end{pspicture}
 \end{LTXexample}
 %\iffalse
@@ -982,7 +1025,7 @@
 %\iffalse
 %<*ignore>
 %\fi
-\begin{LTXexample}
+\begin{LTXexample}[caption={caption}]
 \begin{pspicture}(5,5)
   \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \multido{\i=100+-20,\r=1+-0.2}{5}{%
@@ -990,6 +1033,30 @@
   }%
 \end{pspicture}
 \end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi 
+%
+%\iffalse
+%<*ignore>
+%\fi
+\begingroup
+\captionsetup[lstlisting]{format=pitcaption}
+\begin{LTXexample}[pos=t, caption={%
+\ifGERMAN Mit diesem Paket können auch die Schnittpunkte von
+ Funktionen berechnet werden, die mit \cs{psplot} gezeichnet
+ werden. Dabei ist zu beachten, dass beide einzelnen Kurven aus
+ \opt{plotpoints} Abschnitten bestehen, von denen jeder mit jedem
+ geschnitten wird, was zu langen Berechnungen führen kann.
+ \fi}]
+\begin{pspicture}(10,4.4)
+  \savepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin 1 add 2 mul}}
+  \savepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
+  \psintersect[name=C, showpoints]{A}{B}
+  \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
+\end{pspicture}
+\end{LTXexample}
+\endgroup
 %\iffalse
 %</ignore>
 %\fi 
@@ -1028,7 +1095,7 @@
 %
 % \begin{changelog}
 %\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
-%   \begin{release}{1.0}{2014-xx-xx}
+%   \begin{release}{0.1}{2014-xx-xx}
 %   \item First CTAN version
 %   \end{release}
 % \end{changelog}
@@ -1176,87 +1243,86 @@
 \def\psshowcurve{\pst@object{psshowcurve}}%
 \def\psshowcurve@i#1{%
   \addbefore@par{plotpoints=200}%
+  \begin@OpenObj
    \@ifnextchar\bgroup
      {\PIT@traceintersection{#1}}%
      {\PIT@tracecurve{#1}}%
 }%
 \def\PIT@tracecurve#1{%
   \PIT@checkname{#1}%
-  \begin@OpenObj
-    \addto@pscode{%
-      \pst@intersectdict
-        \PIT@name{#1} dup IsPath {
-          \PIT@key@tstart\space\PIT@key@tstop\space
-          ShowPathPortion
-        }{
-          [exch dup
-          \PIT@key@tstart\space\PIT@key@tstop\space 
-          dup 0 lt { pop 1 } if
-          ToUnitInterval Portion 
-          { aload pop } forall
-          counttomark 2 sub 2 idiv
-          \psk@plotpoints
-          exch
-          \txFunc@BezierCurve
-          \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
-        } ifelse
-      end
-    }%
+  \addto@pscode{%
+    \pst@intersectdict
+    \PIT@name{#1} dup IsPath {
+      \PIT@key@tstart\space\PIT@key@tstop\space
+      ShowPathPortion
+    }{
+      [exch dup
+      \PIT@key@tstart\space\PIT@key@tstop\space 
+      dup 0 lt { pop 1 } if
+      ToUnitInterval Portion 
+      { aload pop } forall
+      counttomark 2 sub 2 idiv
+      \psk@plotpoints
+      exch
+      \txFunc@BezierCurve
+      \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+    } ifelse
+    end
+  }%
   \end@OpenObj
 }%
 \def\PIT@traceintersection#1#2{%
   \PIT@checkname{#2}%
-  \begin@OpenObj
-    \addto@pscode{%
-      \pst@intersectdict
-        \ifx\\#1\\%
-          /\PIT@name{\PIT@name@default}
-        \else
-          /\PIT@name{#1}
-        \fi 
-        dup currentdict exch known not {
-          \ifx\\#1\\%
-            (You haven't defined an intersection!) ==
-          \else
-            (You haven't defined the intersection '#1') ==
-          \fi
-        } if 
-        load
-        dup dup type /dicttype eq exch /\PIT@name{#2} known and not {
-          (You haven't defined the intersection '#2') ==
-        } if
-        dup /\PIT@name{#2} get
-        exch /\PIT@name{#2}@t get
-        dup length \PIT@key@istart\space ge 0 \PIT@key@istart\space lt and {
-          dup \PIT@key@istart\space cvi 1 sub get
-        } {
-          \PIT@key@tstart
-        } ifelse
-        exch % [curve] t_istart|tstart [ts]
-        %
-        dup length \PIT@key@istop\space ge 0 \PIT@key@istop\space lt and {
-          \PIT@key@istop\space cvi 1 sub get
-        } {
-          pop \PIT@key@tstop
-        } ifelse
-        2 copy gt { exch } if 
-        3 -1 roll dup
-        IsPath {
-          3 1 roll
-          ShowPathPortion
-        }{
-          [ exch dup 5 -2 roll
-          dup 0 lt { pop 1 } if
-          ToUnitInterval Portion 
-          { aload pop } forall
-          counttomark 2 sub 2 idiv
-          \psk@plotpoints
-          exch
-          \txFunc@BezierCurve
-          \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
-        } ifelse
-      end
-    }%
+  \addto@pscode{%
+    \pst@intersectdict
+    \ifx\\#1\\%
+    /\PIT@name{\PIT@name@default}
+    \else
+    /\PIT@name{#1}
+    \fi 
+    dup currentdict exch known not {
+      \ifx\\#1\\%
+      (You haven't defined an intersection!) ==
+      \else
+      (You haven't defined the intersection '#1') ==
+      \fi
+    } if 
+    load
+    dup dup type /dicttype eq exch /\PIT@name{#2} known and not {
+      (You haven't defined the intersection '#2') ==
+    } if
+    dup /\PIT@name{#2} get
+    exch /\PIT@name{#2}@t get
+    dup length \PIT@key@istart\space ge 0 \PIT@key@istart\space lt and {
+      dup \PIT@key@istart\space cvi 1 sub get
+    } {
+      \PIT@key@tstart
+    } ifelse
+    exch % [curve] t_istart|tstart [ts]
+    % 
+    dup length \PIT@key@istop\space ge 0 \PIT@key@istop\space lt and {
+      \PIT@key@istop\space cvi 1 sub get
+    } {
+      pop \PIT@key@tstop
+    } ifelse
+    2 copy 2 copy gt 3 1 roll -1 gt exch -1 gt and and { exch } if 
+    3 -1 roll dup
+    IsPath {
+      3 1 roll
+      ShowPathPortion
+    }{
+      [ exch dup 5 -2 roll
+      dup 0 lt { pop 1 } if
+      ToUnitInterval Portion 
+      { aload pop } forall
+      counttomark 2 sub 2 idiv
+      \psk@plotpoints
+      exch
+      \txFunc@BezierCurve
+      \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
+    } ifelse
+    end
+  }%
   \end@OpenObj
 }%
 %

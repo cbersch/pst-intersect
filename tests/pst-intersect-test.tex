@@ -3,6 +3,15 @@
 \SpecialCoor
 \setlength{\parindent}{0pt}
 \begin{document}
+\begin{pspicture}(5.2,5.2)
+\psline[arrows=->](0,0)(1,1)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
+\savebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\psintersect[linecolor=green!70!black, name=C]{A}{B}
+\psshowcurve[linecolor=red, istart=1, istop=2]{C}{A}
+\psshowcurve[linecolor=blue, istart=1, istop=2]{C}{B}
+\end{pspicture}
+\end{document}
 \begin{pspicture}[showgrid](5,5)
   \savebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \savebezier[linecolor=red]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
