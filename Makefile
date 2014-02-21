@@ -17,13 +17,9 @@ all : doc doc-DE
 doc : $(PACKAGE).pdf
 doc-DE : $(PACKAGE)-DE.pdf
 
-dist : doc Changes
+dist : doc doc-DE Changes
 	mkdir -p $(PACKAGE)
 	cp $(ARCHFILES) $(PACKAGE)
-	tar chvzf $(ARCHNAME).tar.gz $(PACKAGE)
-	rm -rf $(PACKAGE)
-	@ echo
-	@ echo $(ARCHNAME).tar.gz
 
 $(PACKAGE).dvi: L = english
 $(PACKAGE)-DE.dvi: L = ngerman
@@ -42,10 +38,7 @@ $(PACKAGE).sty $(PACKAGE).pro $(PACKAGE).tex: $(PACKAGE).ins $(PACKAGE).dtx
 Changes: Changes.py $(PACKAGE).dtx
 	python $<
 
-arch : Changes
-	zip $(ARCHNAME).zip $(ARCHFILES)
-
-arch-tds : Changes
+arch-tds : Changes doc doc-DE
 	$(RM) $(ARCHNAME_TDS).zip
 	mkdir -p tds/tex/latex/$(PACKAGE)
 	mkdir -p tds/tex/generic/$(PACKAGE)
@@ -63,7 +56,8 @@ arch-tds : Changes
 	rm -rf tds
 
 ctan : dist arch-tds
-	tar cf $(PACKAGE).tar $(ARCHNAME_TDS).zip $(ARCHNAME).tar.gz
+	zip -r $(PACKAGE).zip $(ARCHNAME_TDS).zip $(PACKAGE)
+	$(RM) -rf $(PACKAGE)/
 
 clean :
 	$(RM) $(foreach prefix, $(PACKAGE) $(PACKAGE)-DE, \
