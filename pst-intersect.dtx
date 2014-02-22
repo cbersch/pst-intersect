@@ -34,7 +34,7 @@
 \usepackage[ngerman, english,\mainlang]{babel}
 \usepackage{prettyref}
 \usepackage[dvipsnames,x11names,svgnames]{xcolor}
-\usepackage{array,booktabs,paralist,tabularx}
+  %\usepackage{array,booktabs,paralist,tabularx}
 \usepackage{ragged2e, calc}
 \newlength{\PITcaptionmargin}
 \newlength{\PITcaptionheight}
@@ -51,7 +51,7 @@
   \hspace*{-\PITcaptionmargin}#1#2#3\par
 }%
 \captionsetup[lstlisting]{format=pitnocaption}
-\usepackage{nicefrac, multido}
+\usepackage{multido}
 \usepackage{pst-intersect}
 \usepackage{hypdoc}
 \hypersetup{%
@@ -64,13 +64,11 @@
 \definecolor{DOrange}{rgb}{1,.4,.2}%
 \definecolor{DDOrange}{rgb}{0.7, 0.23, 0.07}%
 \colorlet{pdflinkcolor}{DOrange}
-\colorlet{DGreen}{green!90!black}
 \usepackage{showexpl}
 \makeatletter\renewcommand*\SX@Info{}\makeatother
 \usepackage{etoolbox}
 \undef{\cs}\undef{\cmd}
 \usepackage{ltxdockit}
-\newcommand{\poeTR}[1]{\TR{\ttfamily\color{DOrange}#1}}
 \definecolor{colKeys}{rgb}{0,0,0}
 \definecolor{colIdentifier}{rgb}{0,0,0}
 \colorlet{colComments}{green!60!black}
@@ -550,7 +548,7 @@
 %   \hypersetup{pdftitle={Berechnen der Schnittpunkte beliebiger Kurven}}
 % \fi
 % \ifENGLISH
-%   \title{\texttt{pst-optexp}\\ Intersecting arbitrary curves\\[0.5ex] \small \fileversion}
+%   \title{\texttt{pst-intersect}\\ Intersecting arbitrary curves\\[0.5ex] \small \fileversion}
 %   \hypersetup{pdftitle={Intersecting arbitrary curves}}
 % \fi
 % \author{Christoph Bersch}
@@ -1147,7 +1145,8 @@
   \pssavepath{A}{\psplot[plotpoints=200]{0}{10}{x 180 mul sin 1 add 2 mul}}
   \pssavepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
   \psintersect[name=C, showpoints]{A}{B}
-  \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
+  \multido{\i=1+1}{5}{\uput[210](C\i){\i}}
+  \multido{\i=6+2,\ii=7+2}{3}{\uput[225](C\i){\i}\uput[-45](C\ii){\ii}}
 \end{pspicture}
 \end{LTXexample}
 \endgroup
@@ -1250,11 +1249,7 @@
   \addto@pscode{%
     % only 10 points allowed, remove the rest
     counttomark 20 gt { counttomark 20 sub { pop } repeat } if
-    % reverse the point order
-    counttomark -2 4 { 2 roll } for
-    %\addto@pscode{%
-    %counttomark 2 add -1 roll pop % remove the path name
-    counttomark 2 idiv 1 sub dup 9 gt { pop 9 } if
+    counttomark 2 idiv 1 sub
     \psk@plotpoints\space exch
     \txFunc@BezierCurve
     \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
@@ -1354,6 +1349,8 @@
       dup 0 lt { pop 1 } if
       ToUnitInterval Portion 
       { aload pop } forall
+      % reverse the point order
+      counttomark -2 4 { 2 roll } for
       counttomark 2 sub 2 idiv
       \psk@plotpoints
       exch
