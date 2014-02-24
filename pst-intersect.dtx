@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/21 v0.2dev package wrapper for pst-intersect.tex]
+    [2014/02/22 v0.2 package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -574,11 +574,18 @@
 %   \LPack{pst-intersect} ist ein PSTricks-Paket zur
 %   Berechnung der Schnittpunkte von Bézier-Kurven und beliebigen
 %   Postscript-Pfaden.
+%
+%   Beachten Sie, dass die Paket-Versionen 0.x sich in einem
+%   experimentellen Status befinden, und sich grundlegende Änderungen
+%   ergeben können, die zur Vorgängerversion inkompatibel sind.
 % \fi 
 % \ifENGLISH
 %   \section{About the package}
 %   \LPack{pst-intersect} is a PSTricks package to calculate
 %   the intersections of Bezier curves and arbitrary Postscript paths.
+%
+%   Please note, that package versions 0.x are experimental, and may be
+%   subject to fundamental changes, which aren't backward compatible.
 % \fi
 %
 % \ifGERMAN
@@ -1011,14 +1018,14 @@
 % \end{optionlist}
 %
 % \ifGERMAN
-% Beachten Sie, dass in der Version 0.1 die Reihenfolge von
+% Beachten Sie, dass in der Version 0.2 die Reihenfolge von
 % \Lkeyword{tstart} und \Lkeyword{tstop} noch keine Rolle spielt. Für
 % kommende Versionen ist geplant, dass bei \Lkeyword{tstart}
 % \textgreater{} \Lkeyword{tstop} die Pfadrichtung umgekehrt wird. Zur
 % Zeit werden auch noch keine Pfeile für \Lcs{pstracecurve} unterstützt.
 % \fi
 % \ifENGLISH
-% Please note, that as of version 0.1 the order of \Lkeyword{tstart} and
+% Please note, that as of version 0.2 the order of \Lkeyword{tstart} and
 % \Lkeyword{tstop} doesn't play a role. But for upcoming versions it is
 % planned that \Lkeyword{tstart} \textgreater{} \Lkeyword{tstop}
 % reverses the path direction. At the moment arrows aren't supported
@@ -1188,8 +1195,10 @@
 %
 % \begin{changelog}
 %\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
-%   \begin{release}{0.2}{2014-xx-xx}
+%   \begin{release}{0.2}{2014-02-22}
 %   \item Fixed a bug in the termination of the iteration procedure.
+%   \item Fixed a bug in the point order of Bézier curves, which was
+%     related to a now fixed bug in \opt{pst-func}.
 %   \end{release}
 %   \begin{release}{0.1}{2014-02-19}
 %   \item First CTAN version
@@ -1212,7 +1221,7 @@
 \input{pst-intersect.tex}
 \IfFileExists{pst-intersect.pro}{%
     \ProvidesFile{pst-intersect.pro}
-      [2014/02/21 PostScript prologue file]
+      [2014/02/22 PostScript prologue file]
       \@addtofilelist{pst-intersect.pro}}{}%
 %    \end{macrocode}
 %</stylefile>
@@ -1277,14 +1286,17 @@
   \def\PIT@key@name{#1}%
 }%
 \newif\PIT@saveintersections
+\newif\PIT@reversepath
 \define@boolkey[psset]{intersect}[PIT@]{saveintersections}[true]{}
+\define@boolkey[psset]{intersect}[PIT@]{reversepath}[true]{}
 \psset[intersect]{%
   tstart=-1,
   tstop=-1,
   istart=-1,
   istop=-1,
   name={},
-  saveintersections
+  saveintersections,
+  reversepath=false
 }%
 \def\PIT@use@pscode{%
   \pstverb{%
@@ -1304,9 +1316,7 @@
   \PIT@pst@stroke@orig
   \addto@pscode{%
     clear mark
-    { /movetype counttomark 3 roll }
-    { /linetype counttomark 3 roll }
-    { /curvetype counttomark 7 roll }{} pathforall 
+    \pst@intersectdict GetFullPath end
     counttomark 1 add -1 roll pop count }%
 }%
 \def\PIT@name@default{@tmp}%
@@ -1341,13 +1351,33 @@
   \addto@pscode{%
     \pst@intersectdict
     \PIT@name{#1} dup IsPath {
-      \PIT@key@tstart\space\PIT@key@tstop\space
+      % if tstop is < 0, use the array length
+      \PIT@key@tstop\space dup 0 lt { pop dup length } if
+      \PIT@key@tstart\space dup 0 lt { pop 0 } if exch
+      2 copy gt \ifPIT@reversepath true \else false \fi xor {
+        2 copy gt { exch } if
+        % reverse the path, draw everything and resave the path
+        gsave newpath
+          [ 4 -1 roll aload pop InitTracing
+          { counttomark 0 eq { exit } if
+            load exec
+          } loop
+          reversepath
+          [ GetFullPath ] 3 1 roll        
+        grestore
+      } if
       ShowPathPortion
     }{
-      [exch dup
-      \PIT@key@tstart\space\PIT@key@tstop\space 
-      dup 0 lt { pop 1 } if
-      ToUnitInterval Portion 
+      [ exch dup
+      \PIT@key@tstart\space dup 0 lt { pop 0 } if
+      \PIT@key@tstop\space dup 0 lt { pop 1 } if
+      2 copy gt \ifPIT@reversepath true \else false \fi xor {
+        2 copy gt { exch } if
+        [ 5 -2 roll pop PointArrayToArray aload pop
+        counttomark -2 4 { 2 roll } for ] ArrayToPointArray dup
+        4 2 roll
+      } if
+      ToUnitInterval Portion
       { aload pop } forall
       % reverse the point order
       counttomark -2 4 { 2 roll } for
@@ -1778,9 +1808,17 @@ tx@IntersectDict begin
 % \PSname{curvetype}. By default, these are defined as the respective
 % original procedures.
 %    \begin{macrocode}
-/movetype { /moveto load } bind def
-/linetype { /lineto load } bind def
-/curvetype { /curveto load } bind def
+/InitTracing {
+  /movetype { /moveto load } bind def
+  /linetype { /lineto load } bind def
+  /curvetype { /curveto load } bind def
+} def
+InitTracing
+/GetFullPath {
+  { /movetype counttomark 3 roll }
+  { /linetype counttomark 3 roll }
+  { /curvetype counttomark 7 roll }{} pathforall 
+} bind def
 %    \end{macrocode}
 %
 % [ ... /movetype ... /linetype .../curvetype ]
@@ -2251,6 +2289,7 @@ tx@IntersectDict begin
 	% I.min() == 0
 	Max dup 1 eq {% [CurveB] I.max()
 	    % I.max() == 1
+            (unchanged) ==
 	    pop pop	    
 	} { % [CurveB] I.max()
 	    LeftPortion
@@ -2743,9 +2782,8 @@ tx@IntersectDict begin
 } bind def
 /ShowPathPortion {
   6 dict begin
-  exch dup 0 lt { pop 0 } if /tstart exch def
-  % if tstart is < 0, use the array length
-  dup 0 lt { pop dup length } if /tstop exch def
+  /tstart exch def
+  /tstop exch def
   tstop tstart gt {
     /movetype /moveto load def
     /linetype /lineto load def
