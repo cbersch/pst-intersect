@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/22 v0.2 package wrapper for pst-intersect.tex]
+    [2014/02/25 v0.2 package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -34,7 +34,6 @@
 \usepackage[ngerman, english,\mainlang]{babel}
 \usepackage{prettyref}
 \usepackage[dvipsnames,x11names,svgnames]{xcolor}
-  %\usepackage{array,booktabs,paralist,tabularx}
 \usepackage{ragged2e, calc}
 \newlength{\PITcaptionmargin}
 \newlength{\PITcaptionheight}
@@ -1195,7 +1194,11 @@
 %
 % \begin{changelog}
 %\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
-%   \begin{release}{0.2}{2014-02-22}
+%   \begin{release}{0.2}{2014-02-25}
+%   \item Added support for \opt{arrows} to \cs{pstracecurve}.
+%   \item Modified parameters \opt{tstart}, \opt{tstop}, \opt{istart}
+%     and \opt{istop} to respect different directions.
+%   \item Added parameter \opt{reversepath}.
 %   \item Fixed a bug in the termination of the iteration procedure.
 %   \item Fixed a bug in the point order of Bézier curves, which was
 %     related to a now fixed bug in \opt{pst-func}.
@@ -1352,7 +1355,7 @@
     \pst@intersectdict
     \PIT@name{#1} dup IsPath {
       % if tstop is < 0, use the array length
-      \PIT@key@tstop\space dup 0 lt { pop dup length } if
+      \PIT@key@tstop\space dup 0 lt { pop dup GetSegmentCount } if
       \PIT@key@tstart\space dup 0 lt { pop 0 } if exch
       2 copy gt \ifPIT@reversepath true \else false \fi xor {
         2 copy gt { exch } if
@@ -1418,6 +1421,7 @@
     } {
       \PIT@key@tstart
     } ifelse
+    dup 0 lt { pop 0 } if
     exch % [curve] t_istart|tstart [ts]
     % 
     dup length \PIT@key@istop\space ge 0 \PIT@key@istop\space lt and {
@@ -1425,14 +1429,37 @@
     } {
       pop \PIT@key@tstop
     } ifelse
-    2 copy 2 copy gt 3 1 roll -1 gt exch -1 gt and and { exch } if 
+    3 -1 roll dup 4 1 roll GetSegmentCount 
+    2 copy exch dup 3 1 roll % [curve] tstart tstop cnt tstop cnt tstop 
+    lt exch 0 lt or { exch } if pop % (tstop < 0 | cnt < tstop)
     3 -1 roll dup
     IsPath {
       3 1 roll
+      2 copy gt \ifPIT@reversepath true \else false \fi xor {
+        2 copy gt { exch } if
+        3 -1 roll dup 4 1 roll GetSegmentCount
+        dup 4 1 roll exch sub 3 1 roll sub exch
+        % reverse the path, draw everything and resave the path
+        gsave newpath
+          [ 4 -1 roll aload pop InitTracing
+          { counttomark 0 eq { exit } if
+            load exec
+          } loop
+          reversepath
+          GetFullPath ] 3 1 roll        
+        grestore
+      } if
       ShowPathPortion
     }{
       [ exch dup 5 -2 roll
+      exch dup 0 lt { pop 0 } if exch
       dup 0 lt { pop 1 } if
+      2 copy gt \ifPIT@reversepath true \else false \fi xor {
+        2 copy gt { exch } if
+        [ 5 -2 roll pop PointArrayToArray aload pop
+        counttomark -2 4 { 2 roll } for ] ArrayToPointArray dup
+        4 2 roll
+      } if
       ToUnitInterval Portion 
       { aload pop } forall
       counttomark 2 sub 2 idiv
@@ -1809,10 +1836,10 @@ tx@IntersectDict begin
 % original procedures.
 %    \begin{macrocode}
 /InitTracing {
-  /movetype { /moveto load } bind def
-  /linetype { /lineto load } bind def
-  /curvetype { /curveto load } bind def
-} def
+  /movetype /moveto load def
+  /linetype /lineto load def
+  /curvetype /curveto load def
+} bind def
 InitTracing
 /GetFullPath {
   { /movetype counttomark 3 roll }
@@ -1821,27 +1848,57 @@ InitTracing
 } bind def
 %    \end{macrocode}
 %
+% \begin{macro}{PreparePath}
 % [ ... /movetype ... /linetype .../curvetype ]
 %    \begin{macrocode}
 /PreparePath {
-    [ exch aload pop
-    {
-	dup type /nametype eq not { exit } if
-	dup /movetype eq {
-	    pop ToVec /@mycp exch def
-	} {
-	    dup /linetype eq {
-		pop [ @mycp 4 2 roll 2 copy ToVec /@mycp exch def ToVec ]
-	    } {
-		pop [ @mycp 8 2 roll 2 copy ToVec /@mycp exch def
-		ToVec 5 1 roll ToVec 4 1 roll ToVec 3 1 roll ]
-	    } ifelse
-	    counttomark 1 roll	
-	} ifelse
-    } loop ]
+  [ exch aload pop
+  {
+    dup type /nametype eq not { exit } if
+    dup /movetype eq {
+      pop ToVec /@mycp exch def
+    } {
+      dup /linetype eq {
+        pop [ @mycp 4 2 roll 2 copy ToVec /@mycp exch def ToVec ]
+      } {
+        pop [ @mycp 8 2 roll 2 copy ToVec /@mycp exch def
+        ToVec 5 1 roll ToVec 4 1 roll ToVec 3 1 roll ]
+      } ifelse
+      counttomark 1 roll	
+    } ifelse
+  } loop ]
 } bind def
 %    \end{macrocode}
+% \end{macro}
 %
+% \begin{macro}{GetSegmentCount}
+% \PSarray{CurveOrPath} \PSop{GetSegmentCount} -> number of /linetype and /curvetypes
+%    \begin{macrocode}
+/GetSegmentCount {
+  dup IsPath {
+    [ exch aload pop 0
+    {
+      counttomark 1 eq { exit } if
+      exch 
+      dup /movetype eq {
+        pop 3 1 roll pop pop
+      }{
+        dup /linetype eq {
+          pop 1 add 3 1 roll pop pop
+        }{
+          pop 1 add 7 1 roll 6 { pop } repeat
+        } ifelse
+      } ifelse
+    } loop
+    exch pop
+  } {
+    % a Bezier curve is a single segment
+    pop 1
+  } ifelse
+} bind def
+%    \end{macrocode}
+% \end{macro}
+% 
 % \begin{macro}{LoadLineIntersectionPoints}
 % Prepare \PSarray{Curve} for use with tx@Func
 % \begin{pssyntax}
@@ -2289,7 +2346,6 @@ InitTracing
 	% I.min() == 0
 	Max dup 1 eq {% [CurveB] I.max()
 	    % I.max() == 1
-            (unchanged) ==
 	    pop pop	    
 	} { % [CurveB] I.max()
 	    LeftPortion
@@ -2765,70 +2821,140 @@ InitTracing
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ShowFullPath}
+% \begin{macro}{ShowPathPortion}
+%   \begin{pssyntax}
+%     \PSarray{path} \PSvar{tstart tstop} \PSop{ShowPathPortion}
+%   \end{pssyntax}
 %    \begin{macrocode}
-/ShowFullPath {
-  4 dict begin
-  /movetype /moveto load def
-  /linetype /lineto load def
-  /curvetype /curveto load def
-  mark exch aload pop
-  {
-    counttomark 0 eq { exit } if
-    load exec
-  } loop
-  pop 
-  end
-} bind def
 /ShowPathPortion {
   6 dict begin
-  /tstart exch def
   /tstop exch def
-  tstop tstart gt {
-    /movetype /moveto load def
-    /linetype /lineto load def
-    /curvetype /curveto load def
-    /n 0 def
-    mark exch aload pop
-    {
-      counttomark 0 eq { pop exit } if
-      dup /movetype eq not { /n n 1 add def } if
-      % current section is after tstart
-      n tstop sub 1 ge { cleartomark exit } if
-
-      dup /movetype eq {
-        load exec
+  /tstart exch def
+  InitTracing
+  /n 0 def
+  mark exch aload pop
+  {
+    counttomark 0 eq n tstop ge or { pop exit } if
+    dup /movetype eq not { /n n 1 add def } if
+    
+    dup /movetype eq {
+      load exec
+    } {
+      tstart n gt {
+%    \end{macrocode}      
+% current path section is before tstop
+%    \begin{macrocode}
+        /curvetype eq { 6 2 roll 4 { pop } repeat } if
+        movetype
       } {
-        tstart n gt {
-          % current path section is before tstart
-          /curvetype eq { 6 2 roll 4 { pop } repeat } if
-          movetype
-        } {
-          tstart n 1 sub gt tstop n lt or {
-            % draw a truncated section
-            tstart n sub 1 add tstop n sub 1 add
-            ToUnitInterval exch
+        tstart n 1 sub gt tstop n lt or {
+%    \end{macrocode}
+% draw a truncated segment
+%    \begin{macrocode}
+          tstart n sub 1 add tstop n sub 1 add
+          ToUnitInterval exch
+          /linetype eq {
+            3 1 roll ToVec currentpoint ToVec exch ToVec
+            dup 3 -1 roll Portion
+            aload pop exch 
+            tstart n 1 sub gt { 
+%    \end{macrocode}
+% This is the start segment, move to the starting point, as it lies in the middle of the segment.
+%    \begin{macrocode}
+              exch aload pop 3 -1 roll aload pop ArrowA 
+              tstop n le { 
+%    \end{macrocode}
+% only a single segment, draw also the ending arrow 
+%    \begin{macrocode}
+                currentpoint 4 2 roll ArrowB lineto pop pop
+              } {
+%    \end{macrocode}
+% other segments to follow
+%    \begin{macrocode}
+                lineto
+              } ifelse
+            } { 
+%    \end{macrocode}
+% this is the last segment
+%    \begin{macrocode}
+              pop aload pop currentpoint 4 2 roll ArrowB lineto pop pop
+            } ifelse
+          } {
+            7 1 roll [ currentpoint 9 3 roll ] ArrayToPointArray
+            dup 3 -1 roll Portion 
+            { aload pop } forall
+            8 -2 roll
+            tstart n 1 sub gt { moveto } { pop pop } ifelse
+            6 -2 roll currentpoint ArrowA 6 2 roll
+            tstop n le {
+%    \end{macrocode}              
+% only a single segment
+%    \begin{macrocode}
+              ArrowB
+            } if
+            curveto
+          } ifelse
+        }{
+%    \end{macrocode}
+% full segment
+%    \begin{macrocode}
+          tstart n 1 sub eq {
+%    \end{macrocode}
+% the first segment
+%    \begin{macrocode}
             /linetype eq {
-              3 1 roll ToVec currentpoint ToVec exch ToVec
-              dup 3 -1 roll Portion
-              aload pop exch 
-              tstart n 1 sub gt { aload pop moveto } { pop } ifelse
-              aload pop lineto
+              currentpoint ArrowA
+              tstop n eq {
+%    \end{macrocode}
+% a single, full segment
+%    \begin{macrocode}
+                currentpoint 4 2 roll ArrowB lineto pop pop
+              } {
+%    \end{macrocode}
+% not the last segment
+%    \begin{macrocode}
+                lineto
+              } ifelse
             } {
-              7 1 roll [ currentpoint 9 3 roll ] ArrayToPointArray
-              dup 3 -1 roll Portion 
-              { aload pop } forall
-              8 -2 roll
-              tstart n 1 sub gt { moveto } { pop pop } ifelse
+              6 -2 roll currentpoint ArrowA 6 2 roll
+              tstop n eq {
+%    \end{macrocode}
+% single, full curve segment
+%   \begin{macrocode}
+                ArrowB
+              } if
               curveto
             } ifelse
-          }{
-            load exec
+          } {
+%    \end{macrocode}
+% not the first segment
+%    \begin{macrocode}
+            /linetype eq {
+              tstop n eq {
+%    \end{macrocode}
+% last segment but not a single one
+%    \begin{macrocode}
+                currentpoint 4 2 roll ArrowB lineto pop pop
+              }{
+%    \end{macrocode}
+% full middle segment
+%    \begin{macrocode}
+                lineto
+              } ifelse
+            } {
+              tstop n eq {
+%    \end{macrocode}
+% last curveto segment, not a single one
+%    \begin{macrocode}
+                ArrowB
+              } if
+              curveto
+            } ifelse
           } ifelse
         } ifelse
       } ifelse
-    } loop
-  } if
+    } ifelse
+  } loop
   end
 } bind def
 %    \end{macrocode}
