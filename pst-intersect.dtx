@@ -920,6 +920,35 @@
 %\iffalse
 %</ignore>
 %\fi
+%
+% \begin{ltxsyntax}
+%   \cmditem{psGetIsectCenter}{intersection}{curvename}{n}
+%
+%   \ifGERMAN Lädt die Koordinaten des $n$-ten Schnittpunkts des Pfades
+%   \prm{curvenames} in der Schnittmengen \prm{intersection}. Dabei
+%   startet \prm{n} bei 1 und bezeichnet die Nummer des Schnittpunktes
+%   nach aufsteigendem Pfadparameter. \fi
+%   \ifENGLISH\fi
+% \end{ltxsyntax}
+%
+% \iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5,5)
+  \pssavebezier[linecolor=DOrange, arrows=->]{A}%
+             (0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier[arrows=->]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \psintersect[name=C, showpoints]{A}{B}
+  \uput[150](!\psGetIsectCenter{C}{A}{1} A1.x A1.y){1}
+  \uput[85](!\psGetIsectCenter{C}{A}{2} A2.x A2.y){2}
+  \uput[-20](!\psGetIsectCenter{C}{A}{3} A3.x A3.y){3}
+  \uput[90](!\psGetIsectCenter{C}{A}{4} A4.x A4.y){4}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
 % \end{optionlist}
 %
 % \ifGERMAN
@@ -1025,6 +1054,26 @@
 % Please note, that the order of \Lkeyword{tstart} and \Lkeyword{tstop}
 % plays a role. For \Lkeyword{tstart} \textgreater{} \Lkeyword{tstop}
 % the path direction is reversed.
+% \fi
+%
+% \iffalse
+%<*ignore>
+% \fi
+\begin{LTXexample}
+\begin{pspicture}(2,2)
+  \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{A}{\psline(0,0)(1,2)(2,0)}
+  \pstracecurve[tstart=0.1, tstop=0.9, arrows=->]{A}
+\end{pspicture}
+\end{LTXexample}
+
+\begin{LTXexample}
+\begin{pspicture}(2,2)
+  \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{A}{\psline(0,0)(1,2)(2,0)}
+  \pstracecurve[tstart=0.9, tstop=0.1, arrows=->]{A}
+\end{pspicture}
+\end{LTXexample}
+% \iffalse
+%</ignore>
 % \fi
 %
 % \ifGERMAN
@@ -1194,7 +1243,7 @@
 %   \item Added support for \opt{arrows} parameter to \cs{pstracecurve}.
 %   \item Modified parameters \opt{tstart}, \opt{tstop}, \opt{istart}
 %     and \opt{istop} to respect different directions.
-%   \item Added parameter \opt{reversepath}.
+%   \item Added macro \cs{psGetIsectCenter}
 %   \item Fixed a bug in the termination of the iteration procedure.
 %   \item Fixed a bug in the point order of Bézier curves, which was
 %     related to a now fixed bug in \opt{pst-func}.
@@ -1269,6 +1318,20 @@
     [ count 1 sub 1 roll ] ArrayToPointArray def 
   }%
 \ignorespaces}%
+\def\psGetIsectCenter#1#2#3{%
+  \pst@intersectdict
+  \PIT@name{#1} /\PIT@name{#2@t} get #3 1 sub get 
+  \PIT@name{#1} /\PIT@name{#2} get
+  dup IsPath {
+    PreparePath exch dup 3 1 roll cvi get
+  } if
+  PointArrayToArray
+  tx@FuncDict begin 2 dict begin
+    dup length 2 idiv 1 sub /BezierType exch def /Points exch def GetBezierCoor
+  end end
+  end
+  \tx@UserCoor /#2#3.y exch def /#2#3.x exch def
+}%
 \define@key[psset]{intersect}{tstart}{%
   \pst@checknum{#1}\PIT@key@tstart
 }
@@ -1285,17 +1348,14 @@
   \def\PIT@key@name{#1}%
 }%
 \newif\PIT@saveintersections
-\newif\PIT@reversepath
 \define@boolkey[psset]{intersect}[PIT@]{saveintersections}[true]{}
-\define@boolkey[psset]{intersect}[PIT@]{reversepath}[true]{}
 \psset[intersect]{%
   tstart=-1,
   tstop=-1,
   istart=-1,
   istop=-1,
   name={},
-  saveintersections,
-  reversepath=false
+  saveintersections
 }%
 \def\PIT@use@pscode{%
   \pstverb{%
@@ -1349,17 +1409,18 @@
   \PIT@checkname{#1}%
   \addto@pscode{%
     \pst@intersectdict
-    \PIT@key@tstop\space dup 0 lt { pop dup GetSegmentCount } if
+    \PIT@key@tstop\space dup 0 lt { pop \PIT@name{#1} GetSegmentCount } if
     \PIT@key@tstart\space dup 0 lt { pop 0 } if exch
-    \PIT@name{#1} GetSegmentCount 
+    \PIT@name{#1} GetSegmentCount
     2 copy exch dup 3 1 roll
     lt exch 0 lt or { exch } if pop
     \PIT@name{#1} dup IsPath {
-      3 1 roll 2 copy gt \ifPIT@reversepath true \else false \fi xor {
-        2 copy gt { exch } if
-        3 -1 roll dup 4 1 roll GetSegmentCount
+      3 1 roll 2 copy gt {
+%    \end{macrocode}
+% reverse the path, draw everything and resave the path
+%    \begin{macrocode}
+        exch 3 -1 roll dup 4 1 roll GetSegmentCount
         dup 4 1 roll exch sub 3 1 roll sub exch
-        % reverse the path, draw everything and resave the path
         gsave newpath
           [ 4 -1 roll aload pop InitTracing
           { counttomark 0 eq { exit } if
@@ -1372,7 +1433,8 @@
       ShowPathPortion
     }{
       [ exch dup 5 -2 roll
-      2 copy gt \ifPIT@reversepath true \else false \fi xor {
+      2 copy gt {
+        exch
         2 copy gt { exch } if
         [ 5 -2 roll pop PointArrayToArray aload pop
         counttomark -2 4 { 2 roll } for ] ArrayToPointArray dup
@@ -1433,9 +1495,8 @@
     3 -1 roll dup
     IsPath {
       3 1 roll
-      2 copy gt \ifPIT@reversepath true \else false \fi xor {
-        2 copy gt { exch } if
-        3 -1 roll dup 4 1 roll GetSegmentCount
+      2 copy gt {
+        exch 3 -1 roll dup 4 1 roll GetSegmentCount
         dup 4 1 roll exch sub 3 1 roll sub exch
         % reverse the path, draw everything and resave the path
         gsave newpath
@@ -1452,8 +1513,8 @@
       [ exch dup 5 -2 roll
       exch dup 0 lt { pop 0 } if exch
       dup 0 lt { pop 1 } if
-      2 copy gt \ifPIT@reversepath true \else false \fi xor {
-        2 copy gt { exch } if
+      2 copy gt {
+        exch
         [ 5 -2 roll pop PointArrayToArray aload pop
         counttomark -2 4 { 2 roll } for ] ArrayToPointArray dup
         4 2 roll
