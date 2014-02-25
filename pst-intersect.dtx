@@ -1017,18 +1017,14 @@
 % \end{optionlist}
 %
 % \ifGERMAN
-% Beachten Sie, dass in der Version 0.2 die Reihenfolge von
-% \Lkeyword{tstart} und \Lkeyword{tstop} noch keine Rolle spielt. Für
-% kommende Versionen ist geplant, dass bei \Lkeyword{tstart}
-% \textgreater{} \Lkeyword{tstop} die Pfadrichtung umgekehrt wird. Zur
-% Zeit werden auch noch keine Pfeile für \Lcs{pstracecurve} unterstützt.
+% Beachten Sie, dass die Reihenfolge von \Lkeyword{tstart} und
+% \Lkeyword{tstop} eine Rolle spielt. Ist \Lkeyword{tstart}
+% \textgreater{} \Lkeyword{tstop} dann wird die Pfadrichtung umgekehrt.
 % \fi
 % \ifENGLISH
-% Please note, that as of version 0.2 the order of \Lkeyword{tstart} and
-% \Lkeyword{tstop} doesn't play a role. But for upcoming versions it is
-% planned that \Lkeyword{tstart} \textgreater{} \Lkeyword{tstop}
-% reverses the path direction. At the moment arrows aren't supported
-% either.
+% Please note, that the order of \Lkeyword{tstart} and \Lkeyword{tstop}
+% plays a role. For \Lkeyword{tstart} \textgreater{} \Lkeyword{tstop}
+% the path direction is reversed.
 % \fi
 %
 % \ifGERMAN
@@ -1195,7 +1191,7 @@
 % \begin{changelog}
 %\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
 %   \begin{release}{0.2}{2014-02-25}
-%   \item Added support for \opt{arrows} to \cs{pstracecurve}.
+%   \item Added support for \opt{arrows} parameter to \cs{pstracecurve}.
 %   \item Modified parameters \opt{tstart}, \opt{tstop}, \opt{istart}
 %     and \opt{istop} to respect different directions.
 %   \item Added parameter \opt{reversepath}.
@@ -1353,12 +1349,16 @@
   \PIT@checkname{#1}%
   \addto@pscode{%
     \pst@intersectdict
+    \PIT@key@tstop\space dup 0 lt { pop dup GetSegmentCount } if
+    \PIT@key@tstart\space dup 0 lt { pop 0 } if exch
+    \PIT@name{#1} GetSegmentCount 
+    2 copy exch dup 3 1 roll
+    lt exch 0 lt or { exch } if pop
     \PIT@name{#1} dup IsPath {
-      % if tstop is < 0, use the array length
-      \PIT@key@tstop\space dup 0 lt { pop dup GetSegmentCount } if
-      \PIT@key@tstart\space dup 0 lt { pop 0 } if exch
-      2 copy gt \ifPIT@reversepath true \else false \fi xor {
+      3 1 roll 2 copy gt \ifPIT@reversepath true \else false \fi xor {
         2 copy gt { exch } if
+        3 -1 roll dup 4 1 roll GetSegmentCount
+        dup 4 1 roll exch sub 3 1 roll sub exch
         % reverse the path, draw everything and resave the path
         gsave newpath
           [ 4 -1 roll aload pop InitTracing
@@ -1366,14 +1366,12 @@
             load exec
           } loop
           reversepath
-          [ GetFullPath ] 3 1 roll        
+          GetFullPath ] 3 1 roll        
         grestore
       } if
       ShowPathPortion
     }{
-      [ exch dup
-      \PIT@key@tstart\space dup 0 lt { pop 0 } if
-      \PIT@key@tstop\space dup 0 lt { pop 1 } if
+      [ exch dup 5 -2 roll
       2 copy gt \ifPIT@reversepath true \else false \fi xor {
         2 copy gt { exch } if
         [ 5 -2 roll pop PointArrayToArray aload pop
