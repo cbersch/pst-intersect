@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/25 v0.2 package wrapper for pst-intersect.tex]
+    [2014/02/26 v0.2 package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -905,7 +905,7 @@
 %\iffalse
 %<*ignore>
 %\fi
-\begin{LTXexample}
+\begin{LTXexample}[caption={caption}, label={ex:saveintersections}]
 \begin{pspicture}(5,5)
   \pssavebezier[linecolor=DOrange]{A}%
              (0,0)(0,5)(5,5)(5,1)(1,1.5)
@@ -915,35 +915,6 @@
   \uput[85](C2){2}
   \uput[90](C3){3}
   \uput[-20](C4){4}
-\end{pspicture}
-\end{LTXexample}
-%\iffalse
-%</ignore>
-%\fi
-%
-% \begin{ltxsyntax}
-%   \cmditem{psGetIsectCenter}{intersection}{curvename}{n}
-%
-%   \ifGERMAN Lädt die Koordinaten des $n$-ten Schnittpunkts des Pfades
-%   \prm{curvenames} in der Schnittmengen \prm{intersection}. Dabei
-%   startet \prm{n} bei 1 und bezeichnet die Nummer des Schnittpunktes
-%   nach aufsteigendem Pfadparameter. \fi
-%   \ifENGLISH\fi
-% \end{ltxsyntax}
-%
-% \iffalse
-%<*ignore>
-%\fi
-\begin{LTXexample}
-\begin{pspicture}(5,5)
-  \pssavebezier[linecolor=DOrange, arrows=->]{A}%
-             (0,0)(0,5)(5,5)(5,1)(1,1.5)
-  \pssavebezier[arrows=->]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
-  \psintersect[name=C, showpoints]{A}{B}
-  \uput[150](!\psGetIsectCenter{C}{A}{1} A1.x A1.y){1}
-  \uput[85](!\psGetIsectCenter{C}{A}{2} A2.x A2.y){2}
-  \uput[-20](!\psGetIsectCenter{C}{A}{3} A3.x A3.y){3}
-  \uput[90](!\psGetIsectCenter{C}{A}{4} A4.x A4.y){4}
 \end{pspicture}
 \end{LTXexample}
 %\iffalse
@@ -1061,15 +1032,17 @@
 % \fi
 \begin{LTXexample}
 \begin{pspicture}(2,2)
+  \psset{arrows=->, arrowscale=1.5}
   \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{A}{\psline(0,0)(1,2)(2,0)}
-  \pstracecurve[tstart=0.1, tstop=0.9, arrows=->]{A}
+  \pstracecurve[tstart=0.1, tstop=0.9]{A}
 \end{pspicture}
 \end{LTXexample}
 
 \begin{LTXexample}
 \begin{pspicture}(2,2)
+  \psset{arrows=->, arrowscale=1.5}
   \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{A}{\psline(0,0)(1,2)(2,0)}
-  \pstracecurve[tstart=0.9, tstop=0.1, arrows=->]{A}
+  \pstracecurve[tstart=0.9, tstop=0.1]{A}
 \end{pspicture}
 \end{LTXexample}
 % \iffalse
@@ -1153,6 +1126,52 @@
 %</ignore>
 %\fi
 %
+% \begin{ltxsyntax}
+%   \cmditem{psGetIsectCenter}{intersection}{curvename}{n}
+%
+%   \ifGERMAN 
+%   Lädt die Koordinaten des $n$-ten Schnittpunkts des Pfades
+%   \prm{curvename} in der Schnittmenge \prm{intersection}. Dabei
+%   startet die Nummer der Schnittpunkte bei \prm{n}$=1$ und wird in
+%   Pfadrichtung durchnummeriert.
+% 
+%   Die Schnittpunkte können mit \Lkeyword{saveintersections}\opt{=true}
+%   natürlich auch über \cs{psGetNodeCenter} geladen werden. Diese
+%   werden dann nach aufsteigender $x$-Koordinate nummeriert, siehe
+%   \prettyref{ex:saveintersections}.
+%   \fi
+%   \ifENGLISH
+%   Loads the coordinates of the $n$-th intersection point of the path
+%   \prm{curvename} in the intersection set \prm{intersection}. The
+%   numbering of the intersections starts at \prm{n}$=1$ and the number
+%   increases along the path in its original direction.
+%
+%   The intersection points can also be loaded with \cs{psGetNodeCenter}
+%   if \Lkeyword{saveintersection}\opt{=true} is set. In that case, the
+%   numbering of the intersection increases according to their $x$
+%   coordinate, see \prettyref{ex:saveintersections}.
+% \fi
+% \end{ltxsyntax}
+%
+% \iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(5,5)
+  \pssavebezier[linecolor=DOrange, arrows=->]{A}%
+             (0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier[arrows=->]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \psintersect[name=C, showpoints]{A}{B}
+  \color{DOrange}
+  \uput[150](!\psGetIsectCenter{C}{A}{1} A1.x A1.y){1}
+  \uput[85](!\psGetIsectCenter{C}{A}{2} A2.x A2.y){2}
+  \uput[-20](!\psGetIsectCenter{C}{A}{3} A3.x A3.y){3}
+  \uput[90](!\psGetIsectCenter{C}{A}{4} A4.x A4.y){4}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
 % \ifGERMAN
 % \chapter{Beispiele}
 % \fi
@@ -1239,7 +1258,7 @@
 %
 % \begin{changelog}
 %\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
-%   \begin{release}{0.2}{2014-02-25}
+%   \begin{release}{0.2}{2014-02-26}
 %   \item Added support for \opt{arrows} parameter to \cs{pstracecurve}.
 %   \item Modified parameters \opt{tstart}, \opt{tstop}, \opt{istart}
 %     and \opt{istop} to respect different directions.
@@ -1247,6 +1266,7 @@
 %   \item Fixed a bug in the termination of the iteration procedure.
 %   \item Fixed a bug in the point order of Bézier curves, which was
 %     related to a now fixed bug in \opt{pst-func}.
+%   \item Several other improvements.
 %   \end{release}
 %   \begin{release}{0.1}{2014-02-19}
 %   \item First CTAN version
@@ -1269,7 +1289,7 @@
 \input{pst-intersect.tex}
 \IfFileExists{pst-intersect.pro}{%
     \ProvidesFile{pst-intersect.pro}
-      [2014/02/22 PostScript prologue file]
+      [2014/02/26 PostScript prologue file]
       \@addtofilelist{pst-intersect.pro}}{}%
 %    \end{macrocode}
 %</stylefile>
@@ -1304,7 +1324,9 @@
 }%
 \def\pssavebezier@ii{%
   \addto@pscode{%
-    % only 10 points allowed, remove the rest
+%    \end{macrocode}
+% only 10 points allowed, remove the rest
+%    \begin{macrocode}
     counttomark 20 gt { counttomark 20 sub { pop } repeat } if
     counttomark 2 idiv 1 sub
     \psk@plotpoints\space exch
@@ -1498,7 +1520,9 @@
       2 copy gt {
         exch 3 -1 roll dup 4 1 roll GetSegmentCount
         dup 4 1 roll exch sub 3 1 roll sub exch
-        % reverse the path, draw everything and resave the path
+%    \end{macrocode}
+% reverse the path, draw everything and resave the path
+%    \begin{macrocode}
         gsave newpath
           [ 4 -1 roll aload pop InitTracing
           { counttomark 0 eq { exit } if
