@@ -1343,9 +1343,12 @@
 \def\psGetIsectCenter#1#2#3{%
   \pst@intersectdict
   \PIT@name{#1} /\PIT@name{#2@t} get #3 1 sub get 
-  \PIT@name{#1} /\PIT@name{#2} get
+  \PIT@name{#1} /\PIT@name{#2} get 
   dup IsPath {
-    PreparePath exch dup 3 1 roll cvi get
+    PreparePath dup length 1 sub 
+    3 -1 roll dup dup
+    cvi sub 4 1 roll
+    cvi sub get
   } if
   PointArrayToArray
   tx@FuncDict begin 2 dict begin
