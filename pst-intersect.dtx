@@ -1603,14 +1603,23 @@
         \PIT@@name\space /Points get 
         ArrayToPointArray
       end
-      tx@NodeDict begin 
-        dup length 1 1 3 -1 roll {
-          2 copy 1 sub get cvx
-          false 3 -1 roll (N@\PIT@key@name) exch 20 string cvs 
-          \pst@intersectdict strcat end cvn
+      dup length 1 1 3 -1 roll {
+        2 copy 1 sub get 
+        \ifPst@saveNodeCoors
+          \pst@intersectdict 
+          2 copy aload pop \tx@UserCoor 3 -1 roll 
+          20 string cvs (N-\PIT@key@name) exch strcat dup 
+          (.y) strcat cvn exch (.x) strcat cvn
+          end
+          4 -1 roll def exch def
+        \fi
+        cvx
+        false 3 -1 roll (N@\PIT@key@name) exch 20 string cvs 
+        \pst@intersectdict strcat end cvn
+        tx@NodeDict begin 
           10 {InitPnode} /NodeScale {} def NewNode
-        } for
-      end
+        end
+      } for
       pop
     }%
   \fi
