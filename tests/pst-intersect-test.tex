@@ -3,18 +3,26 @@
 \SpecialCoor
 \setlength{\parindent}{0pt}
 \begin{document}
+\begin{pspicture}[showgrid](5,5)
+  \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{A}{%
+    \psbezier(0,1)(1,5)(2,0)(3,3)}
+  \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{B}{%
+    \psline(0,2.4)(5,2.4)}
+  \psintersect[name=I, showpoints]{A}{B}
+\end{pspicture}
+
 \begin{pspicture}[showgrid](5.2,5.2)
 \pssavebezier[linewidth=0.5\pslinewidth, arrows=->, linestyle=dashed]{A}(0,0)(0,5)(5,2)(5,5)
-%\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
-%\psintersect[linecolor=green!70!black, name=C]{A}{B}
-%\pstracecurve[linecolor=red, istart=1, istop=2]{C}{A}
-%\pstracecurve[linecolor=blue, istart=1, istop=2]{C}{B}
+\pssavebezier[linewidth=0.5\pslinewidth, linestyle=dashed, arrows=->]{B}(0,2.5)(2.5,2.5)(4.5, 3)(2,4)
+\psintersect[linecolor=green!70!black, name=C]{A}{B}
+\pstracecurve[linecolor=red, istart=1, istop=2]{C}{A}
+\pstracecurve[linecolor=blue, istart=1, istop=2]{C}{B}
 \end{pspicture}
 \begin{pspicture}[showgrid](5.2,5.2)
 \pssavebezier[linestyle=none]{A}(0,0)(0,5)(5,2)(5,5)
-\pstracecurve[arrows=->, reversepath]{A}
+\pstracecurve[arrows=->]{A}
 \end{pspicture}
-\end{document}
+
 \begin{pspicture}[showgrid](5,5)
   \pssavebezier{A}(0,0)(0,5)(5,5)(5,1)(1,1.5)
   \pssavebezier[linecolor=red]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
