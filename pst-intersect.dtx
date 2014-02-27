@@ -18,7 +18,7 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/26 v0.2 package wrapper for pst-intersect.tex]
+    [2014/02/26 v0.3dev package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
@@ -52,6 +52,7 @@
 \captionsetup[lstlisting]{format=pitnocaption}
 \usepackage{multido}
 \usepackage{pst-intersect}
+\usepackage[makeindex]{splitidx}
 \usepackage{hypdoc}
 \hypersetup{%
   colorlinks=true, 
@@ -502,6 +503,7 @@
 %   \newrefformat{ex}{Bsp.~\ref{#1}}
 %   \newrefformat{tab}{Tab.~\ref{#1}}
 %   \newrefformat{fig}{Abb.~\ref{#1}}
+%   \newindex[Quelltextindex]{idx}
 %   \newcommand{\PITindexMacro}{Makros}
 %   \newcommand{\PITindexKeyword}{Parameter}
 %   \newcommand{\PITindexEnv}{Umgebungen}
@@ -515,6 +517,7 @@
 %   \newrefformat{ex}{Ex.~\ref{#1}}
 %   \newrefformat{tab}{Tab.~\ref{#1}}
 %   \newrefformat{fig}{Fig.~\ref{#1}}
+%   \newindex[Code index]{idx}
 %   \newcommand{\PITindexMacro}{macros}
 %   \newcommand{\PITindexKeyword}{parameters}
 %   \newcommand{\PITindexEnv}{environments}
@@ -1255,9 +1258,14 @@
 % \emph{renamed}, or \emph{removed} demand attention. They indicate a
 % modification which may require changes to existing documents.
 % \fi
-%
+% 
 % \begin{changelog}
-%\patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
+%   \patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
+%   \begin{release}{0.3}{2014-xx-xx}
+%   \item Fixed \cs{psGetIsectNode} to work with more than one segment.
+%   \item Fixed missing support for \opt{pst-node}'s \opt{saveNodeCoors}
+%     parameter to \opt{saveintersections}.
+%   \end{release}
 %   \begin{release}{0.2}{2014-02-26}
 %   \item Added support for \opt{arrows} parameter to \cs{pstracecurve}.
 %   \item Modified parameters \opt{tstart}, \opt{tstop}, \opt{istart}
@@ -1272,7 +1280,7 @@
 %   \item First CTAN version
 %   \end{release}
 % \end{changelog}
-%
+% 
 % \StopEventually{}
 %
 %   \begin{otherlanguage}{english}
@@ -1314,14 +1322,106 @@
 \def\pst@intersectdict{tx@IntersectDict begin }
 \def\PIT@dict#1{\pst@intersectdict #1 end}
 \def\PIT@Verb#1{\pst@Verb{\PIT@dict{#1} }}%
+%    \end{macrocode}
+% \section{The parameter definitions}
+%    \begin{macrocode}
+\define@key[psset]{intersect}{tstart}{%
+  \pst@checknum{#1}\PIT@key@tstart
+}
+\define@key[psset]{intersect}{tstop}{%
+  \pst@checknum{#1}\PIT@key@tstop
+}
+\define@key[psset]{intersect}{istart}{%
+  \pst@checknum{#1}\PIT@key@istart
+}
+\define@key[psset]{intersect}{istop}{%
+  \pst@checknum{#1}\PIT@key@istop
+}
+\define@key[psset]{intersect}{name}{%
+  \def\PIT@key@name{#1}%
+}%
+\newif\PIT@saveintersections
+\define@boolkey[psset]{intersect}[PIT@]{saveintersections}[true]{}
 
+\psset[intersect]{%
+  tstart=-1,
+  tstop=-1,
+  istart=-1,
+  istop=-1,
+  name={},
+  saveintersections
+}%
+%    \end{macrocode}
+% 
+% \begin{macro}{\PIT@use@pscode}
+%   This is a modified version of the \cs{use@pscode} core macro. It
+%   explicitely allows the content of the stack to be moved outside the
+%   local Postscript-scope created by the \cs{pstverb} macro. This
+%   allows to save these values on the global level for later
+%   use. Beware, that you cannot leave arrays or marks on the stack.
+%    \begin{macrocode}
+\def\PIT@use@pscode{%
+  \pstverb{%
+    \pst@dict
+    \tx@STP
+    \pst@newpath
+    \psk@origin
+    \psk@swapaxes
+    \pst@code
+    end
+    count /ocount exch def
+  }%
+  \gdef\pst@code{}%
+}%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\PIT@save@path}
+%   Modified version of the \cs{pst@stroke} core macro, which puts the
+%   whole current path on the stack.
+%    \begin{macrocode}
+\let\PIT@pst@stroke@orig\pst@stroke
+\def\PIT@save@path{%
+  \PIT@pst@stroke@orig
+  \addto@pscode{%
+    clear mark
+    \pst@intersectdict GetFullPath end
+    counttomark 1 add -1 roll pop count }%
+}%
+%    \end{macrocode}
+% \end{macro}
+% 
+%    \begin{macrocode}
+\def\PIT@name@default{@tmp}%
+\def\PIT@name#1{PIT@#1}%
+\def\PIT@checkname#1{%
+  \ifx\@empty#1\@empty
+    \@pstrickserr{Unexpected empty argument!}\@ehpb
+  \fi
+}%
+%    \end{macrocode}
+%
+% \begin{macro}{\pssavebezier}
+%    \begin{macrocode}
 \def\pssavebezier{\pst@object{pssavebezier}}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pssavebezier@i}
+% Process all nodes following the \cs{pssavebezier} macro call.
+%    \begin{macrocode}
 \def\pssavebezier@i#1{%
   \begin@OpenObj
     \PIT@checkname{#1}%
     \addto@pscode{ /\PIT@name{#1} }%
     \pst@getcoors[\pssavebezier@ii%]
 }%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pssavebezier@ii}
+% This does the whole actual work.
+%    \begin{macrocode}
 \def\pssavebezier@ii{%
   \addto@pscode{%
 %    \end{macrocode}
@@ -1340,77 +1440,17 @@
     [ count 1 sub 1 roll ] ArrayToPointArray def 
   }%
 \ignorespaces}%
-\def\psGetIsectCenter#1#2#3{%
-  \pst@intersectdict
-  \PIT@name{#1} /\PIT@name{#2@t} get #3 1 sub get 
-  \PIT@name{#1} /\PIT@name{#2} get 
-  dup IsPath {
-    PreparePath dup length 1 sub 
-    3 -1 roll dup dup
-    cvi sub 4 1 roll
-    cvi sub get
-  } if
-  PointArrayToArray
-  tx@FuncDict begin 2 dict begin
-    dup length 2 idiv 1 sub /BezierType exch def /Points exch def GetBezierCoor
-  end end
-  end
-  \tx@UserCoor /#2#3.y exch def /#2#3.x exch def
-}%
-\define@key[psset]{intersect}{tstart}{%
-  \pst@checknum{#1}\PIT@key@tstart
-}
-\define@key[psset]{intersect}{tstop}{%
-  \pst@checknum{#1}\PIT@key@tstop
-}
-\define@key[psset]{intersect}{istart}{%
-  \pst@checknum{#1}\PIT@key@istart
-}
-\define@key[psset]{intersect}{istop}{%
-  \pst@checknum{#1}\PIT@key@istop
-}
-\define@key[psset]{intersect}{name}{%
-  \def\PIT@key@name{#1}%
-}%
-\newif\PIT@saveintersections
-\define@boolkey[psset]{intersect}[PIT@]{saveintersections}[true]{}
-\psset[intersect]{%
-  tstart=-1,
-  tstop=-1,
-  istart=-1,
-  istop=-1,
-  name={},
-  saveintersections
-}%
-\def\PIT@use@pscode{%
-  \pstverb{%
-    \pst@dict
-    \tx@STP
-    \pst@newpath
-    \psk@origin
-    \psk@swapaxes
-    \pst@code
-    end
-    count /ocount exch def
-  }%
-  \gdef\pst@code{}%
-}%
-\let\PIT@pst@stroke@orig\pst@stroke
-\def\PIT@save@path{%
-  \PIT@pst@stroke@orig
-  \addto@pscode{%
-    clear mark
-    \pst@intersectdict GetFullPath end
-    counttomark 1 add -1 roll pop count }%
-}%
-\def\PIT@name@default{@tmp}%
-\def\PIT@name#1{PIT@#1}%
-\def\PIT@checkname#1{%
-  \ifx\@empty#1\@empty
-    \@pstrickserr{Unexpected empty argument!}\@ehpb
-  \fi
-}%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pssavepath}
+%    \begin{macrocode}
 \def\pssavepath{\pst@object{pssavepath}}%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pssavepath@i}
+%    \begin{macrocode}
 \long\def\pssavepath@i#1#2{%
   \begin@SpecialObj
     \PIT@checkname{#1}%
@@ -1422,7 +1462,17 @@
       [ 3 -1 roll 2 add 2 roll ] def }%
   \end@SpecialObj
 }%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pstracecurve}
+%    \begin{macrocode}
 \def\pstracecurve{\pst@object{pstracecurve}}%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pstracecurve@i}
+%    \begin{macrocode}
 \def\pstracecurve@i#1{%
   \addbefore@par{plotpoints=200}%
   \begin@OpenObj
@@ -1430,6 +1480,11 @@
      {\PIT@traceintersection{#1}}%
      {\PIT@tracecurve{#1}}%
 }%
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\PIT@tracecurve}
+%    \begin{macrocode}
 \def\PIT@tracecurve#1{%
   \PIT@checkname{#1}%
   \addto@pscode{%
@@ -1467,7 +1522,9 @@
       } if
       ToUnitInterval Portion
       { aload pop } forall
-      % reverse the point order
+%    \end{macrocode}
+% reverse the point order
+%    \begin{macrocode}
       counttomark -2 4 { 2 roll } for
       counttomark 2 sub 2 idiv
       \psk@plotpoints
@@ -1479,6 +1536,11 @@
   }%
   \end@OpenObj
 }%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{PIT@traceintersection}
+%    \begin{macrocode}
 \def\PIT@traceintersection#1#2{%
   \PIT@checkname{#2}%
   \addto@pscode{%
@@ -1558,6 +1620,8 @@
   }%
   \end@OpenObj
 }%
+%    \end{macrocode}
+% \end{macro}
 %
 % \begin{macro}{\psintersect}
 %    \begin{macrocode}
@@ -1637,6 +1701,28 @@
 %    \end{macrocode}
 % \end{macro}
 % 
+% \begin{macro}{\psGetIsectCenter}
+%    \begin{macrocode}
+\def\psGetIsectCenter#1#2#3{%
+  \pst@intersectdict
+  \PIT@name{#1} /\PIT@name{#2@t} get #3 1 sub get 
+  \PIT@name{#1} /\PIT@name{#2} get 
+  dup IsPath {
+    PreparePath dup length 1 sub 
+    3 -1 roll dup dup
+    cvi sub 4 1 roll
+    cvi sub get
+  } if
+  PointArrayToArray
+  tx@FuncDict begin 2 dict begin
+    dup length 2 idiv 1 sub /BezierType exch def /Points exch def GetBezierCoor
+  end end
+  end
+  \tx@UserCoor /#2#3.y exch def /#2#3.x exch def
+}%
+%    \end{macrocode}
+% \end{macro}
+%
 %    \begin{macrocode}
 \catcode`\@=\PstAtCode\relax
 %    \end{macrocode}
@@ -2017,7 +2103,7 @@ InitTracing
 %   Load the intersection points. This loads the same intersection point
 %   from both curves, and chooses the one with the lowest error.
 % \begin{pssyntax}
-% \PSarray{curveA} \PSarray{tA} \PSArray{curveB} \PSarray{tB} 
+% \PSarray{curveA} \PSarray{tA} \PSarray{curveB} \PSarray{tB} 
 %  \PSop{LoadCurveIntersectionPoints}
 % \PSarray{I0.x I0.y \ldots IN.x YN.x}
 % \end{pssyntax}
@@ -2149,7 +2235,7 @@ InitTracing
 %
 % \begin{pssyntax}
 %   \PSname{domsA} \PSname{domsB} \PSarray{CurveA} \PSarray{CurveB}
-%   \PSarray{domA} \PSarray{domB} \PSop{_IterateIntersection}
+%   \PSarray{domA} \PSarray{domB} \PSop{\_IterateIntersection}
 % \end{pssyntax}
 %    \begin{macrocode}
 /_IterateIntersection {
@@ -2197,7 +2283,7 @@ InitTracing
 		    exit
 		} if
 %    \end{macrocode}
-% iter < 100 && (dompA.extent() >= precision || dompB.extent() >= precision)
+% iter < 100 \&\& (dompA.extent() >= precision || dompB.extent() >= precision)
 %    \begin{macrocode}
 		CheckIT {
 		    (counter: ) counter 20 string cvs strcat
@@ -2348,8 +2434,9 @@ InitTracing
 % 
 % \begin{macro}{IsEmptyInterval}
 % Check if an interval is empty, which is represented by a [1 0] interval.
-% \begin{pssyntx}
+% \begin{pssyntax}
 % \PSarray{interval} \PSop{IsEmptyInterval} \PSvar{boolean}
+% \end{pssyntax}
 %    \begin{macrocode}
 /IsEmptyInterval {
     aload pop 0 eq exch 1 eq and
@@ -2390,6 +2477,7 @@ InitTracing
 % Does a deep copy of the array \PSarray{Curve}. This also involved deep copies of the contained point arrays.
 % \begin{pssyntax}
 % \PSarray{Curve} \PSop{CloneCurve} \PSarray{newCurve}
+% \end{pssyntax}
 %    \begin{macrocode}
 /CloneCurve {
     [ exch {
