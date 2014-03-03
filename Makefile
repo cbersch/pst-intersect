@@ -8,7 +8,7 @@ ARCHNAME = $(PACKAGE)-$(shell date +"%y%m%d")
 ARCHNAME_TDS = $(PACKAGE).tds
 
 ARCHFILES = $(PACKAGE).dtx $(PACKAGE).ins Makefile \
-            README Changes $(PACKAGE).pdf $(PACKAGE)-DE.pdf $(PACKAGE)-code.pdf
+            README Changes $(PACKAGE).pdf $(PACKAGE)-DE.pdf
 
 PS2PDF = GS_OPTIONS=-dPDFSETTINGS=/prepress ps2pdf
 
@@ -17,7 +17,7 @@ all : doc-all
 doc : $(PACKAGE).pdf
 doc-DE : $(PACKAGE)-DE.pdf
 doc-code: $(PACKAGE)-code.pdf
-doc-all: doc doc-DE doc-code
+doc-all: doc doc-DE
 
 dist : doc-all Changes
 	mkdir -p $(PACKAGE)
@@ -68,7 +68,7 @@ arch-tds : Changes doc-all
 	cp $(PACKAGE).sty tds/tex/latex/$(PACKAGE)/
 	cp $(PACKAGE).tex tds/tex/generic/$(PACKAGE)/
 	cp $(PACKAGE).pro tds/dvips/$(PACKAGE)/
-	cp Changes $(PACKAGE).pdf $(PACKAGE)-DE.pdf $(PACKAGE)-code.pdf README tds/doc/latex/$(PACKAGE)/
+	cp Changes $(PACKAGE).pdf $(PACKAGE)-DE.pdf README tds/doc/latex/$(PACKAGE)/
 	cp $(PACKAGE).dtx $(PACKAGE).ins Makefile \
 	  tds/source/latex/$(PACKAGE)/
 	cd tds ; zip -r ../$(ARCHNAME_TDS).zip tex doc source dvips
