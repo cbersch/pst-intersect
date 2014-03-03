@@ -18,11 +18,12 @@
 %<stylefile>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<stylefile>\ProvidesPackage{pst-intersect}
 %<*stylefile>
-    [2014/02/26 v0.3dev package wrapper for pst-intersect.tex]
+    [2014/03/04 v0.3 package wrapper for pst-intersect.tex]
 %</stylefile>
 %
 %<*driver>
 \documentclass[a4paper, DIV=9, oneside, toc=index, parskip=half-]{scrreprt}
+\usepackage{scrhack}
 \usepackage{doc}
 \setcounter{IndexColumns}{2}
 \usepackage[utf8]{inputenc} 
@@ -908,7 +909,7 @@
 %\iffalse
 %<*ignore>
 %\fi
-\begin{LTXexample}[caption={caption}, label={ex:saveintersections}]
+\begin{LTXexample}
 \begin{pspicture}(5,5)
   \pssavebezier[linecolor=DOrange]{A}%
              (0,0)(0,5)(5,5)(5,1)(1,1.5)
@@ -1137,22 +1138,12 @@
 %   \prm{curvename} in der Schnittmenge \prm{intersection}. Dabei
 %   startet die Nummer der Schnittpunkte bei \prm{n}$=1$ und wird in
 %   Pfadrichtung durchnummeriert.
-% 
-%   Die Schnittpunkte können mit \Lkeyword{saveintersections}\opt{=true}
-%   natürlich auch über \cs{psGetNodeCenter} geladen werden. Diese
-%   werden dann nach aufsteigender $x$-Koordinate nummeriert, siehe
-%   \prettyref{ex:saveintersections}.
 %   \fi
 %   \ifENGLISH
 %   Loads the coordinates of the $n$-th intersection point of the path
 %   \prm{curvename} in the intersection set \prm{intersection}. The
 %   numbering of the intersections starts at \prm{n}$=1$ and the number
 %   increases along the path in its original direction.
-%
-%   The intersection points can also be loaded with \cs{psGetNodeCenter}
-%   if \Lkeyword{saveintersections}\opt{=true} is set. In that case, the
-%   numbering of the intersection increases according to their $x$
-%   coordinate, see \prettyref{ex:saveintersections}.
 % \fi
 % \end{ltxsyntax}
 %
@@ -1160,21 +1151,62 @@
 %<*ignore>
 %\fi
 \begin{LTXexample}
-\begin{pspicture}(5,5)
+\begin{pspicture}(4,5)
   \pssavebezier[linecolor=DOrange, arrows=->]{A}%
              (0,0)(0,5)(5,5)(5,1)(1,1.5)
   \pssavebezier[arrows=->]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
   \psintersect[name=C, showpoints]{A}{B}
   \color{DOrange}
-  \uput[150](!\psGetIsectCenter{C}{A}{1} A1.x A1.y){1}
-  \uput[85](!\psGetIsectCenter{C}{A}{2} A2.x A2.y){2}
-  \uput[-20](!\psGetIsectCenter{C}{A}{3} A3.x A3.y){3}
-  \uput[90](!\psGetIsectCenter{C}{A}{4} A4.x A4.y){4}
+  \uput[150](!\psGetIsectCenter{C}{A}{1} I-C1.x I-C1.y){1}
+  \uput[85](!\psGetIsectCenter{C}{A}{2} I-C2.x I-C2.y){2}
+  \uput[-20](!\psGetIsectCenter{C}{A}{3} I-C3.x I-C3.y){3}
+  \uput[90](!\psGetIsectCenter{C}{A}{4} I-C4.x I-C4.y){4}
 \end{pspicture}
 \end{LTXexample}
 %\iffalse
 %</ignore>
 %\fi
+% 
+% \ifGERMAN 
+% Wenn kein Kurvenname \prm{curvename} angegeben wird, dann werden die
+% Punkte nach aufsteigender $x$-Koordinate sortiert:
+% \fi
+% \ifENGLISH
+% Without \prm{curvename} the points are sorted according to their
+% $x$-coordinate:
+% \fi
+%
+% \iffalse
+%<*ignore>
+%\fi
+\begin{LTXexample}
+\begin{pspicture}(4,5)
+  \pssavebezier[linecolor=DOrange, arrows=->]{A}%
+             (0,0)(0,5)(5,5)(5,1)(1,1.5)
+  \pssavebezier[arrows=->]{B}(0,5)(0,0)(5,0)(5,5)(0,2)
+  \psintersect[name=C, showpoints]{A}{B}
+  \uput[150](!\psGetIsectCenter{C}{}{1} I-C1.x I-C1.y){1}
+  \uput[85](!\psGetIsectCenter{C}{}{2} I-C2.x I-C2.y){2}
+  \uput[90](!\psGetIsectCenter{C}{}{3} I-C3.x I-C3.y){3}
+  \uput[-20](!\psGetIsectCenter{C}{}{4} I-C4.x I-C4.y){4}
+\end{pspicture}
+\end{LTXexample}
+%\iffalse
+%</ignore>
+%\fi
+%
+% \ifGERMAN
+% Die Schnittpunkte können auch mit \Lkeyword{saveintersections} und
+% \opt{saveNodeCoors} geladen werden. Diese werden dann ebenfalls nach
+% aufsteigender $x$-Koordinate nummeriert.
+% \fi
+% \ifENGLISH
+% The intersection points can also be loaded with
+% \Lkeyword{saveintersections} and \opt{saveNodeCoors}. In that case,
+% the numbering of the intersection increases according to their $x$
+% coordinate.
+% \fi
+%
 % \ifGERMAN
 % \chapter{Beispiele}
 % \fi
@@ -1261,8 +1293,10 @@
 % 
 % \begin{changelog}
 %   \patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
-%   \begin{release}{0.3}{2014-xx-xx}
+%   \begin{release}{0.3}{2014-03-04}
 %   \item Fixed \cs{psGetIsectNode} to work with more than one segment.
+%   \item Modified \cs{psGetIsectNode} and the naming conventions of the
+%     variables.
 %   \item Fixed missing support for \opt{pst-node}'s \opt{saveNodeCoors}
 %     parameter to \opt{saveintersections}.
 %   \end{release}
@@ -1297,7 +1331,7 @@
 \input{pst-intersect.tex}
 \IfFileExists{pst-intersect.pro}{%
     \ProvidesFile{pst-intersect.pro}
-      [2014/02/26 PostScript prologue file]
+      [2014/03/04 PostScript prologue file]
       \@addtofilelist{pst-intersect.pro}}{}%
 %    \end{macrocode}
 %</stylefile>
@@ -1705,20 +1739,24 @@
 %    \begin{macrocode}
 \def\psGetIsectCenter#1#2#3{%
   \pst@intersectdict
-  \PIT@name{#1} /\PIT@name{#2@t} get #3 1 sub get 
-  \PIT@name{#1} /\PIT@name{#2} get 
-  dup IsPath {
-    PreparePath dup length 1 sub 
-    3 -1 roll dup dup
-    cvi sub 4 1 roll
-    cvi sub get
-  } if
-  PointArrayToArray
-  tx@FuncDict begin 2 dict begin
-    dup length 2 idiv 1 sub /BezierType exch def /Points exch def GetBezierCoor
-  end end
+  \ifx\\#2\\%
+    \PIT@name{#1} /Points get dup #3 1 sub 2 mul get exch #3 2 mul 1 sub get
+  \else
+    \PIT@name{#1} /\PIT@name{#2@t} get #3 1 sub get 
+    \PIT@name{#1} /\PIT@name{#2} get 
+    dup IsPath {
+      PreparePath dup length 1 sub 
+      3 -1 roll dup dup
+      cvi sub 4 1 roll
+      cvi sub get
+    } if
+    PointArrayToArray
+    tx@FuncDict begin 2 dict begin
+      dup length 2 idiv 1 sub /BezierType exch def /Points exch def GetBezierCoor
+    end end
+  \fi
   end
-  \tx@UserCoor /#2#3.y exch def /#2#3.x exch def
+  \tx@UserCoor /I-#1#3.y exch def /I-#1#3.x exch def
 }%
 %    \end{macrocode}
 % \end{macro}
