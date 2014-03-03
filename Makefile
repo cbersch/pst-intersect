@@ -39,7 +39,7 @@ $(PACKAGE)-code.dvi: $(PACKAGE).dtx $(PACKAGE).sty $(PACKAGE).tex $(PACKAGE).pro
 	        -o $(basename $@)-idx.ind $(basename $@)-idx.idx; \
 	fi
 	$(LATEX) -jobname=$(basename $@) '\newcommand*{\mainlang}{english}\input{tmp.dtx}'	
-	$(RM) -f tmp.dtx
+	$(RM) tmp.dtx
 
 $(PACKAGE).dvi: L = english
 $(PACKAGE)-DE.dvi: L = ngerman
@@ -80,9 +80,10 @@ ctan : dist arch-tds
 	$(RM) -rf $(PACKAGE)/
 
 clean :
-	$(RM) $(foreach prefix, $(PACKAGE) $(PACKAGE)-DE $(PACKAGE)-code, \
+	$(RM) $(foreach prefix, $(PACKAGE) $(PACKAGE)-code $(PACKAGE)-DE, \
 	        $(addprefix $(prefix), .dvi .ps .log .aux .bbl .blg .out .tmp \
-	           .toc .hd))
+	           .toc .idx .ind .ilg .hd \
+	           -idx.idx -idx.ilg -idx.ind -doc.idx -doc.ilg -doc.ind .hd))
 
 veryclean : clean
-	$(RM) $(addprefix $(PACKAGE), .pdf .tex .sty .pro) $(PACKAGE)-DE.pdf $(PACKAGE)-code.pdf Changes
+	$(RM) $(addprefix $(PACKAGE), .pdf .tex .sty .pro .zip .tds.zip) $(PACKAGE)-DE.pdf $(PACKAGE)-code.pdf Changes
