@@ -95,7 +95,7 @@
   \psintersect[showpoints]{First}{Second}
   \pscustom[fillstyle=solid, fillcolor=green!20]{%
     \pstracecurve[istart=1, istop=2]{}{Second}
-    \pstracecurve[istart=1, istop=2]{}{First}
+    \pstracecurve[istart=2, istop=1]{}{First}
   }
   \pstracecurve[linestyle=dashed, istart=1, istop=2, linewidth=2\pslinewidth, linecolor=blue]{}{Second}
 \end{pspicture}
@@ -113,5 +113,19 @@
   \pssavepath{B}{\psplot[plotpoints=50]{0}{10}{2 x neg 0.5 mul exp 4 mul}}
   \psintersect[name=C, showpoints]{A}{B}
   \multido{\i=1+2,\ii=2+2}{5}{\uput[120](C\i){\i}\uput[60](C\ii){\ii}}
+\end{pspicture}
+
+\bigskip
+\begin{pspicture}(0,-1)(5,1)
+  \pssavepath[linestyle=none]{A}{\parametricplot[algebraic, VarStep, VarStepEpsilon=0.0001]{-1}{1}{t^2|t}}
+  \pssavepath[linestyle=none]{B}{\parametricplot[algebraic, VarStep, VarStepEpsilon=0.0001]{-1}{1}{-t^2+5|t}}
+  \pssavepath{C}{\psline(0.5,-1)(0.5,1)}
+  \pssavepath{D}{\psline(4.5,-1)(4.5,1)}
+  \psintersect[name=Ia]{A}{C}
+  \psintersect[name=Ib]{B}{D}
+  \pscustom[linecolor=green, fillstyle=solid, fillcolor=red]{%
+    \pstracecurve[istart=1,istop=2]{Ia}{A}%
+    \pstracecurve[istart=2,istop=1]{Ib}{B}
+    \closepath}
 \end{pspicture}
 \end{document}

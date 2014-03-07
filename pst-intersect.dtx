@@ -1295,6 +1295,7 @@
 %   \patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
 %   \begin{release}{0.4}{2014-xx-xx}
 %   \item Fixed \cs{pstracecurve} for use with \cs{pscustom}.
+%   \item Fixed arrow behavior.
 %   \end{release}
 %   \begin{release}{0.3}{2014-03-04}
 %   \item Fixed \cs{psGetIsectNode} to work with more than one segment.
@@ -1379,6 +1380,8 @@
 }%
 \newif\PIT@saveintersections
 \define@boolkey[psset]{intersect}[PIT@]{saveintersections}[true]{}
+\newif\PIT@addintersections
+\define@boolkey[psset]{intersect}[PIT@]{addintersections}[true]{}
 
 \psset[intersect]{%
   tstart=-1,
@@ -1386,7 +1389,8 @@
   istart=-1,
   istop=-1,
   name={},
-  saveintersections
+  saveintersections,
+  addintersections=false
 }%
 %    \end{macrocode}
 % 
@@ -1536,7 +1540,7 @@
 %    \end{macrocode}
 % reverse the path, draw everything and resave the path
 %    \begin{macrocode}
-        exch 3 -1 roll dup 4 1 roll GetSegmentCount
+        3 -1 roll dup 4 1 roll GetSegmentCount
         dup 4 1 roll exch sub 3 1 roll sub exch
         gsave newpath
           [ 4 -1 roll aload pop InitTracing
@@ -1571,6 +1575,7 @@
     } ifelse
     end
   }%
+  \showpointsfalse
   \end@OpenObj
 }%
 %    \end{macrocode}
@@ -1586,7 +1591,7 @@
     /\PIT@name{\PIT@name@default}
     \else
     /\PIT@name{#1}
-    \fi 
+    \fi
     dup currentdict exch known not {
       \ifx\\#1\\%
       (You haven't defined an intersection!) ==
@@ -1613,7 +1618,7 @@
     } {
       pop \PIT@key@tstop
     } ifelse
-    3 -1 roll dup 4 1 roll GetSegmentCount 
+    3 -1 roll dup 4 1 roll GetSegmentCount
     2 copy exch dup 3 1 roll % [curve] tstart tstop cnt tstop cnt tstop 
     lt exch 0 lt or { exch } if pop % (tstop < 0 | cnt < tstop)
     3 -1 roll dup
@@ -1636,7 +1641,7 @@
       } if
       ShowPathPortion
     }{
-      [ exch dup 5 -2 roll
+      mark exch dup 5 -2 roll
       exch dup 0 lt { pop 0 } if exch
       dup 0 lt { pop 1 } if
       2 copy gt {
@@ -1655,6 +1660,7 @@
     } ifelse
     end
   }%
+  \showpointsfalse
   \end@OpenObj
 }%
 %    \end{macrocode}
@@ -1695,7 +1701,8 @@
         4 copy LoadIntersectionPoints 5 1 roll
       } ifelse
     } ifelse
-    /\PIT@@name\space /\PIT@name{#1} /\PIT@name{#2} 8 3 roll 
+    /\PIT@name{#1} /\PIT@name{#2} /\PIT@@name
+    \ifPIT@addintersections true \else false \fi
     SaveIntersection
   }%
   \ifPIT@saveintersections
@@ -2003,23 +2010,71 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 % 
+% \begin{macro}{MergeAndSort}
+%   Merge and sort two arrays. That may be point arrays or simple
+%   arrays. Both arrays must be of the same type, but that is not
+%   checked.
+%    \begin{macrocode}
+/MergeAndSortArrays {
+  [ 3 1 roll aload pop counttomark -1 roll aload pop ]
+  dup length 0 gt {
+    dup dup 0 get type /arraytype eq {
+      hulldict /comp get
+    } {
+      /lt
+    } ifelse
+    exch quicksort
+  } if
+} bind def
+%    \end{macrocode}
+% \end{macro}
+% 
 % \begin{macro}{SaveIntersection}
 %   \begin{pssyntax}
-%     \PSname{isectname} \PSname{nameA} \PSname{nameB} 
 %     \PSarray{intersectionpoints} \PSarray{A} \PSarray{tA} \PSarray{B} \PSarray{tB} 
+%     \PSname{nameA} \PSname{nameB} \PSname{isectname} \PSvar{add?}
 %     \PSop{SaveIntersection}
 %   \end{pssyntax}
 %    \begin{macrocode}
 /SaveIntersection {
   (SaveIntersection) DebugBegin
-  4 dict dup 10 -1 roll exch def
-  begin %
-    /Points 6 -1 roll def
-    5 -1 roll dup 4 -1 roll def % /curveA [curveA] [tA] [tB] /curveB /curveB [curveB] def
-    nametostr (@t) strcat cvn exch TArray def % /curveA [curveA] [tA] /curveB@t [tB] def
-    3 -1 roll dup 4 -1 roll def
-    nametostr (@t) strcat cvn exch TArray def
-  end
+  exch dup 3 1 roll % isectname add? isectname
+  currentdict exch known and {
+%    \end{macrocode}
+% Want to add the new intersections to an existing intersection. Merge
+% the new arrays with the existing ones and resort the \PSvar{Points}
+% and \PSvar{\ldots @t} arrays.
+%    \begin{macrocode}
+    load begin % pnts A tA B tB /A /B
+      dup currentdict exch known { % /nameB already saved.
+        4 -1 roll pop % pnts A tA tB /A /B
+        nametostr (@t) strcat cvn dup load 4 -1 roll 
+        MergeAndSortArrays def
+      } {
+        dup 5 -1 roll def % pnts A tA B tB /A /B
+        nametostr (@t) strcat cvn 3 -1 roll TArray def
+      } ifelse % pnts A tA /A
+      dup currentdict exch known { % /nameB already saved.
+        3 -1 roll pop
+        nametostr (@t) strcat cvn dup load 3 -1 roll 
+        MergeAndSortArrays def
+      } {
+        dup 4 -1 roll def
+        nametostr (@t) strcat cvn exch TArray def
+      } ifelse
+      /Points exch ArrayToPointArray Points ArrayToPointArray 
+      MergeAndSortArrays PointArrayToArray def
+    end
+  } {
+    4 dict dup 3 1 roll def
+    begin
+      dup 5 -1 roll def
+      nametostr (@t) strcat cvn 3 -1 roll TArray def
+      dup 4 -1 roll def
+      nametostr (@t) strcat cvn exch TArray def
+      /Points exch def
+    end
+  } ifelse
   DebugEnd
 } bind def
 %    \end{macrocode}
@@ -2037,7 +2092,6 @@ tx@IntersectDict begin
 % \end{pssyntax}
 %    \begin{macrocode}
 /TArray {
-  (TArray) DebugBegin
   dup length 0 gt {
     dup 0 get type /arraytype eq {
       [ exch
@@ -2047,7 +2101,6 @@ tx@IntersectDict begin
     } if
     dup /lt exch quicksort
   } if
-  DebugEnd %1 debug
 } bind def
 %    \end{macrocode}
 % \end{macro} 
@@ -3061,7 +3114,7 @@ tx@IntersectDict begin
   8 dict begin
   /tstop exch def
   /tstart exch def
-  /savecp { ToVec /@cp exch def } def
+  /savecp { ToVec cvx /@cp exch def } def
   InitTracing
   /n 0 def
   mark exch aload pop
@@ -3071,7 +3124,7 @@ tx@IntersectDict begin
     dup /movetype eq {
       pop savecp
     } {
-      tstart n gt {
+      tstart n ge {
 %    \end{macrocode}      
 % current path section is before tstop
 %    \begin{macrocode}
@@ -3086,7 +3139,7 @@ tx@IntersectDict begin
           ToUnitInterval exch
           /linetype eq {
             3 1 roll ToVec 
-            tstart n 1 sub gt { @cp } { currentpoint ToVec } ifelse exch ToVec
+            tstart n 1 sub gt { @cp ToVec } { currentpoint ToVec } ifelse exch ToVec
             dup 3 -1 roll Portion
             aload pop exch 
             tstart n 1 sub gt { 
@@ -3112,19 +3165,19 @@ tx@IntersectDict begin
               pop aload pop currentpoint 4 2 roll ArrowB linetype pop pop
             } ifelse
           } {
-            7 1 roll [ currentpoint 9 3 roll ] ArrayToPointArray
-            dup 3 -1 roll Portion 
+            7 1 roll
+            [ tstart n 1 sub gt { @cp }{ currentpoint } ifelse
+            9 3 roll ] ArrayToPointArray
+            dup 3 -1 roll 
+            Portion
             { aload pop } forall
-            8 -2 roll
-            tstart n 1 sub gt { movetype } { pop pop } ifelse
-            6 -2 roll currentpoint ArrowA 6 2 roll
-            tstop n le {
-%    \end{macrocode}              
-% only a single segment
-%    \begin{macrocode}
-              ArrowB
-            } if
-            linetype
+            tstart n 1 sub gt {
+              8 -4 roll 4 2 roll ArrowA 6 2 roll
+            } {
+              8 -2 roll pop pop
+            } ifelse
+            tstop n le { ArrowB } if
+            curvetype
           } ifelse
         }{
 %    \end{macrocode}
