@@ -1534,37 +1534,11 @@
       (You haven't defined the curve '#1') ==
     } if
     \PIT@name{#1} \PIT@key@tstart\space\PIT@key@tstop\space % [curve] tstart tstop
-    UnifyInterval
-    3 -1 roll dup IsPath {
-      3 1 roll 2 copy gt {
-%    \end{macrocode}
-% reverse the path, draw everything and resave the path
-%    \begin{macrocode}
-        ReverseInterval
-        3 -1 roll ReversePath 3 1 roll
-      } if
-      ShowPathPortion
-    }{ % tstart tstop [curve]
-      mark exch 4 2 roll % [ [curve] tstart tstop
-      2 copy gt { % tstart > tstop
-%    \end{macrocode}
-% Exchange tstart and tstop and reverse the curve array
-%    \begin{macrocode}
-        exch
-        [ 4 -1 roll ReverseCurve 3 1 roll % [ [curve'] tstart tstop
-      } if
-      ToUnitInterval exch dup 3 -1 roll Portion
-      { aload pop } forall
-%    \end{macrocode}
-% reverse the point order
-%    \begin{macrocode}
-      counttomark -2 4 { 2 roll } for
-      counttomark 2 sub 2 idiv
-      \psk@plotpoints
-      exch
+    {\psk@plotpoints exch
       \txFunc@BezierCurve
       \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
-    } ifelse
+    }
+    TraceCurveOrPath
     end
   }%
   %\showpointsfalse
@@ -1608,30 +1582,11 @@
     } {
       pop \PIT@key@tstop
     } ifelse % [curve] tstart tstop
-    UnifyInterval
-    3 -1 roll dup IsPath {
-      3 1 roll 2 copy gt {
-%    \end{macrocode}
-% reverse the path, draw everything and resave the path
-%    \begin{macrocode}
-        ReverseInterval
-        3 -1 roll ReversePath 3 1 roll
-      } if
-      ShowPathPortion
-    }{ % tstart tstop [curve]
-      mark exch 4 2 roll
-      2 copy gt {
-        exch
-        [ 4 -1 roll ReverseCurve 3 1 roll
-      } if
-      ToUnitInterval exch dup 3 -1 roll Portion 
-      { aload pop } forall
-      counttomark 2 sub 2 idiv
-      \psk@plotpoints
-      exch
+    {\psk@plotpoints exch
       \txFunc@BezierCurve
       \ifshowpoints \txFunc@BezierShowPoints \else pop \fi
-    } ifelse
+    }
+    TraceCurveOrPath
     end
   }%
   %\showpointsfalse
@@ -1889,7 +1844,7 @@ tx@IntersectDict begin
 %    \begin{macrocode}
 /IntersectBeziers {
   2 copy length 2 eq exch length 2 eq and {
-    IntersectLines
+    IntersectLineSegms
   }{ 
     2 copy [0 1] [0 1] IterateIntersection
   } ifelse
@@ -1899,10 +1854,10 @@ tx@IntersectDict begin
 % \end{macro}
 %
 % \begin{macro}{IntersectLines}
-% 
+% Intersect two lines.
 %   \begin{pssyntax}
 %     \PSarray{lineA} \PSarray{lineB} \PSop{IntersectLines}
-%     \PSarray{lineA} \PSarray{tA} \PSarray{lineB} \PSarray{tB}
+%     \PSarray{lineA} \PSarray{lineB} \PSarray{tA} \PSarray{tB}
 %   \end{pssyntax}
 %    \begin{macrocode}
 /IntersectLines {
@@ -1912,26 +1867,54 @@ tx@IntersectDict begin
   8 -2 roll 2 copy 10 4 roll 4 2 roll 2 copy 6 2 roll 10 2 roll
   VecSub
   6 2 roll 4 2 roll VecSub
-  8 4 roll 4 2 roll VecSub % X3-X4 Y3-Y4 X2-X1 Y2-Y1 X3-X1 Y3-Y1 % b1 b2 a1 a2 c1 c2
+  8 4 roll 4 2 roll VecSub 
+%    \end{macrocode}
+% X3-X4 Y3-Y4 X2-X1 Y2-Y1 X3-X1 Y3-Y1 % b1 b2 a1 a2 c1 c2
+%    \begin{macrocode}
   6 copy 12 -4 roll 
   neg 4 -1 roll mul 3 1 roll mul add
   dup 0 eq {
-    % no intersections
+%    \end{macrocode}
+% no intersections
+%    \begin{macrocode}
     9 { pop } repeat [] []
   } {
     dup 10 1 roll 5 1 roll
      4 -1 roll mul 3 1 roll mul sub exch div
-     6 1 roll 4 -1 roll mul 3 1 roll mul sub exch div
-     2 copy 2 copy 0 ge exch 0 ge and 3 1 roll 1 le exch 1 le and and {
-       [ exch ] exch [ exch ]
-     } {
-       pop pop [] []
-     } ifelse
-  } ifelse
+     6 1 roll 4 -1 roll mul 3 1 roll mul sub exch div 
+     [ exch ] exch [ exch ]
+   } ifelse
   DebugEnd
 } bind def
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{IntersectLineSegms}
+%   Intersect two line segments. This uses the output of
+%   \PSop{IntersectLines} and checks if both line parameters are in the
+%   range [0,1].
+%   \begin{pssyntax}
+%     \PSarray{lineA} \PSarray{lineB} \PSop{IntersectLineSegms}
+%     \PSarray{lineA} \PSarray{lineB} \PSarray{tA} \PSarray{tB}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IntersectLineSegms {
+  IntersectLines
+  dup length 0 eq not {
+%    \end{macrocode}
+% IntersectLines has found an intersection
+%    \begin{macrocode}
+    0 get exch 0 get
+    2 copy 2 copy 0 ge exch 0 ge and 3 1 roll 1 le exch 1 le and and {
+      [ exch ] exch [ exch ]
+    } {
+      pop pop [] []
+    } ifelse
+  } if
+} bind def
+%    \end{macrocode}
+% \end{macro}
+% 
 % \begin{macro}{IntersectPaths}
 %   \begin{pssyntax}
 %     \PSarray{pathA} \PSarray{pathB} \PSop{IntersectPaths}
@@ -2242,7 +2225,6 @@ tx@IntersectDict begin
 % \end{macro}
 % 
 % \begin{macro}{LoadLineIntersectionPoints}
-% Prepare \PSarray{Curve} for use with tx@Func
 % \begin{pssyntax}
 % \PSarray{curve} \PSarray{t} \PSop{LoadLineIntersectionPoints}
 % \PSarray{I0.x I0.y \ldots IN.x YN.x}
@@ -2276,7 +2258,9 @@ tx@IntersectDict begin
     [ exch { aload pop } forall ]
     exch [ exch { aload pop } forall ]
   } repeat
-  % [A0.x A0.y ... AM.x AM.y] [tA0a tA0b ... tAMa tAMb] [tB0a tB0b ... tBNa tBNb] [B0.x B0.y ... BN.x BN.y]
+%    \end{macrocode}
+% [A0.x A0.y ... AM.x AM.y] [tA0a tA0b ... tAMa tAMb] [tB0a tB0b ... tBNa tBNb] [B0.x B0.y ... BN.x BN.y]
+%    \begin{macrocode}
   tx@Dict begin tx@FuncDict begin 2 dict begin
     dup length 2 idiv 1 sub /BezierType exch def /Points exch def
       [ exch { GetBezierCoor } forall ]
@@ -2284,15 +2268,18 @@ tx@IntersectDict begin
     dup length 2 idiv 1 sub /BezierType exch def /Points exch def
       [ exch { GetBezierCoor } forall ]
     end
-    %2 debug
-    % [IB0.xa IB0.ya IB0.xb IB0.yb ... IBM.yb] [IA0.xa IA0.ya IA0.xb IA0.yb ... IAM.yb]
+%    \end{macrocode}
+% [IB0.xa IB0.ya IB0.xb IB0.yb ... IBM.yb] [IA0.xa IA0.ya IA0.xb IA0.yb ... IAM.yb]
+%    \begin{macrocode}
     2 {
       [ exch aload length 4 idiv {
         [ 5 1 roll ] counttomark 1 roll
       } repeat ]
       exch 
     } repeat
-    % [[IB0.xa ...] ... [... IBM.yb]] [[IA0.xa IA0.ya IA0.xb IA0.yb] ...[IAM.xa ... IAM.yb]]
+%    \end{macrocode}
+% [[IB0.xa ...] ... [... IBM.yb]] [[IA0.xa IA0.ya IA0.xb IA0.yb] ...[IAM.xa ... IAM.yb]]
+%    \begin{macrocode}
     2 {
       dup hulldict /comp get exch quicksort exch
     } repeat
@@ -2303,16 +2290,7 @@ tx@IntersectDict begin
         2 copy aload pop VecSub Pyth exch 
         aload pop VecSub Pyth lt { exch } if pop
         aload pop VecAdd 0.5 VecScale
-      } for 
-      % merge near intersection points
-      %counttomark 2 idiv 1 1 3 -1 roll {
-      %  pop
-      %  counttomark 4 lt { exit } if
-      %  4 copy 4 2 roll ToVec 3 1 roll ToVec AreNear {
-
-      %  }
-      %} for
-      ]
+      } for ]
     end
   end end
   DebugEnd
@@ -2368,6 +2346,11 @@ tx@IntersectDict begin
     } if
     DebugEnd
 } bind def
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{TArraysRemoveDup}
+%    \begin{macrocode}
 /TArraysRemoveDup {
   4 dict begin
     /tB exch def
@@ -3303,6 +3286,47 @@ tx@IntersectDict begin
   } loop
   end
   DebugEnd
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{TraceCurveOrPath}
+%   \begin{pssyntax}
+%     \PSarray{curve} \PSvar{tstart tstop} \PSproc{drawcurve}
+%     \PSop{TraceCurveOrPath}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/TraceCurveOrPath {
+  4 1 roll
+  UnifyInterval
+  3 -1 roll dup IsPath {
+    4 -1 roll pop
+    3 1 roll 2 copy gt {
+%    \end{macrocode}
+% reverse the path, draw everything and resave the path
+%    \begin{macrocode}
+      ReverseInterval
+      3 -1 roll ReversePath 3 1 roll
+    } if
+    ShowPathPortion
+  }{ % tstart tstop [curve]
+    mark exch 4 2 roll % [ [curve] tstart tstop
+      2 copy gt { % tstart > tstop
+%    \end{macrocode}
+% Exchange tstart and tstop and reverse the curve array
+%    \begin{macrocode}
+        exch
+        [ 4 -1 roll ReverseCurve 3 1 roll % [ [curve'] tstart tstop
+      } if
+      ToUnitInterval exch dup 3 -1 roll Portion
+      { aload pop } forall
+%    \end{macrocode}
+% reverse the point order
+%    \begin{macrocode}
+      counttomark -2 4 { 2 roll } for
+      counttomark 2 sub 2 idiv
+      counttomark 2 add -1 roll exec
+    } ifelse
 } bind def
 %    \end{macrocode}
 % \end{macro}
