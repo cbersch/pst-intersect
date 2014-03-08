@@ -1294,6 +1294,7 @@
 % \begin{changelog}
 %   \patchcmd{\release}{\setlength{\itemsep}{0pt}}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}{}{}
 %   \begin{release}{0.4}{2014-xx-xx}
+%   \item Added \cs{psGetCurvePoint}.
 %   \item Fixed \cs{pstracecurve} for use with \cs{pscustom}.
 %   \item Fixed arrow behavior.
 %   \end{release}
@@ -1308,7 +1309,7 @@
 %   \item Added support for \opt{arrows} parameter to \cs{pstracecurve}.
 %   \item Modified parameters \opt{tstart}, \opt{tstop}, \opt{istart}
 %     and \opt{istop} to respect different directions.
-%   \item Added macro \cs{psGetIsectCenter}
+%   \item Added \cs{psGetIsectCenter}
 %   \item Fixed a bug in the termination of the iteration procedure.
 %   \item Fixed a bug in the point order of Bézier curves, which was
 %     related to a now fixed bug in \opt{pst-func}.
@@ -1700,23 +1701,15 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{pscurvenode}
+% \begin{macro}{\psGetCurvePoint}
 %    \begin{macrocode}
-\def\pscurvenode#1#2{%
-  \begin@SpecialObj
-    \addto@pscode{%
-      \pst@intersectdict
-      currentdict /\PIT@name{#1} known not {
-        (You haven't defined the curve or path '#1') ==
-      } if
-      \PIT@name{#1} dup isPath {
-        
-      } {
-
-      } else
-      end
-    }%
-  \end@SpecialObj
+\def\psGetCurvePoint#1#2{%
+  \pst@intersectdict
+  currentdict /\PIT@name{#1} known not {
+    (You haven't defined the curve or path '#1') ==
+  } if
+  #2 \PIT@name{#1} GetCurvePoint \tx@UserCoor
+  end
 }%
 %    \end{macrocode}
 % \end{macro}
@@ -1946,7 +1939,6 @@ tx@IntersectDict begin
     } forall
     pop % remove [pathA]
     [ isect { aload pop } forall ] 3 1 roll tA exch tB
-    % [intersections] [pathA] [tA] [pathB] [tB]
   end
   DebugEnd
 } bind def
@@ -1977,7 +1969,6 @@ tx@IntersectDict begin
     } forall
     pop % remove [curveA]
     [ isect { aload pop } forall ] 3 1 roll tA exch tB
-    % [intersections] [curveA] [tA] [pathB] [tB]
   end
   DebugEnd
 } bind def
@@ -3290,6 +3281,71 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{GetCurvePoint}
+% Get the coordinates of the curve point at \PSvar{t}.
+%   \begin{pssyntax}
+%     \PSvar{t} \PSarray{curve} \PSop{GetCurvePoint} \PSvar{X Y}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/GetCurvePoint {
+  dup IsPath {
+    5 dict begin 
+    exch dup /tstart exch def
+    1 add cvi /tstop exch def
+    /savecp { ToVec cvx /@cp exch def } def
+    /n 0 def
+    mark exch aload pop
+    { 
+      counttomark 0 eq n tstop ge or { cleartomark exit } if
+      dup /movetype eq not { /n n 1 add def } if
+      dup /movetype eq {
+        pop savecp
+      } {
+        tstart n ge {
+%    \end{macrocode}      
+% current path section is before tstop
+%    \begin{macrocode}
+          /curvetype eq { 6 2 roll 4 { pop } repeat } if
+          savecp
+        } {
+          tstart n 1 sub gt {
+            tstart n sub 1 add tstop n sub 1 add
+            ToUnitInterval exch
+            /linetype eq {
+              3 1 roll ToVec 
+              tstart n 1 sub gt { @cp ToVec } { currentpoint ToVec } ifelse exch ToVec
+              dup 3 -1 roll Portion 
+            } {
+              7 1 roll
+              [ @cp 9 3 roll ] ArrayToPointArray
+              dup 3 -1 roll 
+              Portion
+            } ifelse
+            0 get aload pop
+          }{
+%    \end{macrocode}
+% full segment
+%    \begin{macrocode}
+            /curvetype eq {
+              pop pop pop pop
+            } if
+          } ifelse
+          counttomark 1 add 2 roll cleartomark exit
+        } ifelse
+      } ifelse
+    } loop
+    end
+  } {
+    exch dup 0 eq {
+      pop 0 get aload pop
+    } {
+      0 exch ToUnitInterval exch dup 3 -1 roll Portion
+      dup length 1 sub get aload pop
+    } ifelse
+  } ifelse
+} bind def
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{TraceCurveOrPath}
 %   \begin{pssyntax}
 %     \PSarray{curve} \PSvar{tstart tstop} \PSproc{drawcurve}

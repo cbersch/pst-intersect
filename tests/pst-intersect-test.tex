@@ -128,4 +128,22 @@
     \pstracecurve[istart=2,istop=1]{Ib}{B}
     \closepath}
 \end{pspicture}
+\bigskip
+
+\begin{pspicture}[showgrid](5,5)
+  \pssavebezier{A}(0,0)(0,5)(5,0)(5,5)
+  \multido{\r=0+0.1}{11}{\psdot(! \psGetCurvePoint{A}{\r})}
+\end{pspicture}
+\bigskip
+
+\begin{pspicture}[showgrid](0,-1)(3,1)
+  \psdot(0,0) \uput[180](0,0){$a$}
+  \psdot(3,1) \uput[45](3,1){$c$}
+  \psdot(3,-1) \uput[-45](3,-1){$b$}
+  \psbezier(3,1)(2,0.4)(1,0.1)(0,0)
+  \pssavepath{A}{\psbezier(0,0)(1,-0.1)(2,-0.4)(3,-1)}
+  \pssavepath{B}{\psbezier(3,-1)(2.6,-0.5)(2.6,0.5)(3,1)}
+  \psline[linecolor=red](!\psGetCurvePoint{A}{0.66})(!\psGetCurvePoint{B}{0.33})
+  \psdots(!\psGetCurvePoint{A}{0.66})(!\psGetCurvePoint{B}{0.33})
+\end{pspicture}
 \end{document}
