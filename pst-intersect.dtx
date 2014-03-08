@@ -1530,38 +1530,30 @@
   \PIT@checkname{#1}%
   \addto@pscode{%
     \pst@intersectdict
-    \PIT@key@tstop\space dup 0 lt { pop \PIT@name{#1} GetSegmentCount } if
-    \PIT@key@tstart\space dup 0 lt { pop 0 } if exch
-    \PIT@name{#1} GetSegmentCount
-    2 copy exch dup 3 1 roll
-    lt exch 0 lt or { exch } if pop
-    \PIT@name{#1} dup IsPath {
+    /\PIT@name{#1} currentdict exch known not {
+      (You haven't defined the curve '#1') ==
+    } if
+    \PIT@name{#1} \PIT@key@tstart\space\PIT@key@tstop\space % [curve] tstart tstop
+    UnifyInterval
+    3 -1 roll dup IsPath {
       3 1 roll 2 copy gt {
 %    \end{macrocode}
 % reverse the path, draw everything and resave the path
 %    \begin{macrocode}
-        3 -1 roll dup 4 1 roll GetSegmentCount
-        dup 4 1 roll exch sub 3 1 roll sub exch
-        gsave newpath
-          [ 4 -1 roll aload pop InitTracing
-          { counttomark 0 eq { exit } if
-            load exec
-          } loop
-          reversepath
-          GetFullPath ] 3 1 roll        
-        grestore
+        ReverseInterval
+        3 -1 roll ReversePath 3 1 roll
       } if
       ShowPathPortion
-    }{
-      [ exch dup 5 -2 roll
-      2 copy gt {
+    }{ % tstart tstop [curve]
+      mark exch 4 2 roll % [ [curve] tstart tstop
+      2 copy gt { % tstart > tstop
+%    \end{macrocode}
+% Exchange tstart and tstop and reverse the curve array
+%    \begin{macrocode}
         exch
-        2 copy gt { exch } if
-        [ 5 -2 roll pop PointArrayToArray aload pop
-        counttomark -2 4 { 2 roll } for ] ArrayToPointArray dup
-        4 2 roll
+        [ 4 -1 roll ReverseCurve 3 1 roll % [ [curve'] tstart tstop
       } if
-      ToUnitInterval Portion
+      ToUnitInterval exch dup 3 -1 roll Portion
       { aload pop } forall
 %    \end{macrocode}
 % reverse the point order
@@ -1575,7 +1567,7 @@
     } ifelse
     end
   }%
-  \showpointsfalse
+  %\showpointsfalse
   \end@OpenObj
 }%
 %    \end{macrocode}
@@ -1610,47 +1602,29 @@
     } {
       \PIT@key@tstart
     } ifelse
-    dup 0 lt { pop 0 } if
     exch % [curve] t_istart|tstart [ts]
-    % 
     dup length \PIT@key@istop\space ge 0 \PIT@key@istop\space lt and {
       \PIT@key@istop\space cvi 1 sub get
     } {
       pop \PIT@key@tstop
-    } ifelse
-    3 -1 roll dup 4 1 roll GetSegmentCount
-    2 copy exch dup 3 1 roll % [curve] tstart tstop cnt tstop cnt tstop 
-    lt exch 0 lt or { exch } if pop % (tstop < 0 | cnt < tstop)
-    3 -1 roll dup
-    IsPath {
-      3 1 roll
-      2 copy gt {
-        3 -1 roll dup 4 1 roll GetSegmentCount
-        dup 4 1 roll exch sub 3 1 roll sub exch
+    } ifelse % [curve] tstart tstop
+    UnifyInterval
+    3 -1 roll dup IsPath {
+      3 1 roll 2 copy gt {
 %    \end{macrocode}
 % reverse the path, draw everything and resave the path
 %    \begin{macrocode}
-        gsave newpath
-          [ 4 -1 roll aload pop InitTracing
-          { counttomark 0 eq { exit } if
-            load exec
-          } loop
-          reversepath
-          GetFullPath ] 3 1 roll        
-        grestore
+        ReverseInterval
+        3 -1 roll ReversePath 3 1 roll
       } if
       ShowPathPortion
-    }{
-      mark exch dup 5 -2 roll
-      exch dup 0 lt { pop 0 } if exch
-      dup 0 lt { pop 1 } if
+    }{ % tstart tstop [curve]
+      mark exch 4 2 roll
       2 copy gt {
         exch
-        [ 5 -2 roll pop PointArrayToArray aload pop
-        counttomark -2 4 { 2 roll } for ] ArrayToPointArray dup
-        4 2 roll
+        [ 4 -1 roll ReverseCurve 3 1 roll
       } if
-      ToUnitInterval Portion 
+      ToUnitInterval exch dup 3 -1 roll Portion 
       { aload pop } forall
       counttomark 2 sub 2 idiv
       \psk@plotpoints
@@ -1660,7 +1634,7 @@
     } ifelse
     end
   }%
-  \showpointsfalse
+  %\showpointsfalse
   \end@OpenObj
 }%
 %    \end{macrocode}
@@ -1771,6 +1745,26 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{pscurvenode}
+%    \begin{macrocode}
+\def\pscurvenode#1#2{%
+  \begin@SpecialObj
+    \addto@pscode{%
+      \pst@intersectdict
+      currentdict /\PIT@name{#1} known not {
+        (You haven't defined the curve or path '#1') ==
+      } if
+      \PIT@name{#1} dup isPath {
+        
+      } {
+
+      } else
+      end
+    }%
+  \end@SpecialObj
+}%
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 \catcode`\@=\PstAtCode\relax
 %    \end{macrocode}
@@ -2124,7 +2118,67 @@ tx@IntersectDict begin
   DebugEnd
 } bind def
 %    \end{macrocode}
+% 
+% \begin{macro}{ReversePath}
+%    \begin{macrocode}
+/ReversePath {
+  gsave newpath
+    [ exch aload pop InitTracing
+    { counttomark 0 eq { exit } if
+      load exec
+    } loop
+    reversepath
+    GetFullPath ]         
+  grestore
+} bind def
+%    \end{macrocode}
+% \end{macro}
 %
+% \begin{macro}{ReverseCurve}
+% Reverse direction of a bezier curve.
+%   \begin{pssyntax}
+%     \PSarray{\PSarray{X0 Y0} \ldots \PSarray{XN YN}}
+%     \PSop{ReverseCurve} \PSarray{\PSarray{XN YN} \ldots \PSarray{X0 Y0}}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/ReverseCurve {
+  PointArrayToArray aload pop % [ tstart tstop [ X0 Y0 X1 Y1...
+  counttomark -2 4 { 2 roll } for ] ArrayToPointArray
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{ReverseInterval}
+%   \begin{pssyntax}
+%     \PSarray{path} \PSvar{tstart} \PSvar{tstop} \PSop{ReverseInterval}
+%     \PSarray{path} \PSvar{L-tstop} \PSvar{L-tstart}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/ReverseInterval {
+  3 -1 roll dup 4 1 roll GetSegmentCount
+  dup 4 1 roll exch sub 3 1 roll sub exch
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{UnifyInterval}
+%   Unifies the interval \PSarray{tstart tstop}. If \PSvar{tstart} is
+%   negative, 0 is used. If \PSvar{tstop} is negative, the curve length
+%   is used. A too large \PSvar{tstop} is also truncated to the curve
+%   length.
+%   \begin{pssyntax}
+%     \PSarray{curve} \PSvar{tstart tstop} \PSop{UnifyInterval}
+%     \PSarray{curve} \PSvar{tstart' tstop}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/UnifyInterval {
+  exch dup 0 lt { pop 0 } if exch
+  3 -1 roll dup 4 1 roll GetSegmentCount
+  2 copy exch dup 3 1 roll % [curve] tstart tstop cnt tstop cnt tstop 
+  lt exch 0 lt or { exch } if pop % (tstop < 0 | cnt < tstop)
+} bind def
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{PreparePath}
 % [ ... /movetype ... /linetype .../curvetype ]
 %    \begin{macrocode}
@@ -2151,7 +2205,14 @@ tx@IntersectDict begin
 % \end{macro}
 %
 % \begin{macro}{GetSegmentCount}
-% \PSarray{CurveOrPath} \PSop{GetSegmentCount} -> number of /linetype and /curvetypes
+%   Count the number of path or bezier curve segments. Bezier curves
+%   always have the length 1, independent of their order. For paths,
+%   only the \PSname{linetype} and \PSname{curvetype} segments are
+%   counted.
+%   \begin{pssyntax}
+%     \PSarray{CurveOrPath} \PSop{GetSegmentCount} \PSvar{cnt}
+%   \end{pssyntax}
+% 
 %    \begin{macrocode}
 /GetSegmentCount {
   (GetSegmentCount) DebugBegin
@@ -2173,7 +2234,7 @@ tx@IntersectDict begin
     exch pop
   } {
     % a Bezier curve is a single segment
-    pop 1
+    length 0 gt { 1 } { 0 } ifelse
   } ifelse
   DebugEnd
 } bind def
