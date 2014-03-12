@@ -1786,14 +1786,14 @@ tx@IntersectDict begin
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ToVec}
+% \begin{macro}{ToPnt}
 %   Convert two numbers to a procedure holding the two values. This
 %   representation is used to save coordinate values of nodes and vectors.
 %   \begin{pssyntax}
-%     \PSvar{X Y} \PSop{ToVec} \PSarray{X Y}
+%     \PSvar{X Y} \PSop{ToPnt} \PSarray{X Y}
 %   \end{pssyntax}
 %    \begin{macrocode}
-/ToVec {
+/ToPnt {
     [ 3 1 roll ]
 } bind def
 %    \end{macrocode}
@@ -2162,13 +2162,13 @@ tx@IntersectDict begin
   {
     dup type /nametype eq not { exit } if
     dup /movetype eq {
-      pop ToVec /@mycp exch def
+      pop ToPnt /@mycp exch def
     } {
       dup /linetype eq {
-        pop [ @mycp 4 2 roll 2 copy ToVec /@mycp exch def ToVec ]
+        pop [ @mycp 4 2 roll 2 copy ToPnt /@mycp exch def ToPnt ]
       } {
-        pop [ @mycp 8 2 roll 2 copy ToVec /@mycp exch def
-        ToVec 5 1 roll ToVec 4 1 roll ToVec 3 1 roll ]
+        pop [ @mycp 8 2 roll 2 copy ToPnt /@mycp exch def
+        ToPnt 5 1 roll ToPnt 4 1 roll ToPnt 3 1 roll ]
       } ifelse
       counttomark 1 roll	
     } ifelse
@@ -2383,14 +2383,13 @@ tx@IntersectDict begin
     /depth depth 1 add def
     /dom null def
     /counter counter 1 add def
-
     CheckIT {
 	(>> curve subdivision performed: dom(A) = ) domA CurveToString strcat
 	(, dom(B) = ) strcat domB CurveToString strcat ( <<) strcat ==
     } if
     CurveA IsConstant CurveB IsConstant and {
-	CurveA MiddlePoint ToVec
-	CurveB MiddlePoint ToVec AreNear {
+	CurveA MiddlePoint ToPnt
+	CurveB MiddlePoint ToPnt AreNear {
 	    domA domB 4 -1 roll exch PutInterval PutInterval
 	} {
 	    pop pop
@@ -2408,8 +2407,8 @@ tx@IntersectDict begin
 		    iter 100 ge {
 			false 
 		    } {
-			CurveA MiddlePoint ToVec
-			CurveB MiddlePoint ToVec AreNear {
+			CurveA MiddlePoint ToPnt
+			CurveB MiddlePoint ToPnt AreNear {
 			    domA domB true
 			}{
 			    false
@@ -2425,7 +2424,6 @@ tx@IntersectDict begin
 		    (, iter: ) iter 20 string cvs strcat strcat
 		    (, depth: ) depth 20 string cvs strcat strcat ==
 		} if
-	
 		CurveA CurveB ClipCurve /dom exch def
 	
 		CheckIT {(dom : ) dom CurveToString strcat == } if		
@@ -2452,8 +2450,8 @@ tx@IntersectDict begin
 			(C1: [ ) CurveA { CurveToString ( ) strcat strcat } forall (]) strcat ==
 			(C2: [ ) CurveB { CurveToString ( ) strcat strcat } forall (]) strcat ==
 		    } if
-		    CurveA MiddlePoint ToVec
-		    CurveB MiddlePoint ToVec AreNear {
+		    CurveA MiddlePoint ToPnt
+		    CurveB MiddlePoint ToPnt AreNear {
 			domA domB true
 		    } {
 			false
@@ -2589,7 +2587,7 @@ tx@IntersectDict begin
     ToUnitRange exch ToUnitRange 2 copy gt {
 	exch
     } if
-    ToVec
+    ToPnt
 } bind def
 %    \end{macrocode}
 % \end{macro}
@@ -2629,7 +2627,7 @@ tx@IntersectDict begin
 % \end{pssyntax}
 %    \begin{macrocode}
 /CloneVec {
-    aload pop ToVec
+    aload pop ToPnt
 } bind def
 %    \end{macrocode}
 % \end{macro}
@@ -2745,7 +2743,7 @@ tx@IntersectDict begin
     3 -1 roll dup 1 exch sub 3 1 roll % [A] (1-t) [B] t
     exch aload pop 3 -1 roll VecScale % [A] (1-t) B.x*t B.y*t
     4 2 roll
-    exch aload pop 3 -1 roll VecScale VecAdd ToVec % [A.x*(1-t)+B.x*t A.y*(1-t)+B.y*t]
+    exch aload pop 3 -1 roll VecScale VecAdd ToPnt % [A.x*(1-t)+B.x*t A.y*(1-t)+B.y*t]
     DebugEnd
 } bind def
 %    \end{macrocode}
@@ -3149,7 +3147,7 @@ tx@IntersectDict begin
   8 dict begin
   /tstop exch def
   /tstart exch def
-  /savecp { ToVec cvx /@cp exch def } def
+  /savecp { ToPnt cvx /@cp exch def } def
   InitTracing
   /n 0 def
   mark exch aload pop
@@ -3173,8 +3171,8 @@ tx@IntersectDict begin
           tstart n sub 1 add tstop n sub 1 add
           ToUnitInterval exch
           /linetype eq {
-            3 1 roll ToVec 
-            tstart n 1 sub gt { @cp ToVec } { currentpoint ToVec } ifelse exch ToVec
+            3 1 roll ToPnt 
+            tstart n 1 sub gt { @cp ToPnt } { currentpoint ToPnt } ifelse exch ToPnt
             dup 3 -1 roll Portion
             aload pop exch 
             tstart n 1 sub gt { 
@@ -3292,7 +3290,7 @@ tx@IntersectDict begin
     5 dict begin 
     exch dup /tstart exch def
     1 add cvi /tstop exch def
-    /savecp { ToVec cvx /@cp exch def } def
+    /savecp { ToPnt cvx /@cp exch def } def
     /n 0 def
     mark exch aload pop
     { 
@@ -3312,8 +3310,8 @@ tx@IntersectDict begin
             tstart n sub 1 add tstop n sub 1 add
             ToUnitInterval exch
             /linetype eq {
-              3 1 roll ToVec 
-              tstart n 1 sub gt { @cp ToVec } { currentpoint ToVec } ifelse exch ToVec
+              3 1 roll ToPnt 
+              tstart n 1 sub gt { @cp ToPnt } { currentpoint ToPnt } ifelse exch ToPnt
               dup 3 -1 roll Portion 
             } {
               7 1 roll
