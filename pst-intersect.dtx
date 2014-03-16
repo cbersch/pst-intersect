@@ -593,8 +593,9 @@
 %
 % \ifGERMAN
 %   \section{Anforderungen}
-%   \LPack{pst-intersect} benötigt aktuelle Versionen der
-%   Pakete \LPack{pstricks}, \LPack{pst-node} und \LPack{pst-func}.
+%   \LPack{pst-intersect} benötigt aktuelle Versionen der Pakete
+%   \LPack{pstricks}, \LPack{pst-node}, \LPack{pst-eucl} und
+%   \LPack{pst-func}.
 %
 %   Alle PSTricks-Pakete machen regen Gebrauch von der Postscript-Sprache, so
 %   dass der typische Arbeitsfluss \opt{latex}, \opt{dvips} und
@@ -604,8 +605,8 @@
 % \fi
 % \ifENGLISH
 %   \section{Requirements}
-%   \LPack{pst-intersect} requires recent versions of
-%   \LPack{pstricks}, \LPack{pst-node}, and \LPack{pst-func}.
+%   \LPack{pst-intersect} requires recent versions of \LPack{pstricks},
+%   \LPack{pst-node}, \LPack{pst-eucl} and \LPack{pst-func}.
 %
 %   All PSTricks package rely heavily on the Postscript language so that the
 %   typical workflow involves \opt{latex}, \opt{dvips}, and \opt{ps2pdf}. Of
@@ -1047,6 +1048,30 @@
   \psset{arrows=->, arrowscale=1.5}
   \pssavepath[linestyle=dashed, linewidth=0.5\pslinewidth]{A}{\psline(0,0)(1,2)(2,0)}
   \pstracecurve[tstart=0.9, tstop=0.1]{A}
+\end{pspicture}
+\end{LTXexample}
+% \iffalse
+%</ignore>
+% \fi
+%
+% \begin{ltxsyntax}
+%   \cmditem{psGetCurvePoint}{curvename}{t}
+%   
+%   \ifGERMAN 
+%   Speichert die Koordinaten der Kurve \prm{curvename} am Punkt \prm{t}.
+%   \fi
+%   \ifENGLISH
+%   Save the coordinates of \prm{curvename} at the point \prm{t}.
+%   \fi
+% \end{ltxsyntax}
+% \iffalse
+%<*ignore>
+% \fi
+\begin{LTXexample}
+\begin{pspicture}(3,3)
+  \pssavebezier{A}(0,0)(0,3)(3,0)(3,3)
+  \multido{\r=0+0.1}{11}{%
+    \psdot(! \psGetCurvePoint{A}{\r} I-A.x I-A.y)}
 \end{pspicture}
 \end{LTXexample}
 % \iffalse
@@ -1710,6 +1735,7 @@
   } if
   #2 \PIT@name{#1} GetCurvePoint \tx@UserCoor
   end
+  /I-#1.y exch def /I-#1.x exch def
 }%
 %    \end{macrocode}
 % \end{macro}
@@ -1907,6 +1933,114 @@ tx@IntersectDict begin
 } bind def
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{IntersectLineSegmLine}
+%   Intersect a line segment with a line. This uses
+%   \PSop{IntersectLines} and checks if the line parameter of the line
+%   segment is in the range [0,1].
+%   \begin{pssyntax}
+%     \PSarray{lineA} \PSarray{lineSegmB} \PSop{IntersectLineLineSegm}
+%     \PSarray{lineA} \PSarray{tA} \PSarray{lineSegmB} \PSarray{tB}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IntersectLineLineSegm {
+  tx@IntersectDict begin IntersectLines end
+  dup length 0 eq not {
+%    \end{macrocode}
+% IntersectLines has found an intersection
+%    \begin{macrocode}
+    0 get dup dup 0 ge exch 1 le and {
+      [ exch ]
+    } {
+      pop pop [] []
+    } ifelse
+  } if 
+  3 -1 roll exch
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{IntersectLinePath}
+%   Compute the first intersection of a line with a path. If an intersection was
+%   found, also the respective path segment remains on the stack for
+%   later computations.
+%   \begin{pssyntax}
+%     \PSarray{lineA} \PSarray{pathB} \PSop{IntersectLinePath}
+%     \PSarray{segment} \PSvar{t} \PSarray{intersection}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/IntersectLinePath {
+  (IntersectLinePath) DebugBegin
+  3 dict begin
+    PreparePath
+%    \end{macrocode}
+% First elongate lineA such, that it could intersect with any segment in pathB
+%    \begin{macrocode}
+    2 copy ElongateLine exch 3 -1 roll pop
+    /isect [] def
+    /t -1 def
+    /n -1 def
+    {
+      /n n 1 add def
+      2 copy IntersectBeziers
+      dup 5 1 roll LoadIntersectionPoints
+      dup length 0 gt {
+%    \end{macrocode}
+% one intersection found, clean up and exit
+%    \begin{macrocode}
+        /isect exch def
+        0 get aload pop add 0.5 mul n add /t exch def
+        exch pop
+        exit
+      } {
+        pop pop pop
+      } ifelse
+    } forall
+    t isect
+  end
+  DebugEnd
+} bind def
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{ElongateLine}
+%   Elongate \PSarray{line} to potentially intersect with every segment
+%   in \PSarray{path}.
+%   \begin{pssyntax}
+%     \PSarray{lineA} \PSarray{path} \PSop{ElongateLine} \PSarray{lineA'}
+%   \end{pssyntax}
+%    \begin{macrocode}
+/ElongateLine {
+  exch { aload pop } forall
+  4 2 roll 2 copy 6 2 roll
+  VecSub 0 5 1 roll
+  6 -1 roll {
+%    \end{macrocode}
+% 0 x0 y0 dx dy [segm\_i]
+%    \begin{macrocode}
+    {
+      aload pop 
+%    \end{macrocode}
+% max x0 y0 dx dy P\_ij.x P\_ij.y
+%    \begin{macrocode}
+      6 2 roll 4 copy 10 4 roll
+      6 2 roll VecSub 4 2 roll 
+      tx@EcldDict begin Project end
+      tx@Dict begin Pyth end
+      6 -1 roll 2 copy
+      gt { pop } { exch pop } ifelse
+      5 1 roll
+    } forall
+  } forall
+%    \end{macrocode}
+% dmax x0 y0 dx dy
+%    \begin{macrocode}
+  % for a line
+  5 -1 roll VecScale 4 copy VecSub ToPnt 5 1 roll VecAdd ToPnt ToPnt
+  % for a ray
+  %4 2 roll 2 copy ToPnt 6 1 roll 4 2 roll 5 -1 roll 1.1 mul VecScale VecAdd ToPnt ToPnt
+} bind def
+%    \end{macrocode}
+% \end{macro}
 % 
 % \begin{macro}{IntersectPaths}
 %   \begin{pssyntax}
@@ -1957,17 +2091,17 @@ tx@IntersectDict begin
     2 copy PreparePath dup length /n exch def
     /isect [] def
     /tA [] def /tB [] def
-    { % [curveA] [Bi]
+    {
       /n n 1 sub def
-      exch dup 3 -1 roll % [curveA] [curveA] [Bi] 
+      exch dup 3 -1 roll
       IntersectBeziers 
-      4 copy LoadIntersectionPoints % [curveA] [tA] [curveB] [tB]
+      4 copy LoadIntersectionPoints
       [ exch isect aload pop ] /isect exch def
       pop 3 -1 roll pop
       [ tB aload length 2 add -1 roll TArray { n add } forall ] /tB exch def
       [ tA aload length 2 add -1 roll TArray aload pop ] /tA exch def
     } forall
-    pop % remove [curveA]
+    pop
     [ isect { aload pop } forall ] 3 1 roll tA exch tB
   end
   DebugEnd
