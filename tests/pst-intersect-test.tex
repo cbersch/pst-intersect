@@ -132,7 +132,7 @@
 
 \begin{pspicture}[showgrid](5,5)
   \pssavebezier{A}(0,0)(0,5)(5,0)(5,5)
-  \multido{\r=0+0.1}{11}{\psdot(! \psGetCurvePoint{A}{\r})}
+  \multido{\r=0+0.1}{11}{\psdot(! \psGetCurvePoint{A}{\r} A.x A.y)}
 \end{pspicture}
 \bigskip
 
